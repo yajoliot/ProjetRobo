@@ -18,11 +18,11 @@ int main()
 
     PORTB = 1;
 
-    _delay_ms(1000);
+    _delay_ms(25);
 
     PORTB = 2;
 
-    _delay_ms(1000);
+    _delay_ms(150);
     
        
 
