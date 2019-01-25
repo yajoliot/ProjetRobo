@@ -29,7 +29,7 @@ PROJECTNAME=test32bits
 # Utilisez le suffixe .cpp pour les fichiers C++
 # Listez tous les fichiers a compiler, separes par
 # un espace. exemple: 'tp1.c tp2.cpp':
-PRJSRC= Pragramchangementcouleur.cpp 
+PRJSRC= attenuation.cpp 
 
 # Inclusions additionnels (ex: -I/path/to/mydir)
 INC= ../TP1/antiRebond.cpp
