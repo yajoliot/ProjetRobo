@@ -319,9 +319,9 @@ END GROUP
  .stab          0x0000000000000840       0x6c /usr/lib/gcc/avr/7.2.0/avr5/libgcc.a(_exit.o)
                                          0x78 (size before relaxing)
 
-.stabstr        0x0000000000000000      0xf16
+.stabstr        0x0000000000000000      0xf1c
  *(.stabstr)
- .stabstr       0x0000000000000000      0xf16 attenuation.o
+ .stabstr       0x0000000000000000      0xf1c attenuation.o
 
 .stab.excl
  *(.stab.excl)

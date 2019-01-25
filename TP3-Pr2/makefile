@@ -29,10 +29,10 @@ PROJECTNAME=test32bits
 # Utilisez le suffixe .cpp pour les fichiers C++
 # Listez tous les fichiers a compiler, separes par
 # un espace. exemple: 'tp1.c tp2.cpp':
-PRJSRC= attenuation.cpp 
+PRJSRC= ControlMoteur.cpp 
 
 # Inclusions additionnels (ex: -I/path/to/mydir)
-INC= ../TP1/antiRebond.cpp
+INC= 
 
 # Libraires a lier (ex: -lmylib)
 LIBS=
@@ -164,7 +164,7 @@ install: $(HEXROMTRG)
 # Make clean permet d'effacer tout les fichiers generes
 # lors de la compilation
 clean:
-	$(REMOVE) $(TRG) $(TRG).map $(OBJDEPS) $(HEXTRG) *.d
+	$(REMOVE) $(TRG) $(TRG).map $(OBJDEPS) $(HEXTRG) *.d *.o
 
 # Pour plus d'information sur les phony target, consulter:
 # http://bit.ly/1WBQe61
