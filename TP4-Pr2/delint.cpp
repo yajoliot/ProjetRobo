@@ -1,4 +1,5 @@
-#define 	F_CPU   1000000UL
+
+#define 	F_CPU   8000000UL
 
 
 #include "../TP1/antiRebond.cpp"
@@ -26,7 +27,9 @@ void isr_INIT() {
 
     EICRA |= (1 << ISC01); // EICRA = EICRA | (1 << ISC01)
 
+
     sei ();
+
 
 }
 
@@ -34,27 +37,28 @@ ISR(INT0_vect){
 
 
    _delay_ms(30);
-    etat++;
+
     EIFR |= (1 << INTF0);
+    PORTB = VERT;
 }
 
 int main(){
 
     isr_INIT();
+
+
+    _delay_ms(50000);
+
+    PORTB = ROUGE;
+    _delay_ms(1000);
+    PORTB = ETEIND;
     
+    _delay_ms(10000);
 
-    for(;;){
+    cli();
 
-    
-
-        if(etat == S){
-            etat = INIT;
-            PORTB = ROUGE;
-            _delay_ms(1000);
-            PORTB = ETEIND;
-        }
-
-    }
+    if(PORTB != VERT)
+        PORTB = ROUGE;
     
 
     

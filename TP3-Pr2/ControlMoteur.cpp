@@ -22,40 +22,59 @@ int main(){
         
     DDRB = 0xff; // PORT B est en mode sortie
     
-    int delay = 0;
-    int delay2 = 17;
+    int delay = 500;
+    int delay2 = 500;
 
 
     for(;;){
 
         PORTB = 1;
 
-        /*while(delay != 0){
-            PORTB = 0;
-            DelayMs(delay);
+        while (delay != 400){
             PORTB = 0;
             DelayMs(delay2);
+            PORTB = 1;
+            DelayMs(delay);
+            delay++;
         }
 
-        while(delay != 0){
-            PORTB = 0;
-            DelayMs(delay);
+        int delay2 = 500;
+        _delay_ms(2000);
+
+        while (delay != 300){
             PORTB = 0;
             DelayMs(delay2);
-        }*/
+            PORTB = 1;
+            DelayMs(delay);
+            delay++;
+        }
 
-        
+        int delay2 = 500;
+        _delay_ms(2000);
+
+        while (delay != 200){
+            PORTB = 0;
+            DelayMs(delay2);
+            PORTB = 1;
+            DelayMs(delay);
+            delay++;
+        }
+
+        int delay2 = 500;
+        _delay_ms(2000);
+
+        while (delay != 100){
+            PORTB = 0;
+            DelayMs(delay2);
+            PORTB = 1;
+            DelayMs(delay);
+            delay++;
+        }
+
+        _delay_ms(2000);
+ 
 
     }
-
-    
-
-
-    
-
-   
-        
-        
 
    return 0;
 
