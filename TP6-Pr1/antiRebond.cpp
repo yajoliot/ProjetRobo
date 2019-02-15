@@ -7,7 +7,6 @@
 
 bool antiRebond(){
 
-    DDRD = 0x00; // le port D est en entree
     bool interrupteur = false; // est a 1 si l'interrupteur est activ/
 
 

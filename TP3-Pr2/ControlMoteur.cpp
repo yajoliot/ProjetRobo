@@ -1,4 +1,4 @@
-#define 	F_CPU   1000000UL
+#define 	F_CPU   8000000
 
 
 #include "../TP1/antiRebond.cpp"
@@ -22,18 +22,97 @@ int main(){
         
     DDRB = 0xff; // PORT B est en mode sortie
     
-    int delay = 500;
-    int delay2 = 500;
+    //int delayA = 0;
+    //int delayB = 0;
+    int temps = 0;
 
 
-    for(;;){
+    
 
-        PORTB = 1;
+    
+    _delay_ms(10000);
+        
+        
 
-        while (delay != 400){
+    
+    while(temps != 120){
+        PORTB = 2;
+        _delay_ms(4.7*5);
+        PORTB = 0;
+        _delay_ms(12.5*5);
+        temps++;
+    }
+
+     
+    while(temps != 240){
+        PORTB = 2;
+        _delay_ms(8*5);
+        PORTB = 0;
+        _delay_ms(8*5);
+        temps++;
+    }
+    
+    while(temps != 360){
+        PORTB = 2;
+        _delay_ms(12.5*5);
+        PORTB = 0;
+        _delay_ms(4.7*5);
+        temps++;
+    }
+
+    while(temps != 480){
+        PORTB = 2;
+        _delay_ms(16.666*5);
+        temps++;
+    }
+
+    PORTB = 0;
+    _delay_ms(10000);
+    temps = 0;
+while(temps != 400){
+        PORTB = 2;
+        _delay_ms(1.25*5);
+        PORTB = 0;
+        _delay_ms(3.75*5);
+        temps++;
+    }
+
+     
+    while(temps != 800){
+        PORTB = 2;
+        _delay_ms(2.5*5);
+        PORTB = 0;
+        _delay_ms(2.5*5);
+        temps++;
+    }
+    
+    while(temps != 1200){
+        PORTB = 2;
+        _delay_ms(3.75*5);
+        PORTB = 0;
+        _delay_ms(1.25*5);
+        temps++;
+    }
+
+    while(temps != 1600){
+        PORTB = 2;
+        _delay_ms(5*5);
+        temps++;
+    }
+    
+    PORTB=0;
+ 
+
+    
+
+   return 0;
+
+
+}
+ /*while (delay != 400){
             PORTB = 0;
             DelayMs(delay2);
-            PORTB = 1;
+            PORTB = 2;
             DelayMs(delay);
             delay++;
         }
@@ -44,7 +123,7 @@ int main(){
         while (delay != 300){
             PORTB = 0;
             DelayMs(delay2);
-            PORTB = 1;
+            PORTB = 2;
             DelayMs(delay);
             delay++;
         }
@@ -55,7 +134,7 @@ int main(){
         while (delay != 200){
             PORTB = 0;
             DelayMs(delay2);
-            PORTB = 1;
+            PORTB = 2;
             DelayMs(delay);
             delay++;
         }
@@ -66,17 +145,9 @@ int main(){
         while (delay != 100){
             PORTB = 0;
             DelayMs(delay2);
-            PORTB = 1;
+            PORTB = 2;
             DelayMs(delay);
             delay++;
         }
 
-        _delay_ms(2000);
- 
-
-    }
-
-   return 0;
-
-
-}
+        _delay_ms(2000);*/

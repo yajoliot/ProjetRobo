@@ -1,0 +1,1 @@
+delint.o: delint.cpp
