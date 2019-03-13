@@ -1,1 +1,0 @@
-lol.o: lol.cpp

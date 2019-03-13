@@ -1,0 +1,13 @@
+**/*.DS_STORE
+**/*.o
+**/*.hex
+**/*.out
+**/*.out.map
+**/*.d
+**/*.nfs*
+**/*~
+**/*.swp
+**/*.a
+**/*.map
+filedump/*
+
