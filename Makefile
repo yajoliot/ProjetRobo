@@ -1,4 +1,10 @@
-CURRENT_DIR=codeCommun/tp/tp9/exec_dir
+include variables.mk
+
+.PHONY: all
 
 all:
+ifndef DEBUG_CMD
 	cd $(CURRENT_DIR) && $(MAKE)
+else
+	cd $(CURRENT_DIR) && $(MAKE) $(DEBUG_CMD)
+endif
