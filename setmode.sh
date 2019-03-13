@@ -10,3 +10,8 @@ elif [ $1 == "debug" ]
 else
 	echo "Unknown parameter"
 fi
+
+#sources:
+#https://www.macs.hw.ac.uk/~hwloidl/Courses/LinuxIntro/x945.html
+#http://linuxcommand.org/lc3_wss0120.php
+#https://askubuntu.com/questions/20414/find-and-replace-text-within-a-file-using-commands
