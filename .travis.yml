@@ -19,6 +19,7 @@ install:
 #  - pip install --user cpplint
 
 script:
+   - chmod +x ./setmode.sh && ./setmode.sh debug
    - make
 #  - chmod +x ./build.sh && bash -c ./build.sh
 

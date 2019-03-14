@@ -175,5 +175,5 @@ clean:
 
 #COOL ASS DEBUG SHIT
 
-include variables.mk
+include debugging.mk
 

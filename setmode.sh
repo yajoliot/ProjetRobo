@@ -1,10 +1,11 @@
-#!/bin/sh
+#!/bin/bash
+set $1
 source variables
 echo $CURRENT_DIR
-if [ $1 == "release" ]
+if [[ $1 == "release" ]]
 	then
 		mv $CURRENT_DIR/debugging.mk debugging.mk.old && awk '{gsub(/DEBUG_CMD=.*/,"DEBUG_CMD=")}1' debugging.mk.old > $CURRENT_DIR/debugging.mk && rm debugging.mk.old
-elif [ $1 == "debug" ]
+elif [[ $1 == "debug" ]]
 	then
 		mv $CURRENT_DIR/debugging.mk debugging.mk.old && awk '{gsub(/DEBUG_CMD=.*/,"DEBUG_CMD=DEBUG")}1' debugging.mk.old > $CURRENT_DIR/debugging.mk && rm debugging.mk.old
 else
