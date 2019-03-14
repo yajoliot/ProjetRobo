@@ -27,9 +27,9 @@ script:
 #  - chmod +x ./build.sh && bash -c ./build.sh
 
 after_success:
-#     - chmod u+x ./cpplint.py
-#     - ./cpplint.py --quiet --recursive ./codeCommun/tp/tp9/
-     - cppcheck --enable=style --language=c++ --std=c99 ./codeCommun/tp/tp9/
+     # - chmod u+x ./cpplint.py
+     # - ./cpplint.py --quiet --root=codeCommun/tp/tp9/ --recursive ./codeCommun/tp/tp9/
+     - cppcheck  --enable=warning,performance --language=c++ --std=c99 --platform=avr8 ./codeCommun/tp/tp9/
 
 notifications:
   email:
