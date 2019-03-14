@@ -2,6 +2,9 @@ language: cpp
 dist: trusty
 sudo: enabled
 os: linux
+branches:
+  only:
+  - CI
 before-install:
 addons:
   apt:
