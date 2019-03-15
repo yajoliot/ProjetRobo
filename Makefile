@@ -1,6 +1,9 @@
 include variables
 
-.PHONY: all
+.PHONY: all install
 
 all:
 	cd $(CURRENT_DIR) && $(MAKE)
+
+install:
+	cd $(CURRENT_DIR) && $(MAKE) install
