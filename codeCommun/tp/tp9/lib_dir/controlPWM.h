@@ -1,5 +1,5 @@
-#ifndef LIB_DIR_ANTIREBOND_H
-#define LIB_DIR_ANTIREBOND_H
+#ifndef LIB_DIR_CONTROLPWM_H
+#define LIB_DIR_CONTROLPWM_H
 
 #include <avr/io.h> 
 #include <util/delay.h>
