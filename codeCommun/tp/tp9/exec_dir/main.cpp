@@ -2,6 +2,11 @@
 #include "couleurDel.h"
 #include "notes.h"
 
+//custom variadic function defines for piezo
+#define VARIADIC_TWO(a, b, ...) (a), (b)
+#define PIEZO_INIT(...) piezo_init(JUST3(__VA_ARGS__, 100))
+
+//general defines
 #define _SIZEOF(x) sizeof(x)/sizeof(x[0])
 
 int main() {
@@ -11,9 +16,15 @@ int main() {
 	TCCR1A |= _BV(COM1B1);  //Clear OC1A/OC1B on compare match
 	TCCR1B |= _BV(WGM13) 	//mode 8, PWM, Phase and Frequency Correct (TOP value is ICR1)
    		   |  _BV(CS11); 	//prescaler(8)
-   	OCR1B = 100;
-   	uint8_t count = 0;//56;
+   	uint8_t temp = 100;
+   	uint8_t count = 0;
    	for(;;){
+   		OCR1B = temp;
+   		if(count%2==0){
+   			temp-=10;
+   			if(temp==0)
+   				temp=100;
+   		}
 		ICR1H = (note[count] >> 8); //first set the high byte
 		ICR1L = note[count];        //now the low byte
 		_delay_ms(2000);
