@@ -15,8 +15,7 @@ int main() {
 		PLAY_NOTE(count);
 		count++;
 		if(count==81){
-			count=count%81;
-			count+=45;
+			count=45;
 		}
 	}
     return 0;
