@@ -16,11 +16,9 @@
 //(PCINT28/XCK1/OC1B) 		PD4 
 //(PCINT29/OC1A) 			PD5 
 
-//What you pass in the piezo_init function is these: PD4 or PD5
+//What you pass in the piezo_init function is the value these macros represent (aka pin positions)
 //This basically says you want the PWM to be generated on (if we go with the motherboard's notation)
 //port D's pin 5 and pin 6
-
-//You absolutely need to decide 
 
 //==========================================================================================================//
 
@@ -35,7 +33,8 @@ static uint8_t setup_value;
 *
 *   Returns :       void
 *
-*   Parameters :    uint8_t location_value -> possible values: {PD4, PD5}
+*   Parameters :    uint8_t pwm_pin -> possible values: {DDD4, DDD5} or any macro that replace to the same values! such as PD4 and PD5
+					uint8_t ground_pin -> possible values: {if pwm_pin == DDD4 : { DDD2, DDD5, DDD6 } else if pwm_pin == DDD5 : { DDD3,DDD4,DDD7 }}
 					uint8_t volume -> possible values: {0, 1, 2, ..., 100}
 *
 *   Purpose :       Set the timer/counter registers for the music pwm
