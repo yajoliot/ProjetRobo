@@ -35,6 +35,8 @@ volatile uint8_t setup_value;
 *
 *****************************************************************************/
 void piezoInit(uint8_t location_value, uint8_t volume){
+	uint8_t rando_name[] = "nice";
+	DEBUG_FUNC(rando_name);
 	setup_value = location_value;
 	switch(setup_value){
    		case PD4: 

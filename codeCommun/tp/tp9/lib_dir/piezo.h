@@ -4,6 +4,7 @@
 #include <avr/io.h>
 #include "notes.h"
 #include "util.h"
+#include "debug.h"
 
 //custom variadic function defines for piezo
 //source:https://stackoverflow.com/a/9180314
