@@ -9,7 +9,7 @@
 //source:https://stackoverflow.com/a/9180314
 #define VARIADIC_TWO(a, b, ...) (a), (b)
 #define PIEZO_INIT(...) piezoInit(VARIADIC_TWO(__VA_ARGS__, MAX_VOLUME))
-#define PLAYNOTE(...) playNote(VARIADIC_TWO(__VA_ARGS__, DEFAULT_SOUND_DURATION_IN_MS))
+#define PLAY_NOTE(...) playNote(VARIADIC_TWO(__VA_ARGS__, DEFAULT_SOUND_DURATION_IN_MS))
 
 const uint8_t MAX_VOLUME = 100;
 const uint16_t DEFAULT_SOUND_DURATION_IN_MS = 1000;

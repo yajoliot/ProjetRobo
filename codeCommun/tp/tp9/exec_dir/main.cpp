@@ -4,7 +4,6 @@
 
 #include <avr/io.h>
 #include "couleurDel.h"
-#include "notes.h"
 #include "piezo.h"
 
 //general defines
@@ -14,13 +13,14 @@ int main() {
 	//PINS 5 and 3 for piezo
 	PIEZO_INIT(PD4);
 	DDRD |= _BV(DDD2); //have to define yourself which other pin the piezo will be taking as a ground
-   	uint8_t count = 0;
+   	uint8_t count = 45;
    	for(;;){
-		ICR1H = (note[count] >> 8); //first set the high byte
-		ICR1L = note[count];        //now the low byte
-		_delay_ms(500);
+		PLAY_NOTE(count);
 		count++;
-		count=count%(_SIZEOF(note));
+		if(count==81){
+			count=count%81;
+			count+=45;
+		}
 	}
     return 0;
 }
