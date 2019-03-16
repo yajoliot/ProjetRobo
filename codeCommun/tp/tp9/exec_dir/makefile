@@ -127,7 +127,7 @@ OBJDEPS=$(CFILES:.c=.o) \
 # En plus de la commande make qui permet de compiler
 # votre projet, vous pouvez utilisez les commandes
 # make all, make install et make clean
-.PHONY: all install clean lib
+.PHONY: all install clean lib $(DEBUG_CMD)
 
 # Make all permet simplement de compiler le projet
 #
@@ -137,8 +137,9 @@ lib:
 	cd ../lib_dir && $(MAKE)
 
 # Implementation de la cible
-$(TRG): $(OBJDEPS) 
-	$(CC) $(LDFLAGS) -o $(TRG) $(OBJDEPS) $(LIBS) $(INC)
+$(TRG): $(OBJDEPS)
+
+	$(CC) $(LDFLAGS) -o $(TRG) $(OBJDEPS) $(LIBS) $(INC) $(DEBUG_FLAGS)
 
 # Production des fichiers object
 # De C a objet
@@ -172,16 +173,7 @@ clean:
 	$(REMOVE) $(TRG) $(TRG).map $(OBJDEPS) $(HEXTRG) *.d \
 	&& cd ../lib_dir && $(MAKE) clean
 
-# Pour plus d'information sur les phony target, consulter:
-# http://bit.ly/1WBQe61
+#COOL ASS DEBUG SHIT
 
-# De plus, pour mieux comprendre les makefiles et 
-# leur fonctionnement, consulter la documentation de GNU Make:
-# http://bit.ly/23Vpk8s
-
-# Finalement, ce tutoriel en ligne constitut une bonne 
-# introduction au Makefile:
-# http://bit.ly/1XvxsN3
-
-#####                    EOF                   #####
+include debugging.mk
 
