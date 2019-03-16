@@ -3,14 +3,17 @@
 
 #include <avr/io.h>
 #include <stdio.h>
+#include "util.h"
+#include "usart.h"
 
-const uint8_t TAG_FUNC_CALL[] = "[FUNC_CALL]"
+const uint8_t TAG_FUNCTION_CALL[] = "[FUNCTIION CALL]";
+const uint8_t TAG_PARAMETER_VALUE[] = "[PARAMETER VALUE]";
 
 #ifdef DEBUG
-	#define DEBUG_FUNC(x) debugFunc(x)
-	;
+	#define DEBUG_FUNCTION_CALL(x) debugFunc(x)
+	const TransmissionUART uart; //[UNDEFINED BEHAVIOUR]
 #else
-	#define DEBUG_FUNC(x) 
+	#define DEBUG_FUNCTION_CALL(x) 
 	;
 #endif
 

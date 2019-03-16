@@ -5,9 +5,7 @@
 #include <avr/io.h>
 #include "couleurDel.h"
 #include "piezo.h"
-
-//general defines
-#define _SIZEOF(x) sizeof(x)/sizeof(x[0])
+#include "util.h"
 
 int main() {
 	//PINS 5 and 3 for piezo

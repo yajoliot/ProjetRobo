@@ -7,6 +7,8 @@
 
 #include <util/delay.h>
 
+#define _SIZEOF(x) sizeof(x)/sizeof(x[0])
+
 void variableDelay(uint16_t duration_in_ms);
 
 #endif
