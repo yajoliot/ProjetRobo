@@ -2,6 +2,8 @@
 //PLEASE READ THE FOLLOWING
 //==========================================================================================================//
 
+//The piezo needs to be plugged in onto the pins. It requires 2 pins. 1 pin gets the PWM output and 1 gets the ground
+
 //There are two timer/counters in the atmega324pa
 
 //We will be using one for this music generation. We will use the timer/counter 1
@@ -14,13 +16,18 @@
 //(PCINT28/XCK1/OC1B) 		PD4 
 //(PCINT29/OC1A) 			PD5 
 
-//What you pass in the piezo_init function is that location value : PD4 or PD5
+//What you pass in the piezo_init function is these: PD4 or PD5
+//This basically says you want the PWM to be generated on (if we go with the motherboard's notation)
+//port D's pin 5 and pin 6
+
+//You absolutely need to decide 
 
 //==========================================================================================================//
 
 #include "piezo.h"
 
-volatile uint8_t setup_value;
+static uint8_t setup_value; 
+//volatile?
 
 /*****************************************************************************
 *
@@ -34,24 +41,42 @@ volatile uint8_t setup_value;
 *   Purpose :       Set the timer/counter registers for the music pwm
 *
 *****************************************************************************/
-void piezoInit(uint8_t location_value, uint8_t volume){
+void piezoInit(uint8_t pwm_pin, uint8_t ground_pin, uint8_t volume){
 	DEBUG_FUNCTION_CALL((uint8_t*)"piezoInit"); //[UNDEFINED BEHAVIOUR] Need to test
-	setup_value = location_value;
-	
+	setup_value = pwm_pin;
+	{
+		DEBUG_PARAMETER_VALUE(&setup_value);
+		DEBUG_PARAMETER_VALUE(&ground_pin);
+	}
 	switch(setup_value){
-   		case PD4: 
-			DDRD |= _BV(DDD4); //OC1B as output
+   		case DDD4: 
+			DDRD |= _BV(pwm_pin); //OC1B as output
 			OCR1B = volume;
    		    break;
-   		case PD5:
-			DDRD |= _BV(DDD5); //OC1B as output
+   		case DDD5:
+			DDRD |= _BV(pwm_pin); //OC1B as output
 			OCR1A = volume;
    		    break;
+   		default:
+   			DEBUG_ERROR();
+	}
+	DDRD |= _BV(ground_pin);
+	{
+		uint8_t test_DDRD = DDRD; //not sure about these maybe i can only pass in DDRD directly?
+		uint8_t test_OCR1A = OCR1A; //same
+		DEBUG_PARAMETER_VALUE((void*)&test_DDRD);
+		DEBUG_PARAMETER_VALUE((void*)&test_OCR1A);
 	}
 	TCCR1A |= _BV(COM1B1);  //Clear OC1A/OC1B on compare match
 	TCCR1B |= _BV(WGM13) 	//mode 8, PWM, Phase and Frequency Correct (TOP value is ICR1)
 	   	   |  _BV(CS11);
-
+	{
+		uint8_t test_TCCR1A = TCCR1A;
+		uint8_t test_TCCR1B = TCCR1B;
+		DEBUG_PARAMETER_VALUE((void*)&test_TCCR1A);
+		DEBUG_PARAMETER_VALUE((void*)&test_TCCR1B);
+	}
+	DEBUG_FUNCTION_EXIT();
 }
 
 
@@ -70,10 +95,10 @@ void piezoInit(uint8_t location_value, uint8_t volume){
 *****************************************************************************/
 void setVolume(uint8_t volume){
 	switch(setup_value){
-   		case PD4: 
+   		case DDD4: 
 			OCR1B = volume;
    		    break;
-   		case PD5:
+   		case DDD5:
 			OCR1A = volume;
    		    break;
 	}
@@ -93,7 +118,11 @@ void setVolume(uint8_t volume){
 *****************************************************************************/
 
 void playNote(uint8_t midi_key, uint16_t duration_in_ms){
+	unsigned char sreg;
+	sreg = SREG;
+	cli();
 	ICR1H = (note[midi_key] >> 8); //first set the high byte
 	ICR1L = note[midi_key];        //now the low byte
+	SREG = sreg;
 	variableDelay(duration_in_ms);
 }

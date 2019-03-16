@@ -13,11 +13,11 @@
 #include <stdio.h>
 class TransmissionUART{
 public:
-  TransmissionUART(); // Constructeur par defaut, initialise les registres
-   static void reinit(); // Permet de reinitialiser les registres au cas ou ils sont changés
-   static void transmission(uint8_t donnee);
-   static void transmissionUART_entier ( uint8_t donnee ); // TransmissionUART d'un entier
-   static void transmissionUART_string(char* donnee); // TransmissionUART d'un string
+	TransmissionUART(); // Constructeur par defaut, initialise les registres
+	static void reinit(); // Permet de reinitialiser les registres au cas ou ils sont changés
+	static void transmission(uint8_t donnee);
+	static void transmissionUART_entier ( uint8_t donnee ); // TransmissionUART d'un entier
+	static void transmissionUART_string(char* donnee); // TransmissionUART d'un string
 };
 
 #endif 

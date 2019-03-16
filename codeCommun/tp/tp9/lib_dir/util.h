@@ -7,6 +7,11 @@
 
 #include <util/delay.h>
 
+//custom variadic function defines for piezo
+//source:https://stackoverflow.com/a/9180314
+#define VARIADIC_TWO(a, b, ...) (a), (b)
+#define VARIADIC_THREE(a, b, c, ...) (a), (b), (c)
+
 #define _SIZEOF(x) sizeof(x)/sizeof(x[0])
 
 void variableDelay(uint16_t duration_in_ms);

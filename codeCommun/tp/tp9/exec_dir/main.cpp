@@ -9,8 +9,7 @@
 
 int main() {
 	//PINS 5 and 3 for piezo
-	PIEZO_INIT(PD4);
-	DDRD |= _BV(DDD2); //have to define yourself which other pin the piezo will be taking as a ground
+	PIEZO_INIT(DDD4, DDD2); //First pin is the PWM output. Second pin passed is the ground pin.
    	uint8_t count = 45;
    	for(;;){
 		PLAY_NOTE(count);
