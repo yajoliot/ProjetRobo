@@ -6,4 +6,4 @@
 
 bool antirebond();
 
-#endif LIB_DIR_ANTIREBOND_H
+#endif

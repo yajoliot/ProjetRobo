@@ -17,4 +17,4 @@ void ajustementAGauche();
 void ajustementReculerAGauche();
 void ajustementReculerADroite();
 
-#endif LIB_DIR_ANTIREBOND_H
+#endif 

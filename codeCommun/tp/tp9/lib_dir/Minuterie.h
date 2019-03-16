@@ -9,4 +9,4 @@ const int MINUTERIEEXPIRE = 0;
 void startMinuterie(uint16_t duree);
 void resetMinuterie ();
 
-#endif LIB_DIR_ANTIREBOND_H
+#endif 

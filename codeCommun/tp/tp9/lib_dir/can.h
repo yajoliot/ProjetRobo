@@ -1,5 +1,5 @@
-#ifndef LIB_DIR_ANTIREBOND_H
-#define LIB_DIR_ANTIREBOND_H
+#ifndef LIB_DIR_CAN_H
+#define LIB_DIR_CAN_H
 
 /*
  * Classe permettant l'acces au convertisseur analogique/numerique
@@ -46,4 +46,4 @@ private:
 };
 
 
-#endif LIB_DIR_ANTIREBOND_H
+#endif 

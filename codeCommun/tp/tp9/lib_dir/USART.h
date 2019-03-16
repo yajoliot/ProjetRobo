@@ -7,4 +7,4 @@
 void initialisationUART (void);
 void transmissionUART (uint8_t donnee);
 
-#endif LIB_DIR_ANTIREBOND_H
+#endif 
