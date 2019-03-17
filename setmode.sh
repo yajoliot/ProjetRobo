@@ -4,10 +4,15 @@ source variables
 echo $CURRENT_DIR
 if [[ $1 == "release" ]]
 	then
-		mv $CURRENT_DIR/debugging.mk debugging.mk.old && awk '{gsub(/DEBUG_CMD=.*/,"DEBUG_CMD=")}1' debugging.mk.old > $CURRENT_DIR/debugging.mk && rm debugging.mk.old
+		#NDEBUG to remove all assert calls. It is mutually exclusive with DEBUG right now
+		mv $CURRENT_DIR/debugging.mk debugging.mk.old && awk '{gsub(/DEBUG_CMD=.*/,"
+		DEBUG_CMD=NDEBUG
+		")}1' debugging.mk.old > $CURRENT_DIR/debugging.mk && rm debugging.mk.old
 elif [[ $1 == "debug" ]]
 	then
-		mv $CURRENT_DIR/debugging.mk debugging.mk.old && awk '{gsub(/DEBUG_CMD=.*/,"DEBUG_CMD=DEBUG")}1' debugging.mk.old > $CURRENT_DIR/debugging.mk && rm debugging.mk.old
+		mv $CURRENT_DIR/debugging.mk debugging.mk.old && awk '{gsub(/DEBUG_CMD=.*/,"
+		DEBUG_CMD=DEBUG
+		")}1' debugging.mk.old > $CURRENT_DIR/debugging.mk && rm debugging.mk.old
 else
 	echo "Unknown parameter"
 fi

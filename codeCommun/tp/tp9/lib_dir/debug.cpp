@@ -41,7 +41,8 @@ void debugParameterValue(uint8_t *parameter_name, void *parameter){
 void debugError(){
 	char buff[64];
 	size_t n =  sprintf(buff,
-						"[ERROR]"
+						"%s\n",
+						TAG_ERROR
 						);
 	if (n > _SIZEOF(buff))
 		return;
@@ -55,8 +56,14 @@ void debugError(){
 	}
 }
 
-
-void rando(){
-	uint8_t a = _SIZEOF(TAG_INFO);
-	DEBUG_PARAMETER_VALUE((uint8_t*)"nice",(void*)a);
+void debugInfo(uint8_t *message){
+	char buff[64];
+	size_t n =  sprintf(buff,
+						"%s %s\n",
+						TAG_INFO,
+						message
+						);
+	if (n > _SIZEOF(buff))
+		return;
+	TransmissionUART::transmissionUART_string(buff);
 }

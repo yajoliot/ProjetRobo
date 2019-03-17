@@ -44,6 +44,8 @@ void piezoInit(uint8_t pwm_pin, uint8_t ground_pin, uint8_t volume){
 	DEBUG_FUNCTION_CALL((uint8_t*)"piezoInit"); //[UNDEFINED BEHAVIOUR] Need to test
 	setup_value = pwm_pin;
 	{
+		DEBUG_INFO((uint8_t*)"pwm_pin == setup_value");
+		DEBUG_INFO((uint8_t*)"possible pin values: { 0, 1, 2, 3, 4, 5, 6, 7 }");
 		DEBUG_PARAMETER_VALUE((uint8_t*)"uint8_t pwm_pin", &pwm_pin);
 		DEBUG_PARAMETER_VALUE((uint8_t*)"uint8_t ground_pin", &ground_pin);
 		DEBUG_PARAMETER_VALUE((uint8_t*)"static uint8_t setup_value", &setup_value);
@@ -63,8 +65,13 @@ void piezoInit(uint8_t pwm_pin, uint8_t ground_pin, uint8_t volume){
    			//silently fail if DEBUG mode is off
    			DEBUG_ERROR();
 	}
+	{
+		//DDRD possible values at this point are either : { (DDD4): 16, (DDD5): }
+		_ASSERT();
+	}
 	DDRD |= _BV(ground_pin);
 	{
+		DEBUG_INFO((uint8_t*)"possible DDRD values: { 20(0b00010100), 48(0b00110000), 96(0b01100000) }");
 		uint8_t test_DDRD = DDRD; //not sure about these maybe i can only pass in DDRD directly?
 		uint8_t test_OCR1A = OCR1A; //same
 		DEBUG_PARAMETER_VALUE((uint8_t*)"uint8_t DDRD", (void*)&test_DDRD);
