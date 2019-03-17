@@ -65,26 +65,9 @@ void piezoInit(uint8_t pwm_pin, uint8_t ground_pin, uint8_t volume){
    			//silently fail if DEBUG mode is off
    			DEBUG_ERROR();
 	}
-	{
-		//DDRD possible values at this point are either : { (DDD4): 16, (DDD5): }
-		_ASSERT();
-	}
 	DDRD |= _BV(ground_pin);
-	{
-		DEBUG_INFO((uint8_t*)"possible DDRD values: { 20(0b00010100), 48(0b00110000), 96(0b01100000) }");
-		uint8_t test_DDRD = DDRD; //not sure about these maybe i can only pass in DDRD directly?
-		uint8_t test_OCR1A = OCR1A; //same
-		DEBUG_PARAMETER_VALUE((uint8_t*)"uint8_t DDRD", (void*)&test_DDRD);
-		DEBUG_PARAMETER_VALUE((uint8_t*)"uint8_t OCR1A", (void*)&test_OCR1A);
-	}
 	TCCR1B |= _BV(WGM13) 	//mode 8, PWM, Phase and Frequency Correct (TOP value is ICR1)
 	   	   |  _BV(CS11);
-	{
-		uint8_t test_TCCR1A = TCCR1A;
-		uint8_t test_TCCR1B = TCCR1B;
-		DEBUG_PARAMETER_VALUE((uint8_t*)"uint8_t TCCR1A", (void*)&test_TCCR1A);
-		DEBUG_PARAMETER_VALUE((uint8_t*)"uint8_t TCCR1B", (void*)&test_TCCR1B);
-	}
 	DEBUG_FUNCTION_EXIT();
 }
 
