@@ -18,14 +18,14 @@
 // Plug these so that the direction pin is connected to the D pin on the pont H for either roue and the pwm pin to the E pin on either roue 
 
 int main() {
-	initPWM();
-   	for(;;){
-   		avancer(50);
-   		_delay_ms(1000);
-   		arreter();
-   		tournerADroite();
-   		tournerAGauche();
+  initPWM();
+  for(;;){
+    avancer(50);
+    _delay_ms(1000);
+    arreter();
+    tournerADroite();
+    tournerAGauche();
    		//these functions cover nearly everything. reculer() wasn't called but same idea as avancer().
-	}
-    return 0;
+  }
+  return 0;
 }
