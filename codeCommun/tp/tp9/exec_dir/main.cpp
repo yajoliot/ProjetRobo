@@ -3,6 +3,7 @@
 #endif
 
 #include "pwm.h"
+#include "piezo.h"
 
 //SETUP is...
 
