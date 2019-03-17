@@ -20,7 +20,7 @@ const uint8_t TAG_INFO[] = "[INFO]";
 	#define DEBUG_PARAMETER_VALUE(x,y) debugParameterValue(x,y)
 	#define DEBUG_ERROR() debugError()
 	#define DEBUG_INFO(x) debugInfo(x)
-	#define _ASSERT(x) assert(x)
+	#define _ASSERT(x) assert(x) 
 	const TransmissionUART uart; //[UNDEFINED BEHAVIOUR]
 #else
 	#define DEBUG_FUNCTION_CALL(x) 
@@ -37,7 +37,5 @@ void debugFunctionExit();
 void debugParameterValue(uint8_t *parameter_name, void *parameter);
 void debugError();
 void debugInfo(uint8_t *message);
-
-void rando();
 
 #endif
