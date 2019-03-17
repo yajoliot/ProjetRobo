@@ -3,7 +3,7 @@
 #endif
 
 #include <avr/io.h>
-#include "couleurDel.h"
+#include "del.h"
 #include "piezo.h"
 #include "util.h"
 
