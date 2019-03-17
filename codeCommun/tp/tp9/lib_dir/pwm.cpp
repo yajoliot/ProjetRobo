@@ -1,4 +1,4 @@
-#include <controlPWM.h>
+#include "pwm.h"
 
 void initPWM(){ 
 	
@@ -87,8 +87,6 @@ void tournerAGauche(){
 	PORTD &= ~(1 << PD7);
 	OCR1A= 255; // A determiner avec le robot
 	_delay_ms(800); // A determiner avec le robot
-
-
 	
 }
 

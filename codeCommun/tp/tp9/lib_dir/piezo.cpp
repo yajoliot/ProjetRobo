@@ -1,4 +1,4 @@
-//==========================================================================================================//
+	//==========================================================================================================//
 //PLEASE READ THE FOLLOWING
 //==========================================================================================================//
 
@@ -44,36 +44,39 @@ void piezoInit(uint8_t pwm_pin, uint8_t ground_pin, uint8_t volume){
 	DEBUG_FUNCTION_CALL((uint8_t*)"piezoInit"); //[UNDEFINED BEHAVIOUR] Need to test
 	setup_value = pwm_pin;
 	{
-		DEBUG_PARAMETER_VALUE(&setup_value);
-		DEBUG_PARAMETER_VALUE(&ground_pin);
+		DEBUG_PARAMETER_VALUE((uint8_t*)"uint8_t pwm_pin", &pwm_pin);
+		DEBUG_PARAMETER_VALUE((uint8_t*)"uint8_t ground_pin", &ground_pin);
+		DEBUG_PARAMETER_VALUE((uint8_t*)"static uint8_t setup_value", &setup_value);
 	}
 	switch(setup_value){
    		case DDD4: 
 			DDRD |= _BV(pwm_pin); //OC1B as output
+			TCCR1A |= _BV(COM1B1); //Clear 
 			OCR1B = volume;
    		    break;
    		case DDD5:
-			DDRD |= _BV(pwm_pin); //OC1B as output
+			DDRD |= _BV(pwm_pin); //OC1A as output
+			TCCR1A = _BV(COM1A1);
 			OCR1A = volume;
    		    break;
    		default:
+   			//silently fail if DEBUG mode is off
    			DEBUG_ERROR();
 	}
 	DDRD |= _BV(ground_pin);
 	{
 		uint8_t test_DDRD = DDRD; //not sure about these maybe i can only pass in DDRD directly?
 		uint8_t test_OCR1A = OCR1A; //same
-		DEBUG_PARAMETER_VALUE((void*)&test_DDRD);
-		DEBUG_PARAMETER_VALUE((void*)&test_OCR1A);
+		DEBUG_PARAMETER_VALUE((uint8_t*)"uint8_t DDRD", (void*)&test_DDRD);
+		DEBUG_PARAMETER_VALUE((uint8_t*)"uint8_t OCR1A", (void*)&test_OCR1A);
 	}
-	TCCR1A |= _BV(COM1B1);  //Clear OC1A/OC1B on compare match
 	TCCR1B |= _BV(WGM13) 	//mode 8, PWM, Phase and Frequency Correct (TOP value is ICR1)
 	   	   |  _BV(CS11);
 	{
 		uint8_t test_TCCR1A = TCCR1A;
 		uint8_t test_TCCR1B = TCCR1B;
-		DEBUG_PARAMETER_VALUE((void*)&test_TCCR1A);
-		DEBUG_PARAMETER_VALUE((void*)&test_TCCR1B);
+		DEBUG_PARAMETER_VALUE((uint8_t*)"uint8_t TCCR1A", (void*)&test_TCCR1A);
+		DEBUG_PARAMETER_VALUE((uint8_t*)"uint8_t TCCR1B", (void*)&test_TCCR1B);
 	}
 	DEBUG_FUNCTION_EXIT();
 }
