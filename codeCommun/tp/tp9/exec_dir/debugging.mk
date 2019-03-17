@@ -11,7 +11,7 @@ ifdef DEBUG_CMD
 ifeq ($(DEBUG_CMD),DEBUG)
 #DONT FUCKIN FORGET THE SPACE AFTER ifeq https://stackoverflow.com/a/16770163
 #this means we need to use this #https://www.rapidtables.com/code/linux/gcc/gcc-d.html
-DEBUG_FLAGS=-DDEBUG
+	DEBUG_FLAGS=-DDEBUG
 #DONT TAB VARIABLES UHH https://stackoverflow.com/a/16931877
 endif
 # ifeq($(DEBUG_CMD),TRACE)
