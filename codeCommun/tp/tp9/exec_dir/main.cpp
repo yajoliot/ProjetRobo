@@ -2,24 +2,30 @@
 #define F_CPU 8000000UL
 #endif
 
-#include <avr/io.h>
-#include "del.h"
-#include "piezo.h"
-#include "util.h"
+#include "pwm.h"
+
+//SETUP is...
+
+// PD2 + PD4 (identified as 1 and 5 on the board) for roueGauche
+// PD5 + PD7 (identified as 6 and 8 on the board) for roueDroite
+
+// PD2: direction 
+// PD4: pwm
+
+// PD5: pwm
+// PD7: direction
+
+// Plug these so that the direction pin is connected to the D pin on the pont H for either roue and the pwm pin to the E pin on either roue 
 
 int main() {
-	//PINS 5 and 3 for piezo
-	PIEZO_INIT(DDD4, DDD2); //First pin is the PWM output. Second pin passed is the ground pin.
-   	uint8_t count = 45;
+	initPWM();
    	for(;;){
-		PLAY_NOTE(count);
-		count++;
-		if(count==81){
-			count=45;
-		}
+   		avancer(50);
+   		_delay_ms(1000);
+   		arreter();
+   		tournerADroite();
+   		tournerAGauche();
+   		//these functions cover nearly everything. reculer() wasn't called but same idea as avancer().
 	}
     return 0;
 }
-
-//source:
-//https://web.archive.org/web/20111128004851/http://aquaticus.info/pwm-music
