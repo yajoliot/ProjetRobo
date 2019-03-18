@@ -18,7 +18,7 @@ public:
 	static void transmission(uint8_t donnee);
 	static void transmissionUART_entier ( uint8_t donnee ); // TransmissionUART d'un entier
 	static void transmissionUART_string(char* donnee); // TransmissionUART d'un string
-	uint8_t transmissionUART_receive( void );
+	static uint8_t transmissionUART_receive( void );
 };
 
 #endif 
