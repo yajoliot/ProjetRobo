@@ -51,7 +51,7 @@ int main() {
 	Memoire24CXXX memoire = Memoire24CXXX();
 
 
-	for (uint16_t i = 0; i < 0xff; i++) {
+	for (uint16_t i = 0; i < 0x56; i++) {
 		
 		uint8_t donnee[1];
 		memoire.lecture(i, donnee);

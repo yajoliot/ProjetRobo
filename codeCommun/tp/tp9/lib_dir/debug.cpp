@@ -28,7 +28,7 @@ void debugFunctionExit()
 void debugParameterValue(uint8_t *parameter_name, void *parameter){
 	char buff[64];
 	size_t n =  sprintf(buff,
-						"\t%s %s : %d\n",
+						"\t%s %s : 0x%02X\n",
 						TAG_PARAMETER_VALUE,
 						parameter_name,
 						*((uint8_t*)parameter)

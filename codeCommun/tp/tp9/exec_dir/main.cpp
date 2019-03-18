@@ -8,10 +8,11 @@
 #include "memoire_24.h"
 
 
-void lireDonnees(uint16_t& adresse,/*const*/ Memoire24CXXX & memoire, uint8_t & instruction, uint8_t & operande){
-  memoire.lecture(adresse, &instruction, sizeof(uint8_t));
+void lireDonnees(uint16_t& adresse, Memoire24CXXX& _memoire, uint8_t & instruction, uint8_t & operande){
+  // Memoire24CXXX _memoire;
+  _memoire.lecture(adresse, &instruction, sizeof(uint8_t));
   adresse += 0x08;
-  memoire.lecture(adresse, &operande, sizeof(uint8_t));
+  _memoire.lecture(adresse, &operande, sizeof(uint8_t));
   adresse += 0x08;
 }
 
@@ -25,6 +26,8 @@ int main() {
     allumerDEL(ETEIND);
     _delay_ms(1000);
   }
+  uint8_t idk = sizeof(uint8_t);
+  DEBUG_PARAMETER_VALUE((uint8_t*)"test size", &idk);
 //Program
   Memoire24CXXX memoire;
   initPWM();
@@ -32,30 +35,44 @@ int main() {
   PLAY_NOTE(45);
   _delay_ms(1000);
   setVolume(0);
-  for(;;){
+  // for(;;){
   uint8_t instruction = 0; // 0 est une valeur non utilisée
   uint8_t operande = 0;
   uint16_t adresse = 0x00;
   // lecture du nombre d'instructions
-  uint8_t nbInstructions;
-  memoire.lecture(adresse, &nbInstructions, sizeof(uint8_t));
-  nbInstructions = (nbInstructions - 0x02) / 0x02;
-  adresse += 0x10; //Passer a la premiere instruction
+  // uint16_t nbInstructions;
+  // {
+  //   uint8_t* instructions_hi;
+  //   uint8_t* instruction_lo;
+  //   memoire.lecture(adresse, instructions_hi);
+  //   memoire.lecture(adresse, instruction_lo, sizeof(uint8_t));
+  //   nbInstructions |= ((*instructions_hi) << 8) | *instruction_lo;
+  // }
+  // DEBUG_PARAMETER_VALUE((uint8_t*)"raw nbInstructions", &nbInstructions);
+  // nbInstructions = (nbInstructions - 0x02) / 0x02;
+  // DEBUG_PARAMETER_VALUE((uint8_t*)"processed nbInstructions", &nbInstructions);
+  // adresse += 0x10; //Passer a la premiere instruction
 
   do {
-  memoire.lecture(adresse, &instruction, sizeof(uint8_t));
-  // Instruction est sur 8 bits et operande sur 8 bits aussi
-  // Pour lire la prochaine instruction il faut sauter 16 bits
-  adresse += 0x10;
-  nbInstructions--;
+    memoire.lecture(adresse, &instruction, sizeof(uint8_t));
+    // Instruction est sur 8 bits et operande sur 8 bits aussi
+    // Pour lire la prochaine instruction il faut sauter 16 bits
+    adresse += 0x10;
+    // nbInstructions--;
+    DEBUG_PARAMETER_VALUE((uint8_t*)"instruction value :D",&instruction);
   }
-  while ( instruction != 0x01 && nbInstructions > 0x00 );
-
+  while ( instruction != 0x01 ); //&& nbInstructions > 0x00 );
+  DEBUG_INFO((uint8_t*)"WE OUTT BABY");
+  DEBUG_PARAMETER_VALUE((uint8_t*)"address value", &adresse);
   // Boucle for pour ne pas lire de la memoire qui n'est pas prévue pour ca
   bool finTrouvee = false;
-  for (uint16_t i = 0x00; i < nbInstructions && !finTrouvee; i++){
+  for (uint16_t i = 0x00; !finTrouvee; i++){
+    DEBUG_INFO((uint8_t*)"WE IN THE LOOP WOOHOO");
     lireDonnees(adresse, memoire, instruction, operande);
-    switch (instruction){
+    DEBUG_INFO((uint8_t*)"MANAGED TO READ MEM!!!");
+    DEBUG_PARAMETER_VALUE((uint8_t*)"instruction",&instruction);
+    DEBUG_PARAMETER_VALUE((uint8_t*)"operande",&operande);
+    switch (instruction){ 
       case 0x02 : // attendre att
         for (uint16_t i = 0; i < operande; i ++){
           _delay_ms(25);
@@ -78,10 +95,10 @@ int main() {
         break;
       
       case 0x48 : // jouer une sonorite : SGO
-        DEBUG_PARAMETER_VALUE((uint8_t*)"operande in SGO", &operande);  
+        // DEBUG_PARAMETER_VALUE((uint8_t*)"operande in SGO", &operande);  
         PLAY_NOTE(operande);
-        PLAY_NOTE(45);
-        _delay_ms(1000);
+        // PLAY_NOTE(45);
+        // _delay_ms(1000);
         break;
 
       case 0x09 : // arreter de jouer la sonorite en cours : SAR
@@ -124,45 +141,6 @@ int main() {
 
     }
   }
-}
-
-
-  // uint8_t count;
-  // uint8_t taille_instructions;
-  // for(;;){
-  //   taille_instructions = uart.transmissionUART_receive();
-  //   for(uint8_t i=0 ; i<taille_instructions ; i++){
-  //     memoire.ecriture(i, uart.transmissionUART_receive());
-  //   }
-  // }
-
-
-//OLD CODE
-
-  // DDRB = 0xFF;
-  // initPWM();
-  // PIEZO_INIT(DDD4, DDD2);
-  // uint8_t count;
-  // for(;;){
-    
-  //   //MOTOR PWM test
-  //   avancer(50);
-  //   _delay_ms(3000);
-  //   arreter();
-  //   tournerADroite();
-  //   tournerAGauche();
-  //   arreter();
-  // //these functions cover nearly everything. reculer() wasn't called but same idea as avancer().
-
-  // //PIEZO test
-  //   count=45;
-  //   setVolume(100);
-  //   for(;count<81;count++){
-  //     PLAY_NOTE(count);
-  //   }
-  //   setVolume(0);
-  // }
-
-
+// }
   return 0;
 }
