@@ -13,12 +13,16 @@
 /* Modifications mineures:                                                    */
 /*   - Pour refaire l'indentation - ete 2007 - Jerome Collin                  */
 /*   - Pour preciser les broches utilisees - novembre 2008 - Jerome Collin    */
-/*   - ajouts de commentaires - septembre 2017 - Jerome Collin
+/*   - ajouts de commentaires - septembre 2017 - Jerome Collin                */
 /*                                                                            */
 /******************************************************************************/
 
 #ifndef MEMOIRE_24_H
 #define MEMOIRE_24_H
+
+#ifndef F_CPU
+#define F_CPU 8000000UL
+#endif
 
 #include <avr/io.h>
 #include <util/twi.h>
