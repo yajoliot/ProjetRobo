@@ -76,7 +76,7 @@ void tournerADroite(){
 	PORTD &= ~(1 << PB2);
 	OCR0B = 255; // A determiner avec le robot
 	_delay_ms(800); // A determiner avec le robot
-
+	arreter();
 }
 
 
@@ -86,6 +86,6 @@ void tournerAGauche(){
 	PORTD &= ~(1 << PB5);
 	OCR0A= 255; // A determiner avec le robot
 	_delay_ms(800); // A determiner avec le robot
-	
+	arreter();
 }
 

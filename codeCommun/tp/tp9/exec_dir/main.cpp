@@ -33,6 +33,7 @@
 // Plug the piezo in any way but on those pins you've passed to the constructor
 
 int main() {
+  DDRB = 0xFF;
   initPWM();
   PIEZO_INIT(DDD4, DDD2);
   uint8_t count;
@@ -40,10 +41,11 @@ int main() {
     
     //MOTOR PWM test
     avancer(50);
-    _delay_ms(1000);
+    _delay_ms(3000);
     arreter();
     tournerADroite();
     tournerAGauche();
+    arreter();
 	//these functions cover nearly everything. reculer() wasn't called but same idea as avancer().
 
 	//PIEZO test
