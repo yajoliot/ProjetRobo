@@ -50,6 +50,7 @@ int main() {
 
 	//PIEZO test
     count=45;
+    setVolume(100);
     for(;count<81;count++){
 		  PLAY_NOTE(count);
     }
