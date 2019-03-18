@@ -18,10 +18,11 @@
 // Plug these so that the direction pin is connected to the D pin on the pont H for either roue and the pwm pin to the E pin on either roue 
 
 int main() {
+  DDRB = 0xFF;
   initPWM();
   for(;;){
     avancer(50);
-    _delay_ms(1000);
+    _delay_ms(3000);
     arreter();
     tournerADroite();
     tournerAGauche();
