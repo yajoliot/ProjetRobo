@@ -49,10 +49,11 @@ int main() {
 	//these functions cover nearly everything. reculer() wasn't called but same idea as avancer().
 
 	//PIEZO test
-	count=45;
+    count=45;
     for(;count<81;count++){
-		PLAY_NOTE(count);
-	}
+		  PLAY_NOTE(count);
+    }
+    setVolume(0);
   }
   return 0;
 }
