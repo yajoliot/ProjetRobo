@@ -8,15 +8,19 @@
 #include "memoire_24.h"
 
 
-void lireDonnees(uint16_t& adresse, Memoire24CXXX& _memoire, uint8_t & instruction, uint8_t & operande){
+void lireDonnees(uint16_t& address, Memoire24CXXX& _memoire, uint8_t & instruction, uint8_t & operande){
   // Memoire24CXXX _memoire;
-  _memoire.lecture(adresse, &instruction, sizeof(uint8_t));
-  adresse += 0x08;
-  _memoire.lecture(adresse, &operande, sizeof(uint8_t));
-  adresse += 0x08;
+  _memoire.lecture(address, &instruction, sizeof(uint8_t));
+  address += 0x01;
+  _memoire.lecture(address, &operande, sizeof(uint8_t));
+  address += 0x01;
 }
 
 int main() {
+//Initialization
+  Memoire24CXXX memoire;
+  initPWM();
+  PIEZO_INIT(DDD4, DDD2);
 
 //Initial Sequence
   DDRB=0xFF;
@@ -26,49 +30,32 @@ int main() {
     allumerDEL(ETEIND);
     _delay_ms(1000);
   }
-  uint8_t idk = sizeof(uint8_t);
-  DEBUG_PARAMETER_VALUE((uint8_t*)"test size", &idk);
-//Program
-  Memoire24CXXX memoire;
-  initPWM();
-  PIEZO_INIT(DDD4, DDD2);
   PLAY_NOTE(45);
   _delay_ms(1000);
   setVolume(0);
-  // for(;;){
-  uint8_t instruction = 0; // 0 est une valeur non utilisée
-  uint8_t operande = 0;
-  uint16_t adresse = 0x00;
-  // lecture du nombre d'instructions
-  // uint16_t nbInstructions;
-  // {
-  //   uint8_t* instructions_hi;
-  //   uint8_t* instruction_lo;
-  //   memoire.lecture(adresse, instructions_hi);
-  //   memoire.lecture(adresse, instruction_lo, sizeof(uint8_t));
-  //   nbInstructions |= ((*instructions_hi) << 8) | *instruction_lo;
-  // }
-  // DEBUG_PARAMETER_VALUE((uint8_t*)"raw nbInstructions", &nbInstructions);
-  // nbInstructions = (nbInstructions - 0x02) / 0x02;
-  // DEBUG_PARAMETER_VALUE((uint8_t*)"processed nbInstructions", &nbInstructions);
-  // adresse += 0x10; //Passer a la premiere instruction
 
+//Program
+  // for(;;){
+  uint8_t instruction = 0x00;
+  uint8_t operande = 0x00;
+  uint16_t address = 0x0000;
+
+  //Setup for loops
+  uint8_t boucle_counter = 0x00;
+  uint8_t boucle_active = 0x00;
+  uint8_t start_loop_address = 0x00;
+
+//Read bytes 'til you can start (hit 0x01 as the start command)
   do {
-    memoire.lecture(adresse, &instruction, sizeof(uint8_t));
-    // Instruction est sur 8 bits et operande sur 8 bits aussi
-    // Pour lire la prochaine instruction il faut sauter 16 bits
-    adresse += 0x10;
-    // nbInstructions--;
-    DEBUG_PARAMETER_VALUE((uint8_t*)"instruction value :D",&instruction);
-  }
-  while ( instruction != 0x01 ); //&& nbInstructions > 0x00 );
-  DEBUG_INFO((uint8_t*)"WE OUTT BABY");
-  DEBUG_PARAMETER_VALUE((uint8_t*)"address value", &adresse);
-  // Boucle for pour ne pas lire de la memoire qui n'est pas prévue pour ca
+    memoire.lecture(address, &instruction, sizeof(uint8_t));
+    address += 0x02;
+  }while ( instruction != 0x01 );
+
+//Start reading instructions and operands
   bool finTrouvee = false;
   for (uint16_t i = 0x00; !finTrouvee; i++){
     DEBUG_INFO((uint8_t*)"WE IN THE LOOP WOOHOO");
-    lireDonnees(adresse, memoire, instruction, operande);
+    lireDonnees(address, memoire, instruction, operande);
     DEBUG_INFO((uint8_t*)"MANAGED TO READ MEM!!!");
     DEBUG_PARAMETER_VALUE((uint8_t*)"instruction",&instruction);
     DEBUG_PARAMETER_VALUE((uint8_t*)"operande",&operande);
@@ -94,11 +81,9 @@ int main() {
         PORTB &= 0xFC;
         break;
       
-      case 0x48 : // jouer une sonorite : SGO
-        // DEBUG_PARAMETER_VALUE((uint8_t*)"operande in SGO", &operande);  
+      case 0x48 : // jouer une sonorite : SGO  
+        setVolume(100);
         PLAY_NOTE(operande);
-        // PLAY_NOTE(45);
-        // _delay_ms(1000);
         break;
 
       case 0x09 : // arreter de jouer la sonorite en cours : SAR
@@ -130,9 +115,20 @@ int main() {
         break;
       
       case 0xC0 : // debut de boucle : DBC
+        boucle_active = 0x01;
+        boucle_counter = operande;
+        start_loop_address = address;
         break;
 
       case 0xC1 : // fin de boucle : FBC
+        if(boucle_active == 0x01){
+          if(boucle_counter == 0x00){
+            boucle_active = 0x00;
+          }else{
+            boucle_counter -= 0x01;
+          }
+          address = start_loop_address;
+        }
         break;
 
       case 0xFF : // fin : fin
