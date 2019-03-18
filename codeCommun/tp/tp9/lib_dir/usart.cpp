@@ -66,3 +66,12 @@ void TransmissionUART::transmission( uint8_t donnee ) {
    /* Put data into buffer, sends the data */
    UDR0 = donnee;
 }
+
+uint8_t TransmissionUART::transmissionUART_receive( void ){
+	/* Wait for data to be received */
+	while ( !(UCSR0A & (1<<RXC0)) )
+	;
+	/* Get and return received data from buffer */
+	return UDR0;
+
+}

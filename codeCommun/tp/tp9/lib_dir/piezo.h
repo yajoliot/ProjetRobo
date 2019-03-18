@@ -13,7 +13,7 @@
 #define PLAY_NOTE(...) playNote(VARIADIC_TWO(__VA_ARGS__, DEFAULT_SOUND_DURATION_IN_MS))
 
 const uint8_t MAX_VOLUME = 100;
-const uint16_t DEFAULT_SOUND_DURATION_IN_MS = 1000;
+const uint16_t DEFAULT_SOUND_DURATION_IN_MS = 0;
 
 //DO NOT USE THESE DIRECTLY
 void piezoInit(uint8_t pwm_pin, uint8_t ground_pin, uint8_t volume);
