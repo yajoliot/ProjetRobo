@@ -113,8 +113,6 @@ int main() {
 
 //Program
 
-  _delay_ms(10000);
-
 //Choose your program
   
   //Write instructions in...
