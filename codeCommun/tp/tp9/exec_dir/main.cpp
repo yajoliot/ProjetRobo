@@ -116,7 +116,9 @@ int main() {
   
   //Write instructions in...
   if(MODE == WRITE_MODE){
-    ecrireDonnees(memoire, uart);
+    for(;;){
+      ecrireDonnees(memoire, uart);
+    }
   
   //Or read the loaded instructions
   }else if(MODE == READ_MODE){
