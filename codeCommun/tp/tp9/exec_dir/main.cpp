@@ -131,8 +131,7 @@ int main() {
 
   //Read bytes 'til you can start (hit 0x01 as the start command)
     do {
-      memoire.lecture(address, &instruction, sizeof(uint8_t));
-      address += 0x02;
+      lireDonnees(address, memoire, instruction, operande);
     }while ( instruction != 0x01 );
 
   //Start reading instructions and operands
