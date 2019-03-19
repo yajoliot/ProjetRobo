@@ -30,7 +30,7 @@ void roueGauche(bool direction, uint8_t rapport){
 	else {
 		PORTB &= ~(0x01 << PB2);
 	}
-	rapport= (rapport)*0xff/100;
+	
 	OCR0B = rapport;
 }
 
@@ -42,7 +42,7 @@ void roueDroite(bool direction,uint8_t rapport){
 	else {
 		PORTB &= ~(1 << PB5);
 	}
-	rapport= (rapport+7>100?100:rapport+7)*255/100;
+
 	OCR0A = rapport;
 }
 
