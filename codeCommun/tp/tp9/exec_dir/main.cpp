@@ -63,8 +63,8 @@ void lireDonnees(uint16_t& address, Memoire24CXXX &_memoire, uint8_t & instructi
 }
 
 void ecrireDonnees(Memoire24CXXX &_memoire, TransmissionUART &_uart){
-  uint8_t taille_octet_1 = _uart.transmissionUART_receive();
-  uint8_t taille_octet_2 = _uart.transmissionUART_receive();
+  uint16_t taille_octet_1 = _uart.transmissionUART_receive();
+  uint16_t taille_octet_2 = _uart.transmissionUART_receive();
   uint16_t taille_octet_total = 0x00;
   taille_octet_total |= (taille_octet_1 << 8) | taille_octet_2;
   for (uint16_t i = 0; i < taille_octet_total;i++)
