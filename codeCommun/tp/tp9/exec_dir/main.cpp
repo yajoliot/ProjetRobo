@@ -78,6 +78,7 @@ void ecrireDonnees(Memoire24CXXX &_memoire, TransmissionUART &_uart){
 ISR (INT0_vect) {
   variableDelay(30);
   if(PIND & 0x04){
+    DEBUG_INFO((uint8_t*)"BUTTON TOUCHED!");
     MODE = WRITE_MODE;
   }
   EIFR |= _BV(INTF0);
@@ -118,6 +119,7 @@ int main() {
   
   //Write instructions in...
   if(MODE == WRITE_MODE){
+    DEBUG_INFO((uint8_t*)"Rentree dans le mode ecriture");
     for(;;){
       ecrireDonnees(memoire, uart);
     }
