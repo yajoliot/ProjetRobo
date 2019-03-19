@@ -49,6 +49,8 @@
 // 4. Essayez de "make clean" toujours avant de faire un "make"/"make install"
 // 5. Demandez des questions
 
+const uin16_t ADDRESSE_INITIALE = 0x0000;
+
 const uint8_t WRITE_MODE = 0x00;
 const uint8_t READ_MODE = 0x01;
 //DEFAULT MODE is to READ
@@ -67,7 +69,7 @@ void ecrireDonnees(Memoire24CXXX &_memoire, TransmissionUART &_uart){
   uint16_t taille_octet_2 = _uart.transmissionUART_receive();
   uint16_t taille_octet_total = 0x00;
   taille_octet_total |= (taille_octet_1 << 8) | taille_octet_2;
-  for (uint16_t i = 0; i < taille_octet_total;i++)
+  for (uint16_t i = ADDRESSE_INITIALE; i < taille_octet_total;i++)
   {
     _memoire.ecriture(i, _uart.transmissionUART_receive());
   }
