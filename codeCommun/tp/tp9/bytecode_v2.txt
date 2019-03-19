@@ -1,0 +1,26 @@
+dbt;        # 0x01
+dal 1;      #allumer la DEL - 0x 02 01
+att 80;     # attendre 1 seconde (25ms*valeur de l'operande)
+det 1;      # eteinddre DEL
+att 80;     # attendre 1 seconde
+
+sgo 45;     # emettre un son a 110Hz
+att 80;
+sgo 50;     # emettre un son a 110Hz
+att 80;
+sgo 70;     # emettre un son a 220Hz
+att 80; 
+sgo 81;     # emettre un son a 880Hz
+att 80;
+sgo 57;     # emettre un son a 220Hz
+att 80; 
+sgo 81;     # emettre un son a 880Hz
+att 80;
+sar;        # arrete de jouer le son
+
+dal 1;      # allumer la DEL
+att 240;    # attendre 3 secondes
+fin;        # fin du programme
+
+
+
