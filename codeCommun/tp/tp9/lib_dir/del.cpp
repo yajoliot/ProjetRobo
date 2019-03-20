@@ -18,3 +18,11 @@ void allumerDEL(uint8_t Couleur){
     
 }
 
+void allumerDEL_dal(uint8_t operande){
+  if (operande == 0x01){ // Allume en vert
+    allumerDEL(VERT);
+  }
+  else if(operande == 0x02){ // Allume en rouge
+    allumerDEL(ROUGE);
+  }
+}

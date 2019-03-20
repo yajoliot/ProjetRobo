@@ -15,6 +15,6 @@
 #define _SIZEOF(x) sizeof(x)/sizeof(x[0])
 
 void variableDelay(uint16_t duration_in_ms);
-void initializePorts();
+void variableDelay25ms(uint8_t iterations);
 
 #endif
