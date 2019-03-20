@@ -57,7 +57,7 @@ volatile uint8_t MODE = READ_MODE;
 ISR (INT0_vect) {
   variableDelay(30);
   if(PIND & 0x04){
-    DEBUG_INFO((uint8_t*)"BUTTON TOUCHED!");
+    DEBUG_INFO((uint8_t*)"Button touched!");
     MODE = WRITE_MODE;
   }
   EIFR |= _BV(INTF0);
@@ -67,18 +67,20 @@ ISR (INT0_vect) {
 
 int main() {
 //Initialization
-  ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-    //PORTS
-    DDRB = 0xFF;
-    //INTERRUPTS
-    EICRA |= _BV(ISC00);
-    EIMSK |= _BV(INT0);
-  }
+  uint8_t sreg = SREG;
+  cli();
+  //PORTS
+  DDRB = 0xFF;
+  //INTERRUPTS
+  EICRA |= _BV(ISC00);
+  EIMSK |= _BV(INT0);
   //LIBRARY INITS
   Memoire24CXXX memoire;
   TransmissionUART uart;
   initPWM();
   PIEZO_INIT(DDD4, DDD6);
+  sei();
+  SREG = sreg;
 
 //Initial Sequence. Interruptable section
   for(uint8_t i=0 ; i<3 ; i++){
@@ -97,7 +99,7 @@ int main() {
   
   //Write instructions in...
   if(MODE == WRITE_MODE){
-    DEBUG_INFO((uint8_t*)"Rentree dans le mode ecriture");
+    DEBUG_INFO((uint8_t*)"Entering write mode...");
     allumerDEL(ROUGE);
     for(;;){
       ecrireDonnees(memoire, uart);
@@ -122,9 +124,9 @@ int main() {
   //Start reading instructions and operands
     bool finTrouvee = false;
     for (uint16_t i = 0x00; !finTrouvee; i++){
-      DEBUG_INFO((uint8_t*)"WE IN THE LOOP WOOHOO");
+      DEBUG_INFO((uint8_t*)"Entering the loop...");
       lireDonnees(address, memoire, instruction, operande);
-      DEBUG_INFO((uint8_t*)"MANAGED TO READ MEM!!!");
+      DEBUG_INFO((uint8_t*)"Read the memory...");
       DEBUG_PARAMETER_VALUE((uint8_t*)"instruction",&instruction);
       DEBUG_PARAMETER_VALUE((uint8_t*)"operande",&operande);
       switch (instruction){ 
@@ -134,7 +136,7 @@ int main() {
 
         case 0x44 : // allumer les DEL : dal
           // Possibilite d'allumer la DEL en rouge ou en vert en fonction de l'operande
-          allumerDEL_dal(operande);
+          dal(operande);
           break;
 
         case 0x45 : // eteindre les DEL : det
