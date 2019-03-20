@@ -3,6 +3,7 @@
 
 #include "memoire_24.h"
 #include "usart.h"
+#include "constantes.h"
 
 void lireDonnees(uint16_t& address, Memoire24CXXX &_memoire, uint8_t & instruction, uint8_t & operande);
 void ecrireDonnees(Memoire24CXXX &_memoire, TransmissionUART &_uart);

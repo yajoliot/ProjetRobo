@@ -51,9 +51,6 @@
 // 4. Essayez de "make clean" toujours avant de faire un "make"/"make install"
 // 5. Demandez des questions
 
-const uint16_t ADDRESSE_INITIALE = 0x0000;
-const uint8_t WRITE_MODE = 0x00;
-const uint8_t READ_MODE = 0x01;
 //DEFAULT MODE is to READ
 volatile uint8_t MODE = READ_MODE;
 
@@ -70,18 +67,18 @@ ISR (INT0_vect) {
 
 int main() {
 //Initialization
-  ATOMIC_BLOCK(RESTORESTATE){
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
     //PORTS
     DDRB = 0xFF;
     //INTERRUPTS
     EICRA |= _BV(ISC00);
     EIMSK |= _BV(INT0);
-    //LIBRARY INITS
-    Memoire24CXXX memoire;
-    TransmissionUART uart;
-    initPWM();
-    PIEZO_INIT(DDD4, DDD6);
   }
+  //LIBRARY INITS
+  Memoire24CXXX memoire;
+  TransmissionUART uart;
+  initPWM();
+  PIEZO_INIT(DDD4, DDD6);
 
 //Initial Sequence. Interruptable section
   for(uint8_t i=0 ; i<3 ; i++){
