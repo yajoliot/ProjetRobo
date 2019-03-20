@@ -27,12 +27,12 @@ script:
 
 after_success:
   #To use for styling checking
-     # - chmod u+x ./cpplint.py
-     # - ./cpplint.py --quiet --root=codeCommun/tp/tp9/ --recursive ./codeCommun/tp/tp9/
+     # - chmod u+x ./.travis-ci/cpplint.py
+     # - ./.travis-ci/cpplint.py --quiet --root=codeCommun/tp/tp9/ --recursive ./codeCommun/tp/tp9/
      # - clang-tidy 
   #To use for static code analysis
   #Need to include own .cfg file for our own library functions
-     - cppcheck  --enable=warning,performance --language=c++ --std=c99 --platform=avr8 --library=avr.cfg ./codeCommun/tp/tp9/
+     - cppcheck  --enable=warning,performance --language=c++ --std=c99 --platform=avr8 --library=./.travis-ci/avr.cfg ./codeCommun/tp/tp9/
     
   #Send the clang-tidy suggested changes
      # - curl --upload-file ./file https://transfer.sh/file
