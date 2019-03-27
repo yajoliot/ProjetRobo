@@ -2,11 +2,13 @@
 #define F_CPU 8000000UL
 #endif
 
+#include <util/atomic.h>
 #include "pwm.h"
 #include "piezo.h"
 #include "usart.h"
 #include "memoire_24.h"
 #include "usart.h"
+#include "bytecode.h"
 
 //Setup is as such
 
@@ -49,31 +51,8 @@
 // 4. Essayez de "make clean" toujours avant de faire un "make"/"make install"
 // 5. Demandez des questions
 
-const uint16_t ADDRESSE_INITIALE = 0x0000;
-
-const uint8_t WRITE_MODE = 0x00;
-const uint8_t READ_MODE = 0x01;
 //DEFAULT MODE is to READ
 volatile uint8_t MODE = READ_MODE;
-
-void lireDonnees(uint16_t& address, Memoire24CXXX &_memoire, uint8_t & instruction, uint8_t & operande){
-  // Memoire24CXXX _memoire;
-  _memoire.lecture(address, &instruction, sizeof(uint8_t));
-  address += 0x01;
-  _memoire.lecture(address, &operande, sizeof(uint8_t));
-  address += 0x01;
-}
-
-void ecrireDonnees(Memoire24CXXX &_memoire, TransmissionUART &_uart){
-  uint16_t taille_octet_1 = _uart.transmissionUART_receive();
-  uint16_t taille_octet_2 = _uart.transmissionUART_receive();
-  uint16_t taille_octet_total = 0x00;
-  taille_octet_total |= (taille_octet_1 << 8) | taille_octet_2;
-  for (uint16_t i = ADDRESSE_INITIALE; i < taille_octet_total;i++)
-  {
-    _memoire.ecriture(i, _uart.transmissionUART_receive());
-  }
-}
 
 ISR (INT0_vect) {
   variableDelay(30);
@@ -82,25 +61,26 @@ ISR (INT0_vect) {
     MODE = WRITE_MODE;
   }
   EIFR |= _BV(INTF0);
+  cli();
 }
 
 
 int main() {
 //Initialization
-  cli();
-  //PORTS
-  DDRB = 0xFF;
-  //INTERRUPTS
-  EICRA |= _BV(ISC00);
-  EIMSK |= _BV(INT0);
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+    //PORTS
+    DDRB = 0xFF;
+    //INTERRUPTS
+    EICRA |= _BV(ISC00);
+    EIMSK |= _BV(INT0);
+  }
   //LIBRARY INITS
   Memoire24CXXX memoire;
   TransmissionUART uart;
   initPWM();
   PIEZO_INIT(DDD4, DDD6);
-  sei();
 
-//Initial Sequence
+//Initial Sequence. Interruptable section
   for(uint8_t i=0 ; i<3 ; i++){
     allumerDEL(VERT);
     _delay_ms(1000);
@@ -118,6 +98,7 @@ int main() {
   //Write instructions in...
   if(MODE == WRITE_MODE){
     DEBUG_INFO((uint8_t*)"Rentree dans le mode ecriture");
+    allumerDEL(ROUGE);
     for(;;){
       ecrireDonnees(memoire, uart);
     }
@@ -148,20 +129,12 @@ int main() {
       DEBUG_PARAMETER_VALUE((uint8_t*)"operande",&operande);
       switch (instruction){ 
         case 0x02 : // attendre att
-          for (uint16_t i = 0; i < operande; i ++){
-            _delay_ms(25);
-          }
+          variableDelay25ms(operande);
           break;
 
         case 0x44 : // allumer les DEL : dal
           // Possibilite d'allumer la DEL en rouge ou en vert en fonction de l'operande
-          if (operande == 0x01){ // Allume en vert
-            allumerDEL(VERT);
-          }
-          else { // Allume en rouge
-            allumerDEL(ROUGE);
-          }
-          
+          allumerDEL_dal(operande);
           break;
 
         case 0x45 : // eteindre les DEL : det

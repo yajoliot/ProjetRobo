@@ -17,3 +17,9 @@ void variableDelay(uint16_t duration_in_ms){
 		_delay_ms(1);
 	}
 }
+
+void variableDelay25ms(uint8_t iterations){
+	for(uint8_t i=0 ; i<iterations ; i++){
+		_delay_ms(25);
+	}
+}
