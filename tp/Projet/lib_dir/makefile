@@ -114,10 +114,10 @@ $(TRG): $(OBJDEPS)
 # Production des fichiers object
 # De C a objet
 %.o: %.c
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) $(DEBUG_FLAGS) -c $<
 # De C++ a objet
 %.o: %.cpp
-	$(CC) $(CFLAGS) $(CXXFLAGS) -c $<
+	$(CC) $(CFLAGS) $(CXXFLAGS) $(DEBUG_FLAGS) -c $<
 
 # Verification des dependances (header dependencies)
 -include *.d
@@ -142,3 +142,5 @@ clean:
 # http://bit.ly/1XvxsN3
 
 #####                    EOF                   #####
+
+include ../exec_dir/debugging.mk
