@@ -54,6 +54,15 @@
 //DEFAULT MODE is to READ
 volatile uint8_t MODE = READ_MODE;
 
+//COMMANDES DU BYTECODE
+enum cmd{DBT=0x01, //commande de depart
+         ATT=0x02, //commande d'attente
+         DAL=0x44, DET=0x45, //commandes de del: allumer et fermer 
+         SGO=0x48, SAR=0x09, //commandes de son: jouer et arreter
+         MAR=0x60, MAR2=0x61, MAV=0x62, MRE=0x63, TRD=0x64, TRG=0x65, //commandes de moteurs
+         DBC=0xC0, FBC=0xC1, //fonctions de bouclage:
+         FIN=0xFF}; //commande de fin
+
 ISR (INT0_vect) {
   variableDelay(30);
   if(PIND & 0x04){
@@ -130,59 +139,24 @@ int main() {
       DEBUG_PARAMETER_VALUE((uint8_t*)"instruction",&instruction);
       DEBUG_PARAMETER_VALUE((uint8_t*)"operande",&operande);
       switch (instruction){ 
-        case 0x02 : // attendre att
-          variableDelay25ms(operande);
-          break;
-
-        case 0x44 : // allumer les DEL : dal
-          // Possibilite d'allumer la DEL en rouge ou en vert en fonction de l'operande
-          allumerDEL_dal(operande);
-          break;
-
-        case 0x45 : // eteindre les DEL : det
-          allumerDEL(ETEIND);
-          break;
-        
-        case 0x48 : // jouer une sonorite : SGO  
-          setVolume(100);
-          PLAY_NOTE(operande);
-          break;
-
-        case 0x09 : // arreter de jouer la sonorite en cours : SAR
-          setVolume(0);
-          break;
-
-        case 0x60 : // arreter les moteurs : MAR
-          arreter();
-          break;
-
-        case 0x61 : // arreter les moteurs : MAR
-          arreter();
-          break;
-
-        case 0x62 : // avancer : MAV
-          avancer(operande);
-          break;
-        
-        case 0x63 : // reculer : MRE
-          reculer(operande);
-          break;
-
-        case 0x64 : // Trouner a droite : TRD
-          tournerADroite();
-          break;
-
-        case 0x65 : // tourner a gauhce : TRG
-          tournerAGauche();
-          break;
-        
-        case 0xC0 : // debut de boucle : DBC
+        case DBT : break;
+        case ATT : variableDelay25ms(operande); break;
+        case DAL : allumerDEL_dal(operande); break;
+        case DET : allumerDEL(ETEIND); break;
+        case SGO : setVolume(100); PLAY_NOTE(operande); break;
+        case SAR : setVolume(0); break;
+        case MAR : arreter(); break;
+        case MAR2 : arreter(); break;
+        case MAV : avancer(operande); break;
+        case MRE : reculer(operande); break;
+        case TRD : tournerADroite(); break;
+        case TRG : tournerAGauche(); break;
+        case DBC : 
           boucle_active = 0x01;
           boucle_counter = operande;
           start_loop_address = address;
           break;
-
-        case 0xC1 : // fin de boucle : FBC
+        case FBC :
           if(boucle_active == 0x01){
             if(boucle_counter == 0x00){
               boucle_active = 0x00;
@@ -192,10 +166,7 @@ int main() {
             address = start_loop_address;
           }
           break;
-
-        case 0xFF : // fin : fin
-          finTrouvee = true;
-          break;
+        case FIN : finTrouvee = true; break;
 
       }
     }

@@ -10,7 +10,7 @@ DEBUG_CMD=DEBUG
 ifdef DEBUG_CMD
 ifeq ($(DEBUG_CMD),DEBUG)
 #DONT FORGET THE SPACE AFTER ifeq https://stackoverflow.com/a/16770163
-	DEBUG_FLAGS=-DDEBUG
+	DEBUG_FLAGS=-D DEBUG
 #DONT FORGET TO TAB VARIABLES https://stackoverflow.com/a/16931877
 endif
 # ifeq($(DEBUG_CMD),TRACE)
