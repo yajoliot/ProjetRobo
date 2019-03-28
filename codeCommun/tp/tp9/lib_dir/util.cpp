@@ -23,3 +23,8 @@ void variableDelay25ms(const uint8_t iterations){
 		_delay_ms(25.0);
 	}
 }
+
+uint16_t strLen (const uint8_t *str)
+{
+    uint8_t *len=malloc(sizeof(uint8_t)); for (*len=0x00 ; str[*len] ; (*len)++); return len;
+}

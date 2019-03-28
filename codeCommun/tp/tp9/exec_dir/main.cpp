@@ -56,7 +56,7 @@ volatile uint8_t MODE = READ_MODE;
 
 ISR (INT0_vect) {
   variableDelay(30);
-  if(PIND & 0x04){
+  if(INTERRUPTEUR_ON){
     DEBUG_INFO((uint8_t*)"Button touched!");
     MODE = WRITE_MODE;
   }
