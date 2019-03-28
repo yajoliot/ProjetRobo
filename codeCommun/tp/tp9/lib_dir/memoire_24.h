@@ -17,8 +17,8 @@
 /*                                                                            */
 /******************************************************************************/
 
-#ifndef MEMOIRE_24_H
-#define MEMOIRE_24_H
+#ifndef LIB_DIR_MEMOIRE_H
+#define LIB_DIR_MEMOIRE_H
 
 #ifndef F_CPU
 #define F_CPU 8000000UL
@@ -66,4 +66,4 @@ private:
    const uint8_t PAGE_SIZE;
 };
 
-#endif /* MEMOIRE_24_H */
+#endif 

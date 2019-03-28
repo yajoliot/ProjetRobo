@@ -23,13 +23,13 @@ MCU=atmega324pa
 
 # Nom de votre projet
 # (utilisez un seul mot, exemple: 'monprojet')
-PROJECTNAME=test
+LIBRARYNAME=108
 
 # Fichiers sources
 # Utilisez le suffixe .cpp pour les fichiers C++
 # Listez tous les fichiers a compiler, separes par
 # un espace. exemple: 'tp1.c tp2.cpp':
-PRJSRC= pb3.cpp memoire_24.cpp
+PRJSRC= $(wildcard *.cpp)
 
 # Inclusions additionnels (ex: -I/path/to/mydir)
 INC=
@@ -40,11 +40,6 @@ LIBS=
 # Niveau d'optimization
 # Utilisez s (size opt), 1, 2, 3 ou 0 (off)
 OPTLEVEL=s
-
-# Programmer ID - Ne pas changer 
-# Liste complete des IDs disponible avec avrdude
-AVRDUDE_PROGRAMMERID=usbasp
-
 
 
 ####################################################
@@ -62,14 +57,8 @@ AVRDUDE_PROGRAMMERID=usbasp
 
 #compilateur utilise
 CC=avr-gcc
-#pour copier le contenu d'un fichier objet vers un autre
-OBJCOPY=avr-objcopy
-#pour permettre le transfert vers le microcontroleur
-AVRDUDE=avrdude
 #pour supprimer les fichiers lorsque l'on appel make clean
 REMOVE=rm -f
-# HEXFORMAT -- format pour les fichiers produient .hex
-HEXFORMAT=ihex
 
 
 
@@ -84,21 +73,10 @@ CFLAGS=-I. -MMD $(INC) -g -mmcu=$(MCU) -O$(OPTLEVEL) \
 # Flags pour le compilateur en C++
 CXXFLAGS=-fno-exceptions     
 
-# Linker pour lier les librairies utilisees
-LDFLAGS=-Wl,-Map,$(TRG).map -mmcu=$(MCU)
-
-
-
 ####### Cible (Target) #######
 
 #Nom des cibles par defaut
-TRG=$(PROJECTNAME).out
-HEXROMTRG=$(PROJECTNAME).hex
-HEXTRG=$(HEXROMTRG) $(PROJECTNAME).ee.hex
-
-
-
-####### Definition de tout les fichiers objets #######
+TRG=lib$(LIBRARYNAME).a
 
 # Cette fonction permet de differencier les fichiers .c
 # des fichiers .cpp
@@ -113,7 +91,6 @@ OBJDEPS=$(CFILES:.c=.o) \
 	
 # Pour plus d'information sur cette section, consulter :
 # http://bit.ly/257R53E	
-# Les fonctions $(filter pattern…,text) &
 # $(patsubst pattern,replacement,text) sont pertinentes
 	
 
@@ -132,34 +109,21 @@ all: $(TRG)
 
 # Implementation de la cible
 $(TRG): $(OBJDEPS)
-	$(CC) $(LDFLAGS) -o $(TRG) $(OBJDEPS) \
-	-lm $(LIBS)
+	avr-ar -crs $@ $^
 
 # Production des fichiers object
 # De C a objet
 %.o: %.c
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) $(DEBUG_FLAGS) -c $<
 # De C++ a objet
 %.o: %.cpp
-	$(CC) $(CFLAGS) $(CXXFLAGS) -c $<
+	$(CC) $(CFLAGS) $(CXXFLAGS) $(DEBUG_FLAGS) -c $<
 
 # Verification des dependances (header dependencies)
 -include *.d
 
 # Pour plus d'information sur cette section, consulter:
 # http://bit.ly/2580FU8
-
-# Production des fichiers hex a partir des fichiers elf
-%.hex: %.out
-	$(OBJCOPY) -j .text -j .data \
-		-O $(HEXFORMAT) $< $@
-
-# Make install permet de compiler le projet puis
-# d'ecrire le programme en memoire flash dans votre
-# microcontroleur. Celui-ci doit etre branche par cable USB
-install: $(HEXROMTRG)				
-	$(AVRDUDE) -c $(AVRDUDE_PROGRAMMERID)   \
-	-p $(MCU) -P -e -U flash:w:$(HEXROMTRG)
 
 # Make clean permet d'effacer tout les fichiers generes
 # lors de la compilation
@@ -178,3 +142,5 @@ clean:
 # http://bit.ly/1XvxsN3
 
 #####                    EOF                   #####
+
+include ../exec_dir/debugging.mk
