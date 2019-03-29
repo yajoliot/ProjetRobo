@@ -27,13 +27,15 @@
  
  
  lineTracker.updateValueMap();
- _delay_ms(1000);
+ //_delay_ms(1000);
  
  PORTC = lineTracker.getValueMap();
  //DEBUG_PARAMETER_VALUE((uint8_t*)"PORTC->", &PORTC);
- _delay_ms(1000);
+ //_delay_ms(1000);
  }
  }
+
+
 /*These define lines can be in the util.h or the constantes.h file (probably constantes.h file)
 #define F_CPU 8000000UL
 #include <avr/io.h>
@@ -67,3 +69,4 @@ int main(){
     // 6. DEL3 && DEL1
     // and so on...
 }
+*/

@@ -30,13 +30,8 @@ void isr_INIT() {
 
 }
 
-ISR(INT0_vect){
 
 
-   _delay_ms(30);
-    etat++;
-    EIFR |= (1 << INTF0);
-}
 
 int main(){
 
@@ -44,8 +39,6 @@ int main(){
     
 
     for(;;){
-
-    
 
         if(etat == S){
             etat = INIT;

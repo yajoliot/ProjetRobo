@@ -1,7 +1,29 @@
 #include "LineTracker.h"
 
+/*void isr_INIT() {
+    
+    DDRD = 0x00;
+    DDRB = 0xff;
+    
+    
+    cli ();
+    
+    EIMSK |= (1 << INT0);
+    
+    EICRA |= (1 << ISC01); // EICRA = EICRA | (1 << ISC01)
+    
+    sei ();
+    
+}
 
-
+ISR(INT0_vect){
+    
+    
+    _delay_ms(30);
+    etat++;
+    EIFR |= (1 << INTF0);
+}
+*/
 LineTracker::LineTracker(){
     this->initTracker();
 }
@@ -38,7 +60,7 @@ void LineTracker::updateValueMap(){
         else
             this->valueMap &= ~(shifter << i);
         
-        DEBUG_PARAMETER_VALUE((uint8_t*)"readValue->value", &this->valueMap);
+        //DEBUG_PARAMETER_VALUE((uint8_t*)"readValue->value", &this->valueMap);
     }
     
 }
