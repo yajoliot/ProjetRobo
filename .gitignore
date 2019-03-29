@@ -10,4 +10,4 @@
 **/*.a
 **/*.map
 filedump/*
-
+**/*.vscode
