@@ -13,27 +13,28 @@
  #include "util.h"
  #include "linetracker.h"
  
- 
- 
- 
- 
- 
- int main() {
- LineTracker lineTracker;
- 
- DDRC = 0xFF;
- 
- for(;;){
- 
- 
- lineTracker.updateValueMap();
- //_delay_ms(1000);
- 
- PORTC = lineTracker.getValueMap();
- //DEBUG_PARAMETER_VALUE((uint8_t*)"PORTC->", &PORTC);
- //_delay_ms(1000);
- }
- }
+int main() {
+    PWM pwm;
+    LineTracker lineTracker;
+    enum etats {LIGNE_DROITE};
+    int etat = LIGNE_DROITE;
+    DDRC = 0xFF;
+    DDRB = 0xFF;
+    
+    
+    for(;;){
+        lineTracker.updateValueMap();
+        PORTC = lineTracker.getValueMap();
+        switch(etat){
+            case LIGNE_DROITE:
+                    if(lineTracker.getValueMap() == 4){
+                        pwm.avancer(50);
+                    }
+            break;
+        }
+        
+    }
+}
 
 
 /*These define lines can be in the util.h or the constantes.h file (probably constantes.h file)
