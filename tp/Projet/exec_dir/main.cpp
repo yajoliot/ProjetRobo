@@ -1,5 +1,40 @@
-
-//These define lines can be in the util.h or the constantes.h file (probably constantes.h file)
+#ifndef F_CPU
+ #define F_CPU 8000000UL
+ #endif
+ 
+ #include <util/atomic.h>
+ #include <util/delay.h>
+ #include "pwm.h"
+ #include "piezo.h"
+ #include "usart.h"
+ #include "memoire_24.h"
+ #include "usart.h"
+ #include "bytecode.h"
+ #include "util.h"
+ #include "linetracker.h"
+ 
+ 
+ 
+ 
+ 
+ 
+ int main() {
+ LineTracker lineTracker;
+ 
+ DDRC = 0xFF;
+ 
+ for(;;){
+ 
+ 
+ lineTracker.updateValueMap();
+ _delay_ms(1000);
+ 
+ PORTC = lineTracker.getValueMap();
+ //DEBUG_PARAMETER_VALUE((uint8_t*)"PORTC->", &PORTC);
+ _delay_ms(1000);
+ }
+ }
+/*These define lines can be in the util.h or the constantes.h file (probably constantes.h file)
 #define F_CPU 8000000UL
 #include <avr/io.h>
 #include <util/delay.h>
