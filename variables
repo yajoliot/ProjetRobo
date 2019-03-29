@@ -1,2 +1,2 @@
 #Which TP are we at? Path of the makefile to use?
-CURRENT_DIR=tp/tp9/exec_dir
+CURRENT_DIR=tp/projet/exec_dir/
