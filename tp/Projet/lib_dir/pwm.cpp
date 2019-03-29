@@ -13,13 +13,12 @@ void PWM::initPWM(){
 	// et valeur de TOP fixe à 0xFF (mode #1 de la table 17-6
 	// page 177 de la description technique du ATmega324PA)
 
-	TCNT1 = 0;
+	TCNT0 = 0;
 
-	TCCR1A |= (1 << COM1A1) | (1<< COM1B1);
-	TCCR1A |= (1 << WGM10);
-	TCCR1B |= (1 << CS11);
+	TCCR0A |= (1 << COM0A1) | (1<< COM0B1);
+	TCCR0A |= (1 << WGM00);
+	TCCR0B |= (1 << CS01);
 
-	TCCR1C = 0;
 
 }
 
@@ -69,7 +68,7 @@ void PWM::roueDroite(bool direction,uint8_t rapport){
 	else {
 		PORTD &= ~(1 << PD7);
 	}
-	rapport= (rapport+7)*255/100;
+	rapport= (rapport)*255/100;
 	OCR1A = rapport;
 
 	this->rapportDroite = OCR1A;
