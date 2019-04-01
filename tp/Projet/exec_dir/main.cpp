@@ -12,7 +12,8 @@
  #include "bytecode.h"
  #include "util.h"
  #include "linetracker.h"
- 
+ #include "debug.h"
+
 int main() {
     PWM pwm;
     LineTracker lineTracker;
@@ -20,17 +21,23 @@ int main() {
     int etat = LIGNE_DROITE;
     DDRC = 0xFF;
     DDRB = 0xFF;
-    
-    
+    uint8_t rapportInitial = 255;
+    //pwm.avancer(255); 
     for(;;){
+        //pwm.avancer(255);
         lineTracker.updateValueMap();
+        uint8_t bipbip = lineTracker.getValueMap();
+        //DEBUG_PARAMETER_VALUE((uint8_t*)"valueMap", &bipbip);
         PORTC = lineTracker.getValueMap();
         switch(etat){
             case LIGNE_DROITE:
-                    if(lineTracker.getValueMap() == 4){
-                        pwm.avancer(50);
-                    }
-            break;
+                    if( lineTracker.getValueMap() == 4 || lineTracker.getValueMap() == 6 ||lineTracker.getValueMap() == 12 ){
+                        uint8_t LOLOLOLOL = lineTracker.getValueMap();
+                        DEBUG_PARAMETER_VALUE((uint8_t*)"cool", &LOLOLOLOL);
+                        pwm.avancementAjuste(rapportInitial, LOLOLOLOL);
+                    }else  
+                        pwm.arreter();
+                    break;
         }
         
     }

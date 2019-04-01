@@ -7,6 +7,8 @@ class Robot {
 
         PWM controlPWM;
         LineTracker lineTracker;
+        //InfraredCom robot2;
+        //uint8_t startingCorner;
 
     public:
         Robot();

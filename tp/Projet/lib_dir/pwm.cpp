@@ -56,10 +56,9 @@ void PWM::roueGauche(bool direction, uint8_t rapport){
 	else {
 		PORTB &= ~(0x01 << PB2);
 	}
-	rapport= ((rapport)/0xff)*100;
 	OCR0B = rapport;
 
-	this->rapportGauche = OCR1B;
+	this->rapportGauche = OCR0B;
 	this->directionGauche = direction;
 }
 
@@ -71,10 +70,9 @@ void PWM::roueDroite(bool direction,uint8_t rapport){
 	else {
 		PORTB &= ~(1 << PB5);
 	}
-	rapport= ((rapport)/255)*100;
-	OCR0A = rapport;
+	OCR0A = rapport - 7 > 0 ? rapport - 7 : rapport;
 
-	this->rapportDroite = OCR1A;
+	this->rapportDroite = OCR0A;
 	this->directionDroite = direction;
 }
 
@@ -91,6 +89,33 @@ void PWM::avancer(uint8_t rapport) {
 
 }
 
+void PWM::avancementAjuste(uint8_t &rapport, uint8_t capteur) {
+
+	if(capteur == 4){
+		rapport = 175;
+		roueDroite(true, rapport);
+		roueGauche(true, rapport);
+
+		this->rapportGauche = rapport;
+		this->rapportDroite = rapport;
+	} else if(capteur == 6){
+		rapport = rapport + 3 < 255 ? rapport + 3: rapport;
+		roueDroite(true, rapport);
+		roueGauche(true, 175);
+
+		this->rapportGauche = 175;
+		this->rapportDroite = rapport;
+	} else if(capteur == 12) {
+		rapport = rapport + 3 < 255 ? rapport + 3: rapport;
+		roueDroite(true, 175);
+		roueGauche(true, rapport);
+
+		this->rapportGauche = rapport;
+		this->rapportDroite = 175;
+	}
+}
+
+
 
 void PWM::reculer(uint8_t rapport){
 	roueDroite(false, rapport);
@@ -104,37 +129,37 @@ void PWM::reculer(uint8_t rapport){
 
 
 void PWM::arreter(){
-	OCR1A = 0;
-	OCR1B = 0;
+	OCR0A = 0;
+	OCR0B = 0;
 
-	rapportGauche = OCR1B;
-	rapportDroite = OCR1A;
+	rapportGauche = OCR0B;
+	rapportDroite = OCR0A;
 }
 
 // Rotation 
 
 void PWM::tournerADroite(){
     // Tourner a droite : bloquer la roue droite et faire tourner vers l'avant la roue gauche
-	OCR1A = 0;
+	OCR0A = 0;
 	PORTD &= ~(1 << PB2);
-	OCR1B = 255; // A determiner avec le robot
+	OCR0B = 255; // A determiner avec le robot
 	_delay_ms(800); // A determiner avec le robot
 
-	rapportGauche = OCR1B;
-	rapportDroite = OCR1A;
+	rapportGauche = OCR0B;
+	rapportDroite = OCR0A;
 
 }
 
 
 void PWM::tournerAGauche(){
 	// Tourner a gauche : bloquer la roue gauche et faire tourner vers l'avant la roue droite
-	OCR1B = 0;
+	OCR0B = 0;
 	PORTD &= ~(1 << PB5);
-	OCR1A= 255; // A determiner avec le robot
+	OCR0A= 255; // A determiner avec le robot
 	_delay_ms(800); // A determiner avec le robot
 
-	rapportGauche = OCR1B;
-	rapportDroite = OCR1A;
+	rapportGauche = OCR0B;
+	rapportDroite = OCR0A;
 
 }
 
