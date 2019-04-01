@@ -17,27 +17,37 @@
 int main() {
     PWM pwm;
     LineTracker lineTracker;
-    enum etats {LIGNE_DROITE};
+    enum etats {LIGNE_DROITE, TOURNE_GAUCHE, ARRETE};
     int etat = LIGNE_DROITE;
     DDRC = 0xFF;
     DDRB = 0xFF;
-    uint8_t rapportInitial = 255;
+    uint8_t rapport = 140; // à changer pas bon -xavier
     //pwm.avancer(255); 
     for(;;){
         //pwm.avancer(255);
         lineTracker.updateValueMap();
-        uint8_t bipbip = lineTracker.getValueMap();
-        //DEBUG_PARAMETER_VALUE((uint8_t*)"valueMap", &bipbip);
         PORTC = lineTracker.getValueMap();
+        uint8_t valueMap = lineTracker.getValueMap();
+
+        if( valueMap == 4 || valueMap == 6 ||valueMap == 12 /*|| valueMap == 2 || valueMap == 8*/)
+            etat = LIGNE_DROITE;
+        else if(valueMap == 7 || valueMap == 15)
+            etat = TOURNE_GAUCHE;
+        else 
+            etat = ARRETE;
+        
         switch(etat){
             case LIGNE_DROITE:
-                    if( lineTracker.getValueMap() == 4 || lineTracker.getValueMap() == 6 ||lineTracker.getValueMap() == 12 ){
-                        uint8_t LOLOLOLOL = lineTracker.getValueMap();
-                        DEBUG_PARAMETER_VALUE((uint8_t*)"cool", &LOLOLOLOL);
-                        pwm.avancementAjuste(rapportInitial, LOLOLOLOL);
-                    }else  
-                        pwm.arreter();
-                    break;
+                    pwm.avancementAjuste(rapport, valueMap);
+                break;
+            
+            case TOURNE_GAUCHE:
+                    pwm.tournantGauche(rapport, valueMap)
+                break;
+            
+            case ARRETE:
+                    pwm.arreter();
+                break;
         }
         
     }

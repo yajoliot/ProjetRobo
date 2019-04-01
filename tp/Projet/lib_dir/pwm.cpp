@@ -70,7 +70,7 @@ void PWM::roueDroite(bool direction,uint8_t rapport){
 	else {
 		PORTB &= ~(1 << PB5);
 	}
-	OCR0A = rapport - 7 > 0 ? rapport - 7 : rapport;
+	OCR0A = rapport;
 
 	this->rapportDroite = OCR0A;
 	this->directionDroite = direction;
@@ -82,36 +82,27 @@ void PWM::roueDroite(bool direction,uint8_t rapport){
 void PWM::avancer(uint8_t rapport) {
 
 	roueDroite(true, rapport);
-	roueGauche(true, rapport);
-
-	this->rapportGauche = rapport;
-	this->rapportDroite = rapport;
+	//ajustement du pwm pour avancer en ligne droite
+	rapport - AJUSTEMENT > 0 ? roueGauche(true, rapport - AJUSTEMENT) : roueGauche(true, rapport);
+	
 
 }
 
 void PWM::avancementAjuste(uint8_t &rapport, uint8_t capteur) {
 
 	if(capteur == 4){
-		rapport = 175;
+		rapport = VITESSE_DEFAULT;
+		this->avancer(rapport);
+	} else if(capteur == 6 || capteur == 2){
+		rapport = rapport + 1 < VITESSE_MAX ? rapport + 1: rapport;
 		roueDroite(true, rapport);
+		roueGauche(true, VITESSE_DEFAULT);
+
+	} else if(capteur == 12 || capteur == 8) {
+		rapport = rapport + 1 < VITESSE_MAX ? rapport + 1: rapport;
+		roueDroite(true, VITESSE_DEFAULT);
 		roueGauche(true, rapport);
 
-		this->rapportGauche = rapport;
-		this->rapportDroite = rapport;
-	} else if(capteur == 6){
-		rapport = rapport + 3 < 255 ? rapport + 3: rapport;
-		roueDroite(true, rapport);
-		roueGauche(true, 175);
-
-		this->rapportGauche = 175;
-		this->rapportDroite = rapport;
-	} else if(capteur == 12) {
-		rapport = rapport + 3 < 255 ? rapport + 3: rapport;
-		roueDroite(true, 175);
-		roueGauche(true, rapport);
-
-		this->rapportGauche = rapport;
-		this->rapportDroite = 175;
 	}
 }
 
@@ -120,11 +111,6 @@ void PWM::avancementAjuste(uint8_t &rapport, uint8_t capteur) {
 void PWM::reculer(uint8_t rapport){
 	roueDroite(false, rapport);
 	roueGauche(false, rapport);
-
-	this->rapportGauche = rapport;
-	this->rapportDroite = rapport;
-    this->directionGauche = 0x00;
-	this->directionDroite = 0x00;
 }
 
 
