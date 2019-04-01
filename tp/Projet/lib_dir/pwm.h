@@ -13,7 +13,7 @@ class PWM{
     private:
         const uint8_t AJUSTEMENT = 7;
         const uint8_t VITESSE_MAX = 255;
-        uint8_t VITESSE_DEFAULT = 255;
+        uint8_t VITESSE_DEFAULT = 125;
         uint8_t rapportGauche,
         rapportDroite,
         directionGauche,

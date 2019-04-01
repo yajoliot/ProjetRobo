@@ -78,8 +78,8 @@ void PWM::roueDroite(bool direction,uint8_t rapport){
 
 
 void PWM::tournantGauche(uint8_t &rapport, uint8_t valueMap){
-	VITESSE_DEFAULT = 125;
-	if(valueMap == 7 || valueMap == 3){
+	rapport = 125;
+	if(valueMap == 7 || valueMap == 3|| valueMap == 15){
 		roueGauche(true, rapport/1.5);
 		roueDroite(true, rapport);
 	}
@@ -111,12 +111,12 @@ void PWM::avancementAjuste(uint8_t &rapport, uint8_t valueMap) {
 	if(valueMap == 4){
 		rapport = VITESSE_DEFAULT;
 		this->avancer(rapport);
-	} else if(valueMap == 6 || valueMap == 2){
+	} else if(valueMap == 6 || valueMap == 2 || valueMap == 3 || valueMap == 1){
 		rapport = rapport + 1 < VITESSE_MAX ? rapport + 1: rapport;
 		roueDroite(true, rapport);
 		roueGauche(true, VITESSE_DEFAULT);
 
-	} else if(valueMap == 12 || valueMap == 8) {
+	} else if(valueMap == 12 || valueMap == 8 || valueMap == 24 || valueMap == 16) {
 		rapport = rapport + 1 < VITESSE_MAX ? rapport + 1: rapport;
 		roueDroite(true, VITESSE_DEFAULT);
 		roueGauche(true, rapport);

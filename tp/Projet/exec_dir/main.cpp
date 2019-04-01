@@ -30,7 +30,7 @@ int main() {
         PORTC = valueMap;
 
         //TODO:  mettre dans une fonction
-        if( valueMap == 4 || valueMap == 6 ||valueMap == 12 || valueMap == 8 || valueMap == 2 )
+        if( valueMap == 4 || valueMap == 6 ||valueMap == 12 || valueMap == 8 || valueMap == 2 || valueMap == 3 || valueMap == 24 ||valueMap == 1 || valueMap == 16)
             etat = LIGNE_DROITE;
         else if(valueMap == 7 || valueMap == 15 || valueMap == 1 || valueMap == 0)
             etat = TOURNE_GAUCHE;
