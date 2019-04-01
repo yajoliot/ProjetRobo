@@ -22,27 +22,29 @@ int main() {
     DDRC = 0xFF;
     DDRB = 0xFF;
     uint8_t rapport = 140; // à changer pas bon -xavier
-    //pwm.avancer(255); 
-    for(;;){
-        //pwm.avancer(255);
-        lineTracker.updateValueMap();
-        PORTC = lineTracker.getValueMap();
-        uint8_t valueMap = lineTracker.getValueMap();
 
-        if( valueMap == 4 || valueMap == 6 ||valueMap == 12 /*|| valueMap == 2 || valueMap == 8*/)
+    for(;;){
+        
+        lineTracker.updateValueMap();
+        uint8_t valueMap = lineTracker.getValueMap();
+        PORTC = valueMap;
+
+        //TODO:  mettre dans une fonction
+        if( valueMap == 4 || valueMap == 6 ||valueMap == 12 || valueMap == 8 || valueMap == 2 )
             etat = LIGNE_DROITE;
-        else if(valueMap == 7 || valueMap == 15)
+        else if(valueMap == 7 || valueMap == 15 || valueMap == 1 || valueMap == 0)
             etat = TOURNE_GAUCHE;
         else 
             etat = ARRETE;
         
+        //TODO:  mettre dans une fonction
         switch(etat){
             case LIGNE_DROITE:
                     pwm.avancementAjuste(rapport, valueMap);
                 break;
             
             case TOURNE_GAUCHE:
-                    pwm.tournantGauche(rapport, valueMap)
+                    pwm.tournantGauche(rapport, valueMap);
                 break;
             
             case ARRETE:

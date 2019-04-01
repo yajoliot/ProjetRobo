@@ -12,8 +12,8 @@
 class PWM{
     private:
         const uint8_t AJUSTEMENT = 7;
-        const uint8_t VITESSE_DEFAULT = 125;
         const uint8_t VITESSE_MAX = 255;
+        uint8_t VITESSE_DEFAULT = 255;
         uint8_t rapportGauche,
         rapportDroite,
         directionGauche,
@@ -32,11 +32,12 @@ class PWM{
         void roueGauche(bool direction, uint8_t rapport);
         void roueDroite(bool direction,uint8_t rapport);
         void avancer(uint8_t rapport);
-        void avancementAjuste(uint8_t &rapport, uint8_t capteur);
+        void avancementAjuste(uint8_t &rapport, uint8_t valueMap);
         void reculer(uint8_t rapport);
         void arreter();
         void tournerADroite();
         void tournerAGauche();
+        void tournantGauche(uint8_t &rapport, uint8_t valueMap);
         void ajustementADroite ();
         void ajustementAGauche();
         void ajustementReculerAGauche();

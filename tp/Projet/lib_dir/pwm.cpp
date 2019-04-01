@@ -76,6 +76,24 @@ void PWM::roueDroite(bool direction,uint8_t rapport){
 	this->directionDroite = direction;
 }
 
+
+void PWM::tournantGauche(uint8_t &rapport, uint8_t valueMap){
+	VITESSE_DEFAULT = 125;
+	if(valueMap == 7 || valueMap == 3){
+		roueGauche(true, rapport/1.5);
+		roueDroite(true, rapport);
+	}
+	else if (valueMap == 1) {
+		roueGauche(true, rapport/2);
+		roueDroite(true, rapport);
+	}
+	else if (valueMap == 0) {
+		roueGauche(true, rapport/5);
+		roueDroite(true, rapport);
+	}
+
+}
+
 // Deplacement en ligne droite
 
 
@@ -88,17 +106,17 @@ void PWM::avancer(uint8_t rapport) {
 
 }
 
-void PWM::avancementAjuste(uint8_t &rapport, uint8_t capteur) {
+void PWM::avancementAjuste(uint8_t &rapport, uint8_t valueMap) {
 
-	if(capteur == 4){
+	if(valueMap == 4){
 		rapport = VITESSE_DEFAULT;
 		this->avancer(rapport);
-	} else if(capteur == 6 || capteur == 2){
+	} else if(valueMap == 6 || valueMap == 2){
 		rapport = rapport + 1 < VITESSE_MAX ? rapport + 1: rapport;
 		roueDroite(true, rapport);
 		roueGauche(true, VITESSE_DEFAULT);
 
-	} else if(capteur == 12 || capteur == 8) {
+	} else if(valueMap == 12 || valueMap == 8) {
 		rapport = rapport + 1 < VITESSE_MAX ? rapport + 1: rapport;
 		roueDroite(true, VITESSE_DEFAULT);
 		roueGauche(true, rapport);
