@@ -63,6 +63,7 @@ void transmitLowBit();
 void transmitHeader();
 void transmitCommand(uint8_t command_);
 void transmitAddress(uint8_t address_);
+void transmit(uint8_t command_, uint8_t address_);
 void enableSIRC();
 void disableSIRC();
 void setupSIRC();
@@ -232,7 +233,7 @@ void transmitAddress(uint8_t address_){
 }
 
 void transmit(uint8_t command_, uint8_t address_){
-    DEBUG_FUNCTION_CALL((uint8_t*)"transmit()")
+    DEBUG_FUNCTION_CALL((uint8_t*)"transmit()");
     for(uint8_t i=0x00 ; i<0x03 ; i++){
         //begin 45 ms timer 3
         begin45msTimer();
