@@ -15,6 +15,7 @@ class PWM{
         const uint8_t AJUSTEMENT = 7;
         const uint8_t VITESSE_MAX = 255;
         uint8_t VITESSE_DEFAULT = 150;
+        uint8_t vitesseTournage = 130;
         uint8_t rapportGauche,
         rapportDroite,
         directionGauche,
@@ -29,6 +30,7 @@ class PWM{
         uint8_t getDirectionGauche();
         uint8_t getDirectionDroite();
         uint8_t getVitesseDefault();
+        uint8_t getVitesseTournage();
 
         void initPWM();
         void roueGauche(bool direction, uint8_t rapport);

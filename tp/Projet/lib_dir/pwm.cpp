@@ -45,6 +45,10 @@ uint8_t PWM::getVitesseDefault(){
 	return VITESSE_DEFAULT;
 }
 
+uint8_t PWM::getVitesseTournage(){
+	return vitesseTournage;
+}
+
 
 
 
