@@ -103,6 +103,7 @@ ISR(TIMER2_OVF_vect){
     overflow_count++;
     if(overflow_count>=OVERFLOW_COUNT_TO_45_MS){
         overflow_count = 0x0000;
+        end45msTimer();
         reach_end_45_ms = TRUE;
     }
 }
@@ -122,26 +123,17 @@ int main() {
 
     sei();
 
-//Create a random command
-
-    //Transmit header
-    
-    DEBUG_FUNCTION_CALL((uint8_t*)"transmitHeader()");
-    transmitHeader();
-
-    //Transmit command
+//Test function is below
 
     //dummy command
     uint8_t command = 0x01;
-    DEBUG_FUNCTION_CALL((uint8_t*)"transmitCommand()");
-    transmitCommand(command);
-
-    //Transmit address
-
     //dummy address
-    uint8_t address = 0x02;
-    DEBUG_FUNCTION_CALL((uint8_t*)"transmitAddress()");
-    transmitAddress(address);
+    uint8_t address = 0x02; //this will get ignored if in MODE_1
+
+    //Tested function
+
+    transmit(command, address);
+    
 
     DEBUG_INFO((uint8_t*)"END OF PROGRAM");
 }
@@ -240,6 +232,7 @@ void transmitAddress(uint8_t address_){
 }
 
 void transmit(uint8_t command_, uint8_t address_){
+    DEBUG_FUNCTION_CALL((uint8_t*)"transmit()")
     for(uint8_t i=0x00 ; i<0x03 ; i++){
         //begin 45 ms timer 3
         begin45msTimer();
@@ -249,12 +242,11 @@ void transmit(uint8_t command_, uint8_t address_){
         transmitAddress(address_);
         //wait till end of 45 ms
         while(!reach_end_45_ms){}
-        //end timer
-        end45msTimer();
         //reset the boolean for 45 ms
         reach_end_45_ms = FALSE;
         //send again. for loop seems appropriate here
     }
+    DEBUG_FUNCTION_EXIT();
 }
 
 void begin45msTimer(){
