@@ -2,7 +2,7 @@
 #include "can.h"
 #include "debug.h"
 
-const uint16_t COMPARE_VALUE = 50;
+const uint16_t COMPARE_VALUE = 128;
 
 class LineTracker{
     private:

@@ -41,6 +41,10 @@ uint8_t PWM::getDirectionGauche(){
 uint8_t PWM::getDirectionDroite(){
 	return directionDroite;
 }
+uint8_t PWM::getVitesseDefault(){
+	return VITESSE_DEFAULT;
+}
+
 
 
 
@@ -94,6 +98,47 @@ void PWM::tournantGauche(uint8_t &rapport, uint8_t valueMap){
 
 }
 
+void PWM::tournantDroite(uint8_t &rapport, uint8_t valueMap){
+	rapport = 125;
+	if(valueMap == 28 || valueMap == 24 || valueMap == 30){
+		roueDroite(true, rapport/1.5);
+		roueGauche(true, rapport);
+	}
+	else if (valueMap == 16) {
+		roueDroite(true, rapport/2);
+		roueGauche(true, rapport);
+	}
+	else if (valueMap == 0) {
+		roueDroite(true, rapport/5);
+		roueGauche(true, rapport);
+	}
+
+}
+
+void PWM::boite(uint8_t &rapport, uint8_t valueMap){
+	DEBUG_PARAMETER_VALUE((uint8_t*)"PRE_BOITE", &valueMap);
+	if(valueMap == 31 || valueMap == 0){
+		rapport = VITESSE_DEFAULT; 
+		avancer(rapport);
+	}
+	else if(valueMap == 1 || valueMap == 3){
+		if(rapport == 0){
+		}else
+			rapport -= 1;
+		DEBUG_PARAMETER_VALUE((uint8_t*)"PRE_BOITE", &rapport);
+		roueGauche(true, VITESSE_DEFAULT);
+		roueDroite(true, rapport);
+	}
+	else if(valueMap == 16 || valueMap == 24){
+		if(rapport == 0){
+		}else
+			rapport -= 1;
+		roueGauche(true, rapport);
+		roueDroite(true, VITESSE_DEFAULT);
+	}
+	
+}
+
 // Deplacement en ligne droite
 
 
@@ -108,7 +153,7 @@ void PWM::avancer(uint8_t rapport) {
 
 void PWM::avancementAjuste(uint8_t &rapport, uint8_t valueMap) {
 
-	if(valueMap == 4){
+	if(valueMap == 4 || valueMap == 31){
 		rapport = VITESSE_DEFAULT;
 		this->avancer(rapport);
 	} else if(valueMap == 6 || valueMap == 2 || valueMap == 3 || valueMap == 1){
