@@ -34,9 +34,10 @@ int main() {
         //TODO:  mettre dans une fonction
         if((valueMap == 4 || valueMap == 6 ||valueMap == 12 || valueMap == 8 || valueMap == 2 || valueMap == 3 || valueMap == 24 ||valueMap == 1 || valueMap == 16) && !boolBoite)
             etat = LIGNE_DROITE;
-        else if((valueMap == 7 || valueMap == 15 || valueMap == 1 || valueMap == 0) && !boolBoite)
+        else if((valueMap == 7 || valueMap == 15) && !boolBoite)
             etat = TOURNE_GAUCHE;
         
+        //TODO: AJOUTER LE CAS VALUEMAP == 0
         
         //Conditions pour entrer dans la boite
         else if (valueMap == 31 && !boolBoite) {
@@ -52,7 +53,10 @@ int main() {
                 break;
             
             case TOURNE_GAUCHE:
-                    pwm.tournantGauche(rapport, valueMap);
+                    //TODO:  mettre dans une fonction
+                    while(!(valueMap == 4 || valueMap == 6 ||valueMap == 12 || valueMap == 8 || valueMap == 2 || valueMap == 3 || valueMap == 24 ||valueMap == 1 || valueMap == 16)){
+                        pwm.tournantGauche(rapport, valueMap);
+                    }
                 break;
 
             case PRE_BOITE:
