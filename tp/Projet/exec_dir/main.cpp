@@ -4,7 +4,7 @@
  
  #include <util/atomic.h>
  #include <util/delay.h>
- #include "pwm.h"
+ #include <pwm.h>
  #include "piezo.h"
  #include "usart.h"
  #include "memoire_24.h"
@@ -17,25 +17,33 @@
 int main() {
     PWM pwm;
     LineTracker lineTracker;
-    enum etats {LIGNE_DROITE, TOURNE_GAUCHE, ARRETE};
+    enum etats {LIGNE_DROITE, TOURNE_GAUCHE, PRE_BOITE, BOITE, POST_BOITE, ARRETE};
     int etat = LIGNE_DROITE;
     DDRC = 0xFF;
     DDRB = 0xFF;
     uint8_t rapport = 140; // à changer pas bon -xavier
+    bool boolBoite = false;
 
     for(;;){
         
         lineTracker.updateValueMap();
         uint8_t valueMap = lineTracker.getValueMap();
         PORTC = valueMap;
+        
 
         //TODO:  mettre dans une fonction
-        if( valueMap == 4 || valueMap == 6 ||valueMap == 12 || valueMap == 8 || valueMap == 2 || valueMap == 3 || valueMap == 24 ||valueMap == 1 || valueMap == 16)
+        if((valueMap == 4 || valueMap == 6 ||valueMap == 12 || valueMap == 8 || valueMap == 2 || valueMap == 3 || valueMap == 24 ||valueMap == 1 || valueMap == 16) && !boolBoite)
             etat = LIGNE_DROITE;
-        else if(valueMap == 7 || valueMap == 15 || valueMap == 1 || valueMap == 0)
+        else if((valueMap == 7 || valueMap == 15 || valueMap == 1 || valueMap == 0) && !boolBoite)
             etat = TOURNE_GAUCHE;
-        else 
-            etat = ARRETE;
+        
+        
+        //Conditions pour entrer dans la boite
+        else if (valueMap == 31 && !boolBoite) {
+            
+            etat = PRE_BOITE;
+        }
+        DEBUG_PARAMETER_VALUE((uint8_t*)"IF STATEMENTS", &valueMap);
         
         //TODO:  mettre dans une fonction
         switch(etat){
@@ -45,6 +53,42 @@ int main() {
             
             case TOURNE_GAUCHE:
                     pwm.tournantGauche(rapport, valueMap);
+                break;
+
+            case PRE_BOITE:
+                    //TODO: à mettre dans fonction à part
+                
+                    while(lineTracker.getValueMap() == 31){
+                        uint8_t temporaire = lineTracker.getValueMap();
+                        DEBUG_PARAMETER_VALUE((uint8_t*)"PRE_BOITE", &temporaire);
+                        pwm.avancer(pwm.getVitesseDefault());
+                        lineTracker.updateValueMap();
+                    }
+                    boolBoite = true;
+                    etat = BOITE;
+                break;
+
+            case BOITE : 
+                    //TODO: à mettre dans fonction à part
+                    while( !(lineTracker.getValueMap() == 31) ){
+                        uint8_t temporaire = lineTracker.getValueMap();
+                        DEBUG_PARAMETER_VALUE((uint8_t*)"BOITE", &temporaire);
+                        pwm.boite(rapport, valueMap);
+                        lineTracker.updateValueMap();
+                    }
+                    etat = POST_BOITE;
+                    
+                break;
+
+            case POST_BOITE:
+                    while(lineTracker.getValueMap() == 31){
+                        uint8_t temporaire = lineTracker.getValueMap();
+                        DEBUG_PARAMETER_VALUE((uint8_t*)"POST_BOITE", &temporaire);
+                        pwm.avancer(pwm.getVitesseDefault());
+                        lineTracker.updateValueMap();
+                    }
+                    boolBoite = false;
+                    etat = LIGNE_DROITE;
                 break;
             
             case ARRETE:

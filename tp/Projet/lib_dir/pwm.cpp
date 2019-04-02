@@ -41,6 +41,10 @@ uint8_t PWM::getDirectionGauche(){
 uint8_t PWM::getDirectionDroite(){
 	return directionDroite;
 }
+uint8_t PWM::getVitesseDefault(){
+	return VITESSE_DEFAULT;
+}
+
 
 
 
@@ -94,6 +98,28 @@ void PWM::tournantGauche(uint8_t &rapport, uint8_t valueMap){
 
 }
 
+void PWM::boite(uint8_t &rapport, uint8_t valueMap){
+	if(valueMap == 31 || valueMap == 0){
+		rapport = VITESSE_DEFAULT; 
+		avancer(rapport);
+	}
+	else if(valueMap == 1 || valueMap == 3){
+		if(rapport == 0){
+		}else
+			rapport -= 1;
+		roueGauche(true, VITESSE_DEFAULT);
+		roueDroite(true, rapport);
+	}
+	else if(valueMap == 16 || valueMap == 24){
+		if(rapport == 0){
+		}else
+			rapport -= 1;
+		roueGauche(true, rapport);
+		roueDroite(true, VITESSE_DEFAULT);
+	}
+	
+}
+
 // Deplacement en ligne droite
 
 
@@ -108,7 +134,7 @@ void PWM::avancer(uint8_t rapport) {
 
 void PWM::avancementAjuste(uint8_t &rapport, uint8_t valueMap) {
 
-	if(valueMap == 4){
+	if(valueMap == 4 || valueMap == 31){
 		rapport = VITESSE_DEFAULT;
 		this->avancer(rapport);
 	} else if(valueMap == 6 || valueMap == 2 || valueMap == 3 || valueMap == 1){
