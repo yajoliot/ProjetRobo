@@ -1,80 +1,199 @@
 #ifndef F_CPU
- #define F_CPU 8000000UL
- #endif
+#define F_CPU 8000000UL
+#endif
  
- #include <util/atomic.h>
- #include <util/delay.h>
- #include "pwm.h"
- #include "piezo.h"
- #include "usart.h"
- #include "memoire_24.h"
- #include "usart.h"
- #include "bytecode.h"
- #include "util.h"
- #include "linetracker.h"
- #include "debug.h"
+#include <util/atomic.h>
+#include <util/delay.h>
+#include "del.h"
+#include "debug.h"
+
+#define HIGH_MODE 0x01
+#define LOW_MODE 0x00
+
+#define COMMAND_SIZE 0x07
+#define ADDRESS_SIZE 0x05
+
+#define CYCLES_PER_T 0x18 //24
+
+void transmitOneCycle(uint8_t mode);
+void transmitHighBit();
+void transmitLowBit();
+void transmitHeader();
+void transmitCommand(uint8_t command_);
+void transmitAddress(uint8_t address_);
+void enableSIRC();
+void disableSIRC();
+void setupSIRC();
+
+volatile uint8_t count = 0x00;
+
+ISR(TIMER1_OVF_vect)
+{
+    DEBUG_FUNCTION_CALL((uint8_t*)"ISR(TIMER1_OVF_vect)");
+    count++;
+    DEBUG_PARAMETER_VALUE((uint8_t*)"count",(void*)&count);
+
+    //Need to put this stop logic here otherwise ISR is too quick!
+    if(count>=CYCLES_PER_T){
+        //Reset count to 0
+        count = 0x00;
+
+        //Stop the PWM
+        disableSIRC();
+    }
+}
 
 int main() {
-    PWM pwm;
-    LineTracker lineTracker;
-    enum etats {LIGNE_DROITE};
-    int etat = LIGNE_DROITE;
-    DDRC = 0xFF;
-    DDRB = 0xFF;
-    uint8_t rapportInitial = 255;
-    //pwm.avancer(255); 
-    for(;;){
-        //pwm.avancer(255);
-        lineTracker.updateValueMap();
-        uint8_t bipbip = lineTracker.getValueMap();
-        //DEBUG_PARAMETER_VALUE((uint8_t*)"valueMap", &bipbip);
-        PORTC = lineTracker.getValueMap();
-        switch(etat){
-            case LIGNE_DROITE:
-                    if( lineTracker.getValueMap() == 4 || lineTracker.getValueMap() == 6 ||lineTracker.getValueMap() == 12 ){
-                        uint8_t LOLOLOLOL = lineTracker.getValueMap();
-                        DEBUG_PARAMETER_VALUE((uint8_t*)"cool", &LOLOLOLOL);
-                        pwm.avancementAjuste(rapportInitial, LOLOLOLOL);
-                    }else  
-                        pwm.arreter();
-                    break;
-        }
-        
-    }
-}
 
+//Port Setup
 
-/*These define lines can be in the util.h or the constantes.h file (probably constantes.h file)
-#define F_CPU 8000000UL
-#include <avr/io.h>
-#include <util/delay.h>
+    DDRD = 0xFF;
+     
+//PWM Setup
 
+    setupSIRC(); //enable/disable as you need
 
+//Global interrupt setup
 
-#define OPEN 0xFF
-#define MAX_5_BIT 0x1F
-#define DELAY_TIME 100
+    sei();
 
+//Create a random command
 
-int main(){
-    // DDRC = OPEN;
-    DDRC = MAX_5_BIT;
+    //Transmit header
     
-    // This for loop will test all the combinations between pins 1 to 5
-    for(uint8_t count=0 ; ;count++){
-        PORTC = count;
-        _delay_ms(DELAY_TIME);
-        // variableDelay(DELAY_TIME); //could just use the _delay_ms() function here since this is not a variable
-        if(count==MAX_5_BIT)
-            count = 0x00	;
-    }
-    // It will follow the following sequence
-    // 1. Nothing
-    // 2. DEL1
-    // 3. DEL2
-    // 4. DEL1 && DEL2
-    // 5. DEL3
-    // 6. DEL3 && DEL1
-    // and so on...
+    DEBUG_FUNCTION_CALL((uint8_t*)"transmitHeader()");
+    transmitHeader();
+
+    //Transmit command
+
+    //dummy command
+    uint8_t command = 0x01;
+    DEBUG_FUNCTION_CALL((uint8_t*)"transmitCommand()");
+    transmitCommand(command);
+
+    //Transmit address
+
+    //dummy address
+    uint8_t address = 0x02;
+    DEBUG_FUNCTION_CALL((uint8_t*)"transmitAddress()");
+    transmitAddress(address);
+
+    for(;;){}
 }
-*/
+
+void setupSIRC(){
+
+    //Set the registers : CTC mode, Toggle on Compare, No prescaler
+    TCCR1A |= _BV(WGM12) | _BV(COM1A0);
+    //TCCR1B |= _BV(CS10);
+    
+    //Set the frequency : 40 kHz
+    //The following value is what we will use to set the "one"
+    OCR1A = 0x63;
+
+}
+
+void enableSIRC(){
+    //Non 0 value for the prescaler enables the timer
+    TCCR1B |= _BV(CS10);
+    //Enable timer interrupt 
+    TIMSK1 |= _BV(TOIE1); 
+}
+
+void disableSIRC(){
+    //Sets the only prescaler value we touched to 0
+    TCCR1B &= ~(_BV(CS10));
+    //Disable timer interrupt
+    TIMSK1 &= ~(_BV(TOIE1));
+    // cli();
+}
+
+void transmitOneCycle(uint8_t mode){
+    DEBUG_FUNCTION_CALL((uint8_t*)"transmitOneCycle()");
+    //Set the PWM
+    //Set to high or low
+    if(mode == HIGH_MODE){
+        DEBUG_INFO((uint8_t*)"HIGH_MODE ENABLED");
+        OCR1A = 0x63;
+    }else if(mode == LOW_MODE){
+        DEBUG_INFO((uint8_t*)"LOW_MODE ENABLED");
+        OCR1A = 0x00;
+    }else{
+        //fail silently
+        disableSIRC();
+        //send to del a signal
+        PORTB = VERT;
+        //if debug mode is on then uart will receive an error
+        DEBUG_INFO((uint8_t*)"Error");
+        DEBUG_PARAMETER_VALUE((uint8_t*)"mode value", &mode);
+    }
+    enableSIRC();
+    //For one T worth of time -> 600 us / 25 us = 24 cycles
+    while(count!=CYCLES_PER_T){
+        //DEBUG_PARAMETER_VALUE((uint8_t*)"count", (void*)&count);
+    }
+
+    // //Reset count to 0
+    // count = 0x00;
+
+    // //Stop the PWM
+    // disableSIRC();
+    uint8_t tmp = TCCR1B;
+    DEBUG_PARAMETER_VALUE((uint8_t*)"TCCR1B",&tmp);
+    DEBUG_FUNCTION_EXIT();
+}
+
+void transmitHighBit(){
+    //Two Cycles @ Hi
+    for(uint8_t i=0x00 ; i<0x02; i++){
+        transmitOneCycle(HIGH_MODE);
+    }
+    //One Cycle @ Lo
+    transmitOneCycle(LOW_MODE);
+}
+
+void transmitLowBit(){
+    //One Cycle @ Hi
+    transmitOneCycle(HIGH_MODE);
+    //One Cycle @ Lo
+    transmitOneCycle(LOW_MODE);
+}
+
+void transmitHeader(){
+    //Four Cycles @ Hi
+    for(uint8_t i=0x00 ; i<0x04 ; i++){
+        transmitOneCycle(HIGH_MODE);
+    }
+    //One Cycle @ Lo
+    transmitOneCycle(LOW_MODE);
+}
+
+
+void transmitBits(uint8_t command_, uint8_t size_){
+
+    for(uint8_t i=0x00 ; i<size_ ; i++){
+        //if the bit @ the ith position is 1
+        uint8_t bitmask = _BV(i);
+        DEBUG_PARAMETER_VALUE((uint8_t*)"_BV(i)", &bitmask);
+        if(command_ & bitmask){
+            //then transmit a high bit
+            transmitHighBit();
+        }else{
+            transmitLowBit();
+        }
+    }
+}
+
+void transmitCommand(uint8_t command_){
+    transmitBits(command_, COMMAND_SIZE);
+}
+
+void transmitAddress(uint8_t address_){
+    transmitBits(address_, ADDRESS_SIZE);
+}
+
+// void bitmask(uint8_t position){
+//     return _BV(position);
+// }
+
+
