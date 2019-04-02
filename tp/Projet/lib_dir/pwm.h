@@ -40,6 +40,7 @@ class PWM{
         void tournerADroite();
         void tournerAGauche();
         void tournantGauche(uint8_t &rapport, uint8_t valueMap);
+        void tournantDroite(uint8_t &rapport, uint8_t valueMap);
         void boite(uint8_t &rapport, uint8_t valueMap);
         void ajustementADroite ();
         void ajustementAGauche();

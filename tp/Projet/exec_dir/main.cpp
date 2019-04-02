@@ -17,12 +17,14 @@
 int main() {
     PWM pwm;
     LineTracker lineTracker;
-    enum etats {LIGNE_DROITE, TOURNE_GAUCHE, PRE_BOITE, BOITE, POST_BOITE, ARRETE};
+    enum etats {LIGNE_DROITE, TOURNE_GAUCHE, TOURNE_DROITE, PRE_BOITE, BOITE, POST_BOITE, ARRETE};
     int etat = LIGNE_DROITE;
     DDRC = 0xFF;
     DDRB = 0xFF;
     uint8_t rapport = pwm.getVitesseDefault(); // à changer pas bon -xavier
     bool boolBoite = false;
+    bool tournerGauche = false;
+    bool tournerDroite = false;
 
     for(;;){
         
@@ -32,10 +34,30 @@ int main() {
         
 
         //TODO:  mettre dans une fonction
-        if((valueMap == 4 || valueMap == 6 ||valueMap == 12 || valueMap == 8 || valueMap == 2 || valueMap == 3 || valueMap == 24 ||valueMap == 1 || valueMap == 16) && !boolBoite)
+        if((valueMap == 4 || 
+            valueMap == 6 ||
+            valueMap == 12 || 
+            valueMap == 8 || 
+            valueMap == 2 || 
+            valueMap == 3 || 
+            valueMap == 24 ||
+            valueMap == 1 || 
+            valueMap == 16) && 
+            !boolBoite){
             etat = LIGNE_DROITE;
-        else if((valueMap == 7 || valueMap == 15) && !boolBoite)
+            // tournerGauche = false;
+            // tournerDroite = false;
+        }
+        else if((valueMap == 7 || valueMap == 15 || (valueMap == 0 && tournerGauche)) && !boolBoite){
             etat = TOURNE_GAUCHE;
+            tournerGauche = true;
+            tournerDroite = false;
+        }
+        else if((valueMap == 28 || valueMap == 30 || (valueMap == 0 && tournerDroite)) && !boolBoite){
+            etat = TOURNE_DROITE;
+            tournerGauche = false;
+            tournerDroite = true;
+        }
         
         //TODO: AJOUTER LE CAS VALUEMAP == 0
         
@@ -54,9 +76,12 @@ int main() {
             
             case TOURNE_GAUCHE:
                     //TODO:  mettre dans une fonction
-                    while(!(valueMap == 4 || valueMap == 6 ||valueMap == 12 || valueMap == 8 || valueMap == 2 || valueMap == 3 || valueMap == 24 ||valueMap == 1 || valueMap == 16)){
-                        pwm.tournantGauche(rapport, valueMap);
-                    }
+                    pwm.tournantGauche(rapport, valueMap);
+                break;
+
+            case TOURNE_DROITE:
+                    //TODO:  mettre dans une fonction
+                    pwm.tournantDroite(rapport, valueMap);
                 break;
 
             case PRE_BOITE:

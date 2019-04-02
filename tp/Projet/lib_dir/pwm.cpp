@@ -98,6 +98,23 @@ void PWM::tournantGauche(uint8_t &rapport, uint8_t valueMap){
 
 }
 
+void PWM::tournantDroite(uint8_t &rapport, uint8_t valueMap){
+	rapport = 125;
+	if(valueMap == 28 || valueMap == 24 || valueMap == 30){
+		roueDroite(true, rapport/1.5);
+		roueGauche(true, rapport);
+	}
+	else if (valueMap == 16) {
+		roueDroite(true, rapport/2);
+		roueGauche(true, rapport);
+	}
+	else if (valueMap == 0) {
+		roueDroite(true, rapport/5);
+		roueGauche(true, rapport);
+	}
+
+}
+
 void PWM::boite(uint8_t &rapport, uint8_t valueMap){
 	DEBUG_PARAMETER_VALUE((uint8_t*)"PRE_BOITE", &valueMap);
 	if(valueMap == 31 || valueMap == 0){
