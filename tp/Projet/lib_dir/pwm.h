@@ -5,6 +5,7 @@
 #endif
 #include <avr/io.h>
 #include <util/delay.h>
+#include "debug.h"
 
 
 

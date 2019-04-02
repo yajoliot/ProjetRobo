@@ -21,7 +21,7 @@ int main() {
     int etat = LIGNE_DROITE;
     DDRC = 0xFF;
     DDRB = 0xFF;
-    uint8_t rapport = 140; // à changer pas bon -xavier
+    uint8_t rapport = pwm.getVitesseDefault(); // à changer pas bon -xavier
     bool boolBoite = false;
 
     for(;;){
@@ -73,7 +73,7 @@ int main() {
                     while( !(lineTracker.getValueMap() == 31) ){
                         uint8_t temporaire = lineTracker.getValueMap();
                         DEBUG_PARAMETER_VALUE((uint8_t*)"BOITE", &temporaire);
-                        pwm.boite(rapport, valueMap);
+                        pwm.boite(rapport, temporaire);
                         lineTracker.updateValueMap();
                     }
                     etat = POST_BOITE;

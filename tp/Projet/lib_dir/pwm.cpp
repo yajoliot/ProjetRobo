@@ -99,6 +99,7 @@ void PWM::tournantGauche(uint8_t &rapport, uint8_t valueMap){
 }
 
 void PWM::boite(uint8_t &rapport, uint8_t valueMap){
+	DEBUG_PARAMETER_VALUE((uint8_t*)"PRE_BOITE", &valueMap);
 	if(valueMap == 31 || valueMap == 0){
 		rapport = VITESSE_DEFAULT; 
 		avancer(rapport);
@@ -107,6 +108,7 @@ void PWM::boite(uint8_t &rapport, uint8_t valueMap){
 		if(rapport == 0){
 		}else
 			rapport -= 1;
+		DEBUG_PARAMETER_VALUE((uint8_t*)"PRE_BOITE", &rapport);
 		roueGauche(true, VITESSE_DEFAULT);
 		roueDroite(true, rapport);
 	}
