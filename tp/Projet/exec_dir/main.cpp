@@ -4,6 +4,7 @@
  
  #include <util/atomic.h>
  #include <util/delay.h>
+ #include <avr/interrupt.h>
  #include "pwm.h"
  #include "piezo.h"
  #include "usart.h"
@@ -13,80 +14,118 @@
  #include "util.h"
  #include "linetracker.h"
  #include "debug.h"
+ #include "Minuterie.h"
+
+
+void isr_INIT() {
+
+    DDRD = 0x00;
+    DDRB = 0xff;
+
+    
+    cli ();
+
+    EIMSK |= (1 << INT0);
+
+    EICRA |= (1 << ISC01); // EICRA = EICRA | (1 << ISC01)
+
+    sei();
+}
+
+ISR(INT0_vect){
+    _delay_ms(30);
+    etat = ANALYSE;
+}
+
+ISR(TIM0_OVF_vect){
+    timer += 1;
+}
 
 int main() {
     PWM pwm;
     LineTracker lineTracker;
-    enum etats {LIGNE_DROITE, TOURNE_GAUCHE, ARRETE};
-    int etat = LIGNE_DROITE;
+    enum etats {INIT, INTWAIT, ANALYSE, };
+    int etat = INIT;
     DDRC = 0xFF;
     DDRB = 0xFF;
-    uint8_t rapport = 140; // à changer pas bon -xavier
+    uint8_t rapport = 100;
+    timer uint8_t = 0;
+    duree uint16_t = ?;
+    uint16_t distTime1 = 0;
+    uint16_t distTime2 = 0;
+    bool droite = true;
+    
 
     for(;;){
-        
         lineTracker.updateValueMap();
-        uint8_t valueMap = lineTracker.getValueMap();
-        PORTC = valueMap;
-
-        //TODO:  mettre dans une fonction
-        if( valueMap == 4 || valueMap == 6 ||valueMap == 12 || valueMap == 8 || valueMap == 2 || valueMap == 3 || valueMap == 24 ||valueMap == 1 || valueMap == 16)
-            etat = LIGNE_DROITE;
-        else if(valueMap == 7 || valueMap == 15 || valueMap == 1 || valueMap == 0)
-            etat = TOURNE_GAUCHE;
-        else 
-            etat = ARRETE;
-        
-        //TODO:  mettre dans une fonction
-        switch(etat){
-            case LIGNE_DROITE:
-                    pwm.avancementAjuste(rapport, valueMap);
-                break;
-            
-            case TOURNE_GAUCHE:
-                    pwm.tournantGauche(rapport, valueMap);
-                break;
-            
-            case ARRETE:
-                    pwm.arreter();
-                break;
+        if(getValueMap() == 0x1F){
+            etat = INTWAIT;
         }
         
+
+        switch(etat){
+            case INIT:
+                pwm.avancementAjuste(rapport, lineTracker.getValueMap())
+            break;
+
+            case INTWAIT:
+                pwm.arreter();
+            break;
+
+            default:
+            break;
+
+            case ANALYSE:
+                if(getValueMap() == 0x1F)
+                    etat = DIST_1;
+                    
+                switch(etat){
+                    case INIT:
+                        pwm.avancementAjuste(rapport, lineTracker.getValueMap());
+                    break;
+
+                    case DIST_1:
+                        startMinuterie();
+                        while(!lineTracker.getValuemap() == 0x1C
+                            || !lineTracker.getValuemap() == 0x07){
+                            lineTracker.updateValueMap();
+                        }
+                        if(lineTracker.getValuemap() == 0x07)
+                            droite = false;
+
+                        distTime1 = timer;
+                        timer = 0;
+                        resetMinuterie();
+                        etat = DIST_2;
+                    break;
+                    case DIST_2:
+                        startMinuterie();
+                        if(droite){
+                            while(!lineTracker.getValuemap() == 0x07)
+                                lineTracker.updateValueMap();
+                        } else {
+                            while(!lineTracker.getValuemap() == 0x1C)
+                            lineTracker.updateValueMap();
+                        }
+
+                        distTime2 = timer;
+                        timer = 0;
+                        resetMinuterie();
+                        
+                    break;
+                    
+                }
+                
+                
+            break;
+
+
+        }
+
+        
+        
     }
 }
 
 
-/*These define lines can be in the util.h or the constantes.h file (probably constantes.h file)
-#define F_CPU 8000000UL
-#include <avr/io.h>
-#include <util/delay.h>
 
-
-
-#define OPEN 0xFF
-#define MAX_5_BIT 0x1F
-#define DELAY_TIME 100
-
-
-int main(){
-    // DDRC = OPEN;
-    DDRC = MAX_5_BIT;
-    
-    // This for loop will test all the combinations between pins 1 to 5
-    for(uint8_t count=0 ; ;count++){
-        PORTC = count;
-        _delay_ms(DELAY_TIME);
-        // variableDelay(DELAY_TIME); //could just use the _delay_ms() function here since this is not a variable
-        if(count==MAX_5_BIT)
-            count = 0x00	;
-    }
-    // It will follow the following sequence
-    // 1. Nothing
-    // 2. DEL1
-    // 3. DEL2
-    // 4. DEL1 && DEL2
-    // 5. DEL3
-    // 6. DEL3 && DEL1
-    // and so on...
-}
-*/
