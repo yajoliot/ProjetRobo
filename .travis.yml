@@ -4,7 +4,9 @@ sudo: enabled
 os: linux
 branches:
   only:
-  - CI
+  - master
+  - SuiveurDeLigne
+  - section3
 before-install:
 addons:
   apt:
