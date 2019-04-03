@@ -43,8 +43,3 @@ after_success:
 notifications:
   email:
     - simon.zhang@polymtl.ca
-    
-branches:
-  only:
-    - master
-    - core
