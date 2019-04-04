@@ -102,19 +102,20 @@ int main() {
                         if(lineTracker.getValueMap() == 0x04 || lineTracker.getValueMap() == 0x06 || lineTracker.getValueMap() == 0x0C){
                             etat2 = DIST_1;
                         }
+                        _delay_ms(1);
                     break;
 
                     case DIST_1:
                         startMinuterie(duree);
                         while(!(lineTracker.getValueMap() == 0x1C
-                            || lineTracker.getValueMap() == 0x07 || lineTracker.getValueMap() == 0x06 || lineTracker.getValueMap() == 0x0C)){
+                            || lineTracker.getValueMap() == 0x07 || lineTracker.getValueMap() == 0x06 || lineTracker.getValueMap() == 0x0C || lineTracker.getValueMap() == 0x03 || lineTracker.getValueMap() == 0x18)){
                             lineTracker.updateValueMap();
                             PORTC = lineTracker.getValueMap();
                             pwm.avancementAjuste(rapport, lineTracker.getValueMap());
                             uint8_t tmp = lineTracker.getValueMap();        
                             DEBUG_PARAMETER_VALUE((uint8_t*)"test",&tmp);
                         }
-                        if(lineTracker.getValueMap() == 0x07) //if found left
+                        if(lineTracker.getValueMap() == 0x07 || 0x06 || 0x03) //if found left
                             droite = false;
 
                         distTime1 = TCNT1;
@@ -151,7 +152,7 @@ int main() {
                     etat = END;
                     pwm.arreter();
                 }
-                compare_value = (distTime1>>1)+(distTime1>>3);
+                compare_value = distTime1;
             break;
 
             case END:
@@ -180,7 +181,7 @@ int main() {
                     PORTC = 0x10;
                 } else if ( abs(distTime2 - distTime1) > compare_value && droite) {
                     PORTC = 0x08;
-                } else if( abs(distTime2 - distTime1) < compare_value && !droite ) {
+                } else if( (abs(distTime2 - distTime1) < compare_value) && !droite  ) {
                     PORTC = 0x04;
                 } else {
                     PORTC = 0x02;
