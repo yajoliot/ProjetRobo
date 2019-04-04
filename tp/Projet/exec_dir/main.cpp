@@ -11,8 +11,9 @@
  #include "usart.h"
  #include "bytecode.h"
  #include "util.h"
- #include "linetracker.h"
+ #include "LineTracker.h"
  #include "debug.h"
+ #include "Minuterie.h"
 
 int main() {
     PWM pwm;
@@ -26,10 +27,13 @@ int main() {
     bool tournerGauche = false;
     bool tournerDroite = false;
 
-    for(;;){
-        
-        lineTracker.updateValueMap();
-        uint8_t valueMap = lineTracker.getValueMap();
+    //for(;;){
+
+
+      startMinuterie(0x00);
+
+        //lineTracker.updateValueMap();
+        uint8_t valueMap = 0x04;//lineTracker.getValueMap();
         PORTC = valueMap;
         
 
@@ -124,8 +128,14 @@ int main() {
                     pwm.arreter();
                 break;
         }
-        
-    }
+    
+    uint8_t tmp = TCNT1H;
+    DEBUG_PARAMETER_VALUE((uint8_t*)"TNCT1H", &tmp);
+    tmp = TCNT1L;
+    DEBUG_PARAMETER_VALUE((uint8_t*)"TCNT1L", &tmp);
+
+    for(;;){}
+    //}
 }
 
 

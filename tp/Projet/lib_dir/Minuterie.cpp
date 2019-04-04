@@ -12,16 +12,16 @@ void startMinuterie (uint16_t duree){
 
     TCNT1 = 0 ;
 
-    OCR1A = duree;
+   // OCR1A = duree;
 
-    TCCR1A |= (1 << COM1A1);
-    TCCR1A |= (1 << COM1A0);
-    TCCR1B |= (1 << WGM10);
+   // TCCR1A |= (1 << COM1A1);
+   // TCCR1A |= (1 << COM1A0);
+   // TCCR1B |= (1 << WGM10);
     TCCR1B |= (1 << CS10);
-    TCCR1B |= (1 << CS12);
-    TCCR1C = 0;
+    //TCCR1B |= (1 << CS12);
+   // TCCR1C = 0;
 
-    TIMSK1 |= (1 << OCIE1A);
+   // TIMSK1 |= (1 << OCIE1A);
 
 
 }
