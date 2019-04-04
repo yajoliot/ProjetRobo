@@ -159,12 +159,12 @@ void PWM::avancementAjuste(uint8_t &rapport, uint8_t valueMap) {
 		rapport = VITESSE_DEFAULT;
 		this->avancer(rapport);
 	} else if(valueMap == 6 || valueMap == 2 || valueMap == 3 || valueMap == 1){
-		rapport = rapport - 1 > VITESSE_DEFAULT-20 ? rapport - 1: rapport;
+		rapport = rapport - 1 > VITESSE_DEFAULT-85 ? rapport - 1: rapport;
 		roueDroite(true, VITESSE_DEFAULT);
 		roueGauche(true, rapport);
 
 	} else if(valueMap == 12 || valueMap == 8 || valueMap == 24 || valueMap == 16) {
-		rapport = rapport - 1 > VITESSE_DEFAULT-20 ? rapport - 1: rapport;
+		rapport = rapport - 1 > VITESSE_DEFAULT-85 ? rapport - 1: rapport;
 		roueDroite(true, rapport);
 		roueGauche(true, VITESSE_DEFAULT);
 

@@ -108,14 +108,14 @@ int main() {
                     case DIST_1:
                         startMinuterie(duree);
                         while(!(lineTracker.getValueMap() == 0x1C
-                            || lineTracker.getValueMap() == 0x07 || lineTracker.getValueMap() == 0x06 || lineTracker.getValueMap() == 0x0C || lineTracker.getValueMap() == 0x03 || lineTracker.getValueMap() == 0x18)){
+                            || lineTracker.getValueMap() == 0x07 || lineTracker.getValueMap() == 0x03 || lineTracker.getValueMap() == 0x18)){
                             lineTracker.updateValueMap();
                             PORTC = lineTracker.getValueMap();
                             pwm.avancementAjuste(rapport, lineTracker.getValueMap());
                             uint8_t tmp = lineTracker.getValueMap();        
                             DEBUG_PARAMETER_VALUE((uint8_t*)"test",&tmp);
                         }
-                        if(lineTracker.getValueMap() == 0x07 || 0x06 || 0x03) //if found left
+                        if(lineTracker.getValueMap() == 0x07 || lineTracker.getValueMap() == 0x06) //if found left
                             droite = false;
 
                         distTime1 = TCNT1;
@@ -125,13 +125,13 @@ int main() {
                     case DIST_2:
                         startMinuterie(duree);
                         if(droite){
-                            while(!(lineTracker.getValueMap() == 0x07)){
+                            while(!(lineTracker.getValueMap() == 0x07 || lineTracker.getValueMap() == 0x06)){
                                 lineTracker.updateValueMap();
                                 pwm.avancementAjuste(rapport, lineTracker.getValueMap());
                             }
 
                         } else {
-                            while(!(lineTracker.getValueMap() == 0x1C)){
+                            while(!(lineTracker.getValueMap() == 0x1C || lineTracker.getValueMap() == 0x18)){
                                 lineTracker.updateValueMap();
                                 pwm.avancementAjuste(rapport, lineTracker.getValueMap());
                             }
