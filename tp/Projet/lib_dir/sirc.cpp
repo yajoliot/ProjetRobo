@@ -1,45 +1,4 @@
-#ifndef F_CPU
-#define F_CPU 8000000UL
-#endif
- 
-// #include <util/atomic.h>
-// #include <util/delay.h>
-// #include "del.h"
-// #include "debug.h"
-// #include "util.h"
-
-#include "sirc.h"
-
-int main() {
-    DEBUG_INFO((uint8_t*)"START OF PROGRAM");
-
-//Port Setup
-
-    DDRD = 0xFF;
-     
-//PWM Setup
-
-    setupSIRC(); //enable/disable as you need
-
-//Global interrupt setup
-
-    sei();
-
-//Test function is below
-
-    //dummy command
-    uint8_t command = 0x01;
-    //dummy address
-    uint8_t address = 0x02; //this will get ignored if in MODE_1
-
-    //Tested function
-
-    transmit(command, address);
-
-    DEBUG_INFO((uint8_t*)"END OF PROGRAM");
-}
-
-void setupSIRC(){
+static void SIRC::setupSIRC(){
 
     //Set the registers : CTC mode, Toggle on Compare, No prescaler
     TCCR1A |= _BV(WGM12) | _BV(COM1A0);
@@ -51,14 +10,14 @@ void setupSIRC(){
 
 }
 
-void enableSIRC(){
+static void SIRC::enableSIRC(){
     //Non 0 value for the prescaler enables the timer
     TCCR1B |= _BV(CS10);
     //Enable counter overflow interrupt 
     TIMSK1 |= _BV(TOIE1); 
 }
 
-void disableSIRC(){
+static void SIRC::disableSIRC(){
     //Sets the only prescaler value we touched to 0
     TCCR1B &= ~(_BV(CS10));
     //Disable counter overflow interrupt
@@ -66,7 +25,7 @@ void disableSIRC(){
     // cli();
 }
 
-void transmitOneCycle(uint8_t mode){
+void SIRC::ransmitOneCycle(uint8_t mode){
     // DEBUG_FUNCTION_CALL((uint8_t*)"transmitOneCycle()");
     //Set the PWM
     enableSIRC();
@@ -79,7 +38,7 @@ void transmitOneCycle(uint8_t mode){
     // DEBUG_FUNCTION_EXIT();
 }
 
-void transmitHighBit(){
+void SIRC::transmitHighBit(){
     //DEBUG_FUNCTION_CALL((uint8_t*)"transmitHighBit()");
     //Two Cycles @ Hi
     for(uint8_t i=0x00 ; i<0x02; i++){
@@ -89,7 +48,7 @@ void transmitHighBit(){
     transmitOneCycle(LOW_MODE);
 }
 
-void transmitLowBit(){
+void SIRC::transmitLowBit(){
     //DEBUG_FUNCTION_CALL((uint8_t*)"transmitLowBit()");
     //One Cycle @ Hi
     transmitOneCycle(HIGH_MODE);
@@ -97,7 +56,7 @@ void transmitLowBit(){
     transmitOneCycle(LOW_MODE);
 }
 
-void transmitHeader(){
+void SIRC::transmitHeader(){
     //Four Cycles @ Hi
     for(uint8_t i=0x00 ; i<0x04 ; i++){
         transmitOneCycle(HIGH_MODE);
@@ -107,7 +66,7 @@ void transmitHeader(){
 }
 
 
-void transmitBits(uint8_t command_, uint8_t size_){
+void SIRC::transmitBits(uint8_t command_, uint8_t size_){
     //DEBUG_FUNCTION_CALL((uint8_t*)"transmitBits(uint8_t command_, uint8_t size_)");
     for(uint8_t i=0x00 ; i<size_ ; i++){
         //if the bit @ the ith position is 1
@@ -122,17 +81,17 @@ void transmitBits(uint8_t command_, uint8_t size_){
     }
 }
 
-void transmitCommand(uint8_t command_){
+void SIRC::transmitCommand(uint8_t command_){
     //DEBUG_FUNCTION_CALL((uint8_t*)"transmitCommand(uint8_t command_)");
     transmitBits(command_, COMMAND_SIZE);
 }
 
-void transmitAddress(uint8_t address_){
+void SIRC::transmitAddress(uint8_t address_){
     //DEBUG_FUNCTION_CALL((uint8_t*)"transmitAddress(uint8_t address_)");
     transmitBits(address_, ADDRESS_SIZE);
 }
 
-void transmit(uint8_t command_, uint8_t address_){
+void SIRC::transmit(uint8_t command_, uint8_t address_){
     DEBUG_FUNCTION_CALL((uint8_t*)"transmit()");
     for(uint8_t i=0x00 ; i<0x03 ; i++){
         //begin 45 ms timer 3
@@ -150,7 +109,7 @@ void transmit(uint8_t command_, uint8_t address_){
     DEBUG_FUNCTION_EXIT();
 }
 
-void begin45msTimer(){
+void SIRC::begin45msTimer(){
     //Set timer2 to normal mode
     //WGM22:0 = 0 -> you don't need to do anything. all are initialized at 0
     //Enable the timer
@@ -159,7 +118,7 @@ void begin45msTimer(){
     TIMSK2 |= _BV(TOIE2); 
 }
 
-void end45msTimer(){
+void SIRC::end45msTimer(){
     TCCR2B &= ~(_BV(CS20));
     TIMSK2 &= ~(_BV(TOIE2));
 }

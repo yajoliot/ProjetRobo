@@ -14,6 +14,9 @@
 
 #define _SIZEOF(x) sizeof(x)/sizeof(x[0])
 
+#define TRUE 0x01
+#define FALSE 0x00
+
 void variableDelay(uint16_t duration_in_ms);
 void variableDelay25ms(uint8_t iterations);
 
