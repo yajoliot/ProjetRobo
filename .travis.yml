@@ -15,18 +15,11 @@ addons:
 install:
   - sudo apt-get install avrdude avrdude-doc avr-libc binutils-avr gcc-avr gdb-avr
   - sudo apt-get install cppcheck
-
-#  - pip install --user --upgrade pip
-# To use CPPUNIT tests in the code
-#  - sudo apt-get install libcppunit-dev
-# To use gcov to learn code coverage (% of code being used in a program) which is not that useful for us
-#  - pip install --user cpp-coveralls
-# To use cpplint without the ./ and by not having the script in the root folder
-#  - pip install --user cpplint
-
 script:
-#   - chmod +x ./setmode.sh && ./setmode.sh debug
+#   - ls .
+   - chmod +r ./tp ./tp/Projet ./tp/Projet/exec_dir ./tp/Projet/lib_dir
    - make
+#   - chmod +x ./setmode.sh && ./setmode.sh debug
 
 after_success:
   #To use for styling checking

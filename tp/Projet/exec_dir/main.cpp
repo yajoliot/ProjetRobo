@@ -13,7 +13,7 @@
  #include "usart.h"
  #include "bytecode.h"
  #include "util.h"
- #include "linetracker.h"
+ #include "LineTracker.h"
  #include "debug.h"
  #include "Minuterie.h"
 
