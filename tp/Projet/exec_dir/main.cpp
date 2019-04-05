@@ -2,6 +2,7 @@
 #define F_CPU 8000000UL
 #endif
  
+<<<<<<< HEAD
 // #include <util/atomic.h>
 // #include <util/delay.h>
 // #include "del.h"
@@ -9,6 +10,19 @@
 // #include "util.h"
 
 #include "sirc.h"
+=======
+ #include <util/atomic.h>
+ #include <util/delay.h>
+ #include <pwm.h>
+ #include "piezo.h"
+ #include "usart.h"
+ #include "memoire_24.h"
+ #include "usart.h"
+ #include "bytecode.h"
+ #include "util.h"
+ #include "LineTracker.h"
+ #include "debug.h"
+>>>>>>> e8b2745... Update CI
 
 int main() {
     DEBUG_INFO((uint8_t*)"START OF PROGRAM");

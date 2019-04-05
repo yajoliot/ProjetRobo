@@ -1,0 +1,39 @@
+language: cpp
+dist: trusty
+sudo: enabled
+os: linux
+branches:
+  only:
+  - master
+  - SuiveurDeLigne
+  - section3
+  - sirc
+before-install:
+addons:
+  apt:
+    update: true
+install:
+  - sudo apt-get install avrdude avrdude-doc avr-libc binutils-avr gcc-avr gdb-avr
+  - sudo apt-get install cppcheck
+script:
+#   - ls .
+   - chmod +r ./tp ./tp/Projet ./tp/Projet/exec_dir ./tp/Projet/lib_dir
+   - make
+#   - chmod +x ./setmode.sh && ./setmode.sh debug
+
+after_success:
+  #To use for styling checking
+     # - chmod u+x ./.travis-ci/cpplint.py
+     # - ./.travis-ci/cpplint.py --quiet --root=codeCommun/tp/tp9/ --recursive ./codeCommun/tp/tp9/
+     # - clang-tidy 
+  #To use for static code analysis
+  #Need to include own .cfg file for our own library functions
+     - cppcheck  --enable=warning,performance --language=c++ --std=c99 --platform=avr8 --library=./.travis-ci/avr.cfg ./codeCommun/tp/tp9/
+    
+  #Send the clang-tidy suggested changes
+     # - curl --upload-file ./file https://transfer.sh/file
+
+
+notifications:
+  email:
+    - simon.zhang@polymtl.ca
