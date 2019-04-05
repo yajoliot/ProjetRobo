@@ -24,7 +24,7 @@ install:
 #  - pip install --user cpplint
 
 script:
-   - chmod +x ./setmode.sh && ./setmode.sh debug
+#   - chmod +x ./setmode.sh && ./setmode.sh debug
    - make
 
 after_success:
