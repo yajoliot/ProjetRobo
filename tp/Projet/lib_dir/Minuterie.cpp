@@ -8,11 +8,14 @@ minuterie::MINUTERIE::~MINUTERIE(){
 	free(configuration);
 }
 
+//65535 * 1024 = 8s
+//65535 * 256 = 8s/4 = 2s
+//65535 * 64 = 2s/4 = 0.5s
+//65535 * 8 = 0.5s/8 = 0.065535s
+//65535 * 1 = 0.00819s
+
 void minuterie::MINUTERIE::startMinuterie(){
-    switch(configuration->minuterie_mode_){
-        case CTC: TCCR1A |= _BV()
-        case PFC: 
-    }
+    
 }
 
 void minuterie::MINUTERIE::stopMinuterie(){
