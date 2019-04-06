@@ -48,6 +48,8 @@ class PWM{
         void ajustementAGauche();
         void ajustementReculerAGauche();
         void ajustementReculerADroite();
+        void tourner90Gauche(uint8_t rapport);
+        void tourner90Droite(uint8_t rapport);
 
 };
 

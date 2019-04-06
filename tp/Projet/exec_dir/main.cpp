@@ -13,154 +13,202 @@
  #include "util.h"
  #include "LineTracker.h"
  #include "debug.h"
+ #include "Minuterie.h"
 
 int main() {
     PWM pwm;
     LineTracker lineTracker;
-    enum etats {LIGNE_DROITE, TOURNE_GAUCHE, TOURNE_DROITE, PRE_BOITE, BOITE, POST_BOITE, ARRETE};
-    int etat = LIGNE_DROITE;
+    PIEZO_INIT(DDD4, DDD5, 50);
+    
+
+    DDRA = 0x00;
     DDRC = 0xFF;
     DDRB = 0xFF;
-    uint8_t rapport = pwm.getVitesseDefault(); // à changer pas bon -xavier
-    bool boolBoite = false;
-    bool tournerGauche = false;
-    bool tournerDroite = false;
+
+    uint8_t rapport = pwm.getVitesseDefault();
+    uint8_t duree = 0xFF;
+
+    enum etats {INIT, ANALYSE_IR}
+    enum aStates {IR_WAIT, P1P2P3 ,P4P5P6, P7P8P9}
+    uint32_t rapport3Inch;
+    etats etat = INIT;
+    aStates state = IR_WAIT;
+    uint8_t valueMap;
+    
 
     for(;;){
-        
+    
         lineTracker.updateValueMap();
         uint8_t valueMap = lineTracker.getValueMap();
         PORTC = valueMap;
-        
 
-        //TODO:  mettre dans une fonction
-        if((valueMap == 4 || 
-            valueMap == 6 ||
-            valueMap == 12 || 
-            valueMap == 8 || 
-            valueMap == 2 || 
-            valueMap == 3 || 
-            valueMap == 24 ||
-            valueMap == 1 || 
-            valueMap == 16) && 
-            !boolBoite){
-            etat = LIGNE_DROITE;
-            // tournerGauche = false;
-            // tournerDroite = false;
-        }
-        else if((valueMap == 7 || valueMap == 15 || (valueMap == 0 && tournerGauche)) && !boolBoite){
-            etat = TOURNE_GAUCHE;
-            tournerGauche = true;
-            tournerDroite = false;
-        }
-        else if((valueMap == 28 || valueMap == 30 || (valueMap == 0 && tournerDroite)) && !boolBoite){
-            etat = TOURNE_DROITE;
-            tournerGauche = false;
-            tournerDroite = true;
-        }
-        
-        //TODO: AJOUTER LE CAS VALUEMAP == 0
-        
-        //Conditions pour entrer dans la boite
-        else if (valueMap == 31 && !boolBoite) {
-            
-            etat = PRE_BOITE;
-        }
-        DEBUG_PARAMETER_VALUE((uint8_t*)"IF STATEMENTS", &valueMap);
-        
-        //TODO:  mettre dans une fonction
         switch(etat){
-            case LIGNE_DROITE:
-                    pwm.avancementAjuste(rapport, valueMap);
-                break;
-            
-            case TOURNE_GAUCHE:
-                    //TODO:  mettre dans une fonction
-                    pwm.tournantGauche(rapport, valueMap);
-                break;
-
-            case TOURNE_DROITE:
-                    //TODO:  mettre dans une fonction
-                    pwm.tournantDroite(rapport, valueMap);
-                break;
-
-            case PRE_BOITE:
-                    //TODO: à mettre dans fonction à part
-                
-                    while(lineTracker.getValueMap() == 31){
-                        uint8_t temporaire = lineTracker.getValueMap();
-                        DEBUG_PARAMETER_VALUE((uint8_t*)"PRE_BOITE", &temporaire);
-                        pwm.avancer(pwm.getVitesseDefault());
-                        lineTracker.updateValueMap();
-                    }
-                    boolBoite = true;
-                    etat = BOITE;
-                break;
-
-            case BOITE : 
-                    //TODO: à mettre dans fonction à part
-                    while( !(lineTracker.getValueMap() == 31) ){
-                        uint8_t temporaire = lineTracker.getValueMap();
-                        DEBUG_PARAMETER_VALUE((uint8_t*)"BOITE", &temporaire);
-                        pwm.boite(rapport, temporaire);
-                        lineTracker.updateValueMap();
-                    }
-                    etat = POST_BOITE;
-                    
-                break;
-
-            case POST_BOITE:
-                    while(lineTracker.getValueMap() == 31){
-                        uint8_t temporaire = lineTracker.getValueMap();
-                        DEBUG_PARAMETER_VALUE((uint8_t*)"POST_BOITE", &temporaire);
-                        pwm.avancer(pwm.getVitesseDefault());
-                        lineTracker.updateValueMap();
-                    }
-                    boolBoite = false;
-                    etat = LIGNE_DROITE;
-                break;
-            
-            case ARRETE:
+            case INIT:
+                pwm.avancementAjuste(rapport, valueMap);
+                startMinuterie(duree);
+                if(valueMap == 0x1F){
                     pwm.arreter();
-                break;
+                    rapport3Inch = (TCNT*7.62)/10.3;
+                    etat = ANALYSE_IR;
+                }
+
+                stopMinuterie();
+                resetMinuterie();
+
+            break;
+
+            case ANALYSE_IR:
+
+                switch(state){
+
+                    case IR_WAIT:
+                    if(sirc_receiver.getCmd() == 0x00 ||
+                    sirc_receiver.getCmd() == 0x01 ||
+                    sirc_receiver.getCmd() == 0x02 ){
+                        state = P1P2P3;
+                    } else if (sirc_receiver.getCmd() == 0x03 ||
+                    sirc_receiver.getCmd() == 0x04 ||
+                    sirc_receiver.getCmd() == 0x05 ) {
+                        state = P4P5P6;
+                    } else {
+                        state = P7P8P9;
+                    }
+                    
+
+                    case P1P2P3:
+
+                        startMinuterie(duree);
+                        while(TCNT < 3*rapport3Inch)
+                            pwm.avancer2*(rapport);
+                        stopMinuterie();
+                        resetMinuterie();
+                        pwm.tourner90Gauche(rapport);
+                        if(sirc_receiver.getCmd() == 0x00){
+                            startMinuterie(duree);
+                            while(TCNT < 4*rapport3Inch)
+                                pwm.avancer2*(rapport);
+                            stopMinuterie();
+                            resetMinuterie();
+                        } else if(sirc_receiver.getCmd() == 0x01){
+                            startMinuterie(duree);
+                            while(TCNT < 3*rapport3Inch)
+                                pwm.avancer2*(rapport);
+                            stopMinuterie();
+                            resetMinuterie();
+                        } else {
+                            startMinuterie(duree);
+                            while(TCNT < 2*rapport3Inch)
+                                pwm.avancer2*(rapport);
+                            stopMinuterie();
+                            resetMinuterie();
+                        }
+
+                    break;
+
+                    case P4P5P6:
+
+                        while(TCNT < 2*rapport3Inch)
+                            pwm.avancer(rapport);
+                        stopMinuterie();
+                        resetMinuterie();
+                        if(sirc_receiver.getCmd() == 0x03){
+                            startMinuterie(duree);
+                            while(TCNT < 4*rapport3Inch)
+                                pwm.avancer2*(rapport);
+                            stopMinuterie();
+                            resetMinuterie();
+                        } else if(sirc_receiver.getCmd() == 0x04){
+                            startMinuterie(duree);
+                            while(TCNT < 3*rapport3Inch)
+                                pwm.avancer2*(rapport);
+                            stopMinuterie();
+                            resetMinuterie();
+                        } else {
+                            startMinuterie(duree);
+                            while(TCNT < 2*rapport3Inch)
+                                pwm.avancer2*(rapport);
+                            stopMinuterie();
+                            resetMinuterie();
+
+                    break;
+                    
+                    case P7P8P9:
+
+                        while(TCNT < 2*rapport3Inch)
+                            pwm.avancer(rapport);
+                        stopMinuterie();
+                        resetMinuterie();
+                        if(sirc_receiver.getCmd() == 0x06){
+                            startMinuterie(duree);
+                            while(TCNT < 4*rapport3Inch)
+                                pwm.avancer2*(rapport);
+                            stopMinuterie();
+                            resetMinuterie();
+                        } else if(sirc_receiver.getCmd() == 0x07){
+                            startMinuterie(duree);
+                            while(TCNT < 3*rapport3Inch)
+                                pwm.avancer2*(rapport);
+                            stopMinuterie();
+                            resetMinuterie();
+                        } else {
+                            startMinuterie(duree);
+                            while(TCNT < 2*rapport3Inch)
+                                pwm.avancer2*(rapport);
+                            stopMinuterie();
+                            resetMinuterie();
+                    break;
+
+                }
+
+                stopMinuterie();
+                resetMinuterie();
+                state = WAIT;
+
+            break;
+
+            case WAIT:
+                tourner90Droite(rapport);
+                playNote(45, 3000);
+                state = GOTO_S3;
+                
+            break;
+
+            case GOTO_S3:
+                
+                tourner90Droite(rapport);
+                if(sirc_receiver.getCmd() == 0x02 ||
+                sirc_receiver.getCmd() == 0x05 ||
+                sirc_receiver.getCmd() == 0x08 ){
+                    startMinuterie(duree);
+                    while(TCNT < 2*rapport3Inch)
+                        avancer(rapport);
+                } else  if(sirc_receiver.getCmd() == 0x01 ||
+                sirc_receiver.getCmd() == 0x04 ||
+                sirc_receiver.getCmd() == 0x07 ) {
+                    startMinuterie(duree);
+                    while(TCNT < 3*rapport3Inch)
+                        avancer(rapport);
+                } else {
+                    startMinuterie(duree);
+                    while(TCNT < 4*rapport3Inch)
+                        avancer(rapport);
+                }
+                stopMinuterie();
+                resetMinuterie();
+                tourner90Gauche(rapport);
+                while(valueMap = 0x00){
+                    pwm.avancer(rapport);
+                }
+
+                pwm.avancementAjuste(rapport, valueMap);
+                
+
+            break;
+
+
+                
         }
         
     }
 }
 
-
-
-/*These define lines can be in the util.h or the constantes.h file (probably constantes.h file)
-#define F_CPU 8000000UL
-#include <avr/io.h>
-#include <util/delay.h>
-
-
-
-#define OPEN 0xFF
-#define MAX_5_BIT 0x1F
-#define DELAY_TIME 100
-
-
-int main(){
-    // DDRC = OPEN;
-    DDRC = MAX_5_BIT;
-    
-    // This for loop will test all the combinations between pins 1 to 5
-    for(uint8_t count=0 ; ;count++){
-        PORTC = count;
-        _delay_ms(DELAY_TIME);
-        // variableDelay(DELAY_TIME); //could just use the _delay_ms() function here since this is not a variable
-        if(count==MAX_5_BIT)
-            count = 0x00	;
-    }
-    // It will follow the following sequence
-    // 1. Nothing
-    // 2. DEL1
-    // 3. DEL2
-    // 4. DEL1 && DEL2
-    // 5. DEL3
-    // 6. DEL3 && DEL1
-    // and so on...
-}
-*/

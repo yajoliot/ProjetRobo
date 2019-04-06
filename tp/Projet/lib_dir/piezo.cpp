@@ -113,8 +113,10 @@ void playNote(uint8_t midi_key, uint16_t duration_in_ms){
 	unsigned char sreg;
 	sreg = SREG;
 	cli();
+	setVolume(OCR1B);
 	ICR1H = (note[midi_key] >> 8); //first set the high byte
 	ICR1L = note[midi_key];        //now the low byte
 	SREG = sreg;
 	variableDelay(duration_in_ms);
+	setVolume(0);
 }

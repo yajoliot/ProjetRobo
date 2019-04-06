@@ -207,6 +207,8 @@ void PWM::tournerADroite(){
 }
 
 
+
+
 void PWM::tournerAGauche(){
 	// Tourner a gauche : bloquer la roue gauche et faire tourner vers l'avant la roue droite
 	OCR0B = 0;
@@ -219,3 +221,18 @@ void PWM::tournerAGauche(){
 
 }
 
+void PWM::tourner90Droite(uint8_t rapport){
+
+	roueGauche(false, rapport);
+	roueDroite(true, rapport);
+	_delay_ms(300);
+	arreter();
+}
+
+void PWM::tourner90Gauche(uint8_t rapport){
+
+	roueGauche(true, rapport);
+	roueDroite(false, rapport);
+	_delay_ms(300);
+	arreter();
+}
