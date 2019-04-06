@@ -4,14 +4,13 @@
  
  #include <util/atomic.h>
  #include <util/delay.h>
- #include <pwm.h>
+ #include <PWM.h>
  #include "piezo.h"
  #include "usart.h"
  #include "memoire_24.h"
- #include "usart.h"
  #include "bytecode.h"
  #include "util.h"
- #include "linetracker.h"
+ #include "LineTracker.h"
  #include "debug.h"
 
 int main() {
@@ -31,7 +30,10 @@ int main() {
         lineTracker.updateValueMap();
         uint8_t valueMap = lineTracker.getValueMap();
         PORTC = valueMap;
-        
+        uint8_t ralentir = 0;
+        if (ralentir==100){
+
+        }
 
         //TODO:  mettre dans une fonction
         if((valueMap == 4 || 
@@ -72,6 +74,15 @@ int main() {
         switch(etat){
             case LIGNE_DROITE:
                     pwm.avancementAjuste(rapport, valueMap);
+                    if (valueMap==3 || valueMap==7){
+                        ralentir++;
+                        if (ralentir == 100){
+                            pwm.avancementAjuste(rapport=0,valueMap);
+                        }
+                    }
+                    else if (valueMap !=3 || valueMap !=7){
+                        ralentir=0;
+                    }
                 break;
             
             case TOURNE_GAUCHE:
@@ -124,6 +135,7 @@ int main() {
                     pwm.arreter();
                 break;
         }
+
         
     }
 }
