@@ -8,7 +8,10 @@
 // #include "debug.h"
 // #include "util.h"
 
-#include "sirc.h"
+#include "sirc_sender.h"
+
+
+
 
 int main() {
     DEBUG_INFO((uint8_t*)"START OF PROGRAM");
@@ -19,7 +22,7 @@ int main() {
      
 //PWM Setup
 
-    setupSIRC(); //enable/disable as you need
+    SIRC_SENDER sirc_sender;
 
 //Global interrupt setup
 
@@ -34,7 +37,7 @@ int main() {
 
     //Tested function
 
-    transmit(command, address);
+    sirc_sender.transmit(command, address);
 
     DEBUG_INFO((uint8_t*)"END OF PROGRAM");
 }

@@ -1,5 +1,6 @@
 #ifndef LIB_DIR_SIRC_H
 #define LIB_DIR_SIRC_H
+
 #ifndef F_CPU
 #define F_CPU 8000000UL
 #endif
@@ -45,10 +46,7 @@
 #define HIGH_MODE 0x01
 #define LOW_MODE 0x00
 
-class SIRC(){
-    static void enableSIRC();
-    static void disableSIRC();
-    static void setupSIRC(); //call this function before calling transmit
+class SIRC_SENDER{
 private:
     void transmitOneCycle(uint8_t mode);
     void transmitHighBit();
@@ -56,12 +54,17 @@ private:
     void transmitHeader();
     void transmitCommand(uint8_t command_);
     void transmitAddress(uint8_t address_);
-    void begin45msTimer();
-    void end45msTimer();
-
+    void transmitBits(uint8_t command_, uint8_t size_);
+    
 public:
+    SIRC_SENDER();
     void transmit(uint8_t command_, uint8_t address_);
-}
+    static void enableSender();
+    static void disableSender();
+    static void setupSender();
+    static void begin45msTimer();
+    static void end45msTimer();
+};
 
 #define CYCLES_PER_T 0x18 ////For one T worth of time -> 600 us / 25 us = 24 cycles. 0x18 = 24 cycles.
 volatile uint8_t count = 0x00;
@@ -79,7 +82,7 @@ ISR(TIMER1_OVF_vect)
         count = 0x00;
 
         //Stop the PWM
-        disableSIRC();
+        SIRC_SENDER::disableSender();
 
         //Set the boolean for the ISR setting function
         reach_end_T = TRUE;
@@ -94,7 +97,7 @@ ISR(TIMER2_OVF_vect){
     overflow_count++;
     if(overflow_count>=OVERFLOW_COUNT_TO_45_MS){
         overflow_count = 0x0000;
-        end45msTimer();
+        SIRC_SENDER::end45msTimer();
         reach_end_45_ms = TRUE;
     }
 }
