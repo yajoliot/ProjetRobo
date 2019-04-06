@@ -1,3 +1,4 @@
+
 #include <Minuterie.h>
 
 
@@ -10,7 +11,7 @@ void startMinuterie (uint16_t duree){
 
     // interruption après la durée spécifiée
 
-    TCNT1 = 0 ;
+    
 
     OCR1A = duree;
 
@@ -26,8 +27,13 @@ void startMinuterie (uint16_t duree){
 
 }
 
+void stopMinuterie(){
+    TCCR1B &= (0 << CS12);
+    TCCR1B &= (0 << CS11);
+    TCCR1B &= (0 << CS10);
+}
+
 void resetMinuterie ()
 {
-    
-    TIMSK1 = (0 << OCIE1A);
+    TCNT1 &= 0x00;
 }

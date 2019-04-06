@@ -11,6 +11,7 @@
 const int MINUTERIEEXPIRE = 0;
 
 void startMinuterie(uint16_t duree);
+void stopMinuterie();
 void resetMinuterie ();
 
 #endif 
