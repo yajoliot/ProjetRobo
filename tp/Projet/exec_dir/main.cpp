@@ -25,12 +25,13 @@ int main() {
     bool boolBoite = false;
     bool tournerGauche = false;
     bool tournerDroite = false;
-
+    uint8_t ralentir=0;
     for(;;){
         
         lineTracker.updateValueMap();
         uint8_t valueMap = lineTracker.getValueMap();
         PORTC = valueMap;
+        
         
 
         //TODO:  mettre dans une fonction
@@ -55,6 +56,7 @@ int main() {
         }
         else if((valueMap == 28 || valueMap == 30 || (valueMap == 0 && tournerDroite)) && !boolBoite){
             etat = TOURNE_DROITE;
+            pwm.resetVitesseDefault();
             tournerGauche = false;
             tournerDroite = true;
         }
@@ -66,12 +68,28 @@ int main() {
             
             etat = PRE_BOITE;
         }
-        DEBUG_PARAMETER_VALUE((uint8_t*)"IF STATEMENTS", &valueMap);
+        //DEBUG_PARAMETER_VALUE((uint8_t*)"IF STATEMENTS", &valueMap);
         
         //TODO:  mettre dans une fonction
         switch(etat){
             case LIGNE_DROITE:
-                    pwm.avancementAjuste(rapport, valueMap);
+                //DEBUG_PARAMETER_VALUE((uint8_t*)"nimport", &valueMap);
+                DEBUG_PARAMETER_VALUE((uint8_t*)"nimport", &ralentir);
+                pwm.ralentissement(rapport,valueMap, ralentir,tournerDroite);
+                /*if (valueMap==6 || valueMap==2){
+                    ralentir++;
+                    if (ralentir >= 15){
+                        rapport = 0;
+                        pwm.avancementAjuste(rapport,valueMap);
+                   }
+                   else{
+                       pwm.avancementAjuste(rapport, valueMap);
+                   }
+                }
+                    else if ( !( valueMap ==6 || valueMap ==2) ){
+                        
+                        ralentir=0;
+                }*/
                 break;
             
             case TOURNE_GAUCHE:
@@ -81,6 +99,7 @@ int main() {
 
             case TOURNE_DROITE:
                     //TODO:  mettre dans une fonction
+                    
                     pwm.tournantDroite(rapport, valueMap);
                 break;
 
@@ -89,7 +108,7 @@ int main() {
                 
                     while(lineTracker.getValueMap() == 31){
                         uint8_t temporaire = lineTracker.getValueMap();
-                        DEBUG_PARAMETER_VALUE((uint8_t*)"PRE_BOITE", &temporaire);
+                        //DEBUG_PARAMETER_VALUE((uint8_t*)"PRE_BOITE", &temporaire);
                         pwm.avancer(pwm.getVitesseDefault());
                         lineTracker.updateValueMap();
                     }
@@ -101,7 +120,7 @@ int main() {
                     //TODO: à mettre dans fonction à part
                     while( !(lineTracker.getValueMap() == 31) ){
                         uint8_t temporaire = lineTracker.getValueMap();
-                        DEBUG_PARAMETER_VALUE((uint8_t*)"BOITE", &temporaire);
+                        //DEBUG_PARAMETER_VALUE((uint8_t*)"BOITE", &temporaire);
                         pwm.boite(rapport, temporaire);
                         lineTracker.updateValueMap();
                     }
@@ -112,7 +131,7 @@ int main() {
             case POST_BOITE:
                     while(lineTracker.getValueMap() == 31){
                         uint8_t temporaire = lineTracker.getValueMap();
-                        DEBUG_PARAMETER_VALUE((uint8_t*)"POST_BOITE", &temporaire);
+                        //DEBUG_PARAMETER_VALUE((uint8_t*)"POST_BOITE", &temporaire);
                         pwm.avancer(pwm.getVitesseDefault());
                         lineTracker.updateValueMap();
                     }

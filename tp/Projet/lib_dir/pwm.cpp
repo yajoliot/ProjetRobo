@@ -49,6 +49,16 @@ uint8_t PWM::getVitesseTournage(){
 	return vitesseTournage;
 }
 
+uint8_t PWM::getVitesseInitiale(){
+	return VITESSE_INITIALE;
+}
+
+void PWM::resetVitesseDefault(){
+	VITESSE_DEFAULT = VITESSE_INITIALE;
+}
+
+
+
 
 
 
@@ -190,6 +200,22 @@ void PWM::arreter(){
 
 	rapportGauche = OCR0B;
 	rapportDroite = OCR0A;
+}
+
+void PWM::ralentissement(uint8_t &rapport, uint8_t valueMap, uint8_t &ralentir, bool tourneD){
+	if(valueMap == 6 || valueMap == 2 || valueMap == 3 || valueMap == 1 )
+		ralentir++;
+	else
+		ralentir == 0;
+	
+
+	if(ralentir > 250 && !tourneD){
+		VITESSE_DEFAULT = vitesseTournage;
+		avancementAjuste(rapport, valueMap);
+	}
+	else
+		avancementAjuste(rapport, valueMap);
+	
 }
 
 // Rotation 
