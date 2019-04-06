@@ -1,4 +1,4 @@
-	//==========================================================================================================//
+//==========================================================================================================//
 //PLEASE READ THE FOLLOWING
 //==========================================================================================================//
 
@@ -25,7 +25,6 @@
 #include "piezo.h"
 
 static uint8_t setup_value; 
-//volatile?
 
 /*****************************************************************************
 *
@@ -41,15 +40,7 @@ static uint8_t setup_value;
 *
 *****************************************************************************/
 void piezoInit(uint8_t pwm_pin, uint8_t ground_pin, uint8_t volume){
-	DEBUG_FUNCTION_CALL((uint8_t*)"piezoInit"); //[UNDEFINED BEHAVIOUR] Need to test
 	setup_value = pwm_pin;
-	{
-		DEBUG_INFO((uint8_t*)"pwm_pin == setup_value");
-		DEBUG_INFO((uint8_t*)"possible pin values: { 0, 1, 2, 3, 4, 5, 6, 7 }");
-		DEBUG_PARAMETER_VALUE((uint8_t*)"uint8_t pwm_pin", &pwm_pin);
-		DEBUG_PARAMETER_VALUE((uint8_t*)"uint8_t ground_pin", &ground_pin);
-		DEBUG_PARAMETER_VALUE((uint8_t*)"static uint8_t setup_value", &setup_value);
-	}
 	switch(setup_value){
    		case DDD4: 
 			DDRD |= _BV(pwm_pin); //OC1B as output
@@ -66,9 +57,8 @@ void piezoInit(uint8_t pwm_pin, uint8_t ground_pin, uint8_t volume){
    			DEBUG_ERROR();
 	}
 	DDRD |= _BV(ground_pin);
-	TCCR1B |= _BV(WGM13) 	//mode 8, PWM, Phase and Frequency Correct (TOP value is ICR1)
-	   	   |  _BV(CS11);
-	DEBUG_FUNCTION_EXIT();
+	TCCR1B |= _BV(WGM13) 	//PWM, Phase and Frequency Correct (TOP value is ICR1)
+	   	   |  _BV(CS11);	//8 prescaler
 }
 
 

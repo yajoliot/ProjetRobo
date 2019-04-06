@@ -1,7 +1,7 @@
 #ifndef LIB_DIR_MINUTERIE_H
 #define LIB_DIR_MINUTERIE_H
 
-#include <stdlib.h>;
+#include <stdlib.h>
 
 namespace minuterie{
 
@@ -50,19 +50,19 @@ namespace minuterie{
 	}minuterie_configuration;
 
 
+	/**
+ 	 * This class RUNS only on TIMER1
+ 	 */
 	class MINUTERIE{
 		public:
 			MINUTERIE(minuterie_configuration configuration_);
+			~MINUTERIE();
+			startMinuterie();
+			stopMinuterie();
+			resetMinuterie();
 		private:
 			minuterie_configuration* configuration;
 
 	};
-
-
-	MINUTERIE::MINUTERIE(minuterie_configuration configuration_){
-		configuration = (minuterie_configuration*)malloc(sizeof(minuterie_configuration));
-
-	}	
-
 }
 #endif
