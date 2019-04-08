@@ -16,15 +16,16 @@
 
 class Robot {
     private:
-        SIRC sirc;
-        PWM controlPWM;
-        LineTracker lineTracker;
+        //Minuterie
+        //SIRC sirc;
+        PWM* pwm;
+        LineTracker* lineTracker;
         
 
     public:
 
         Robot();
-        void Run(uint8_t IRCOM);
+        void Run(uint8_t IRCom);
         void RunCMD1();
         void RunCMD2();
         void RunCMD3();

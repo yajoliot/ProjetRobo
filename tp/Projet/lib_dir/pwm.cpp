@@ -2,7 +2,7 @@
 
 
 PWM::PWM(){
-	PWM::initPWM();
+	initPWM();
 }
 
 
