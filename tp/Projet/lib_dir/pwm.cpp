@@ -148,7 +148,7 @@ void PWM::boite(uint8_t &rapport, uint8_t valueMap){
 
 void PWM::avancer(uint8_t rapport) {
 
-	roueDroite(true, rapport);
+	roueDroite(true, rapport-10);
 	//ajustement du pwm pour avancer en ligne droite
 	rapport - AJUSTEMENT > 0 ? roueGauche(true, rapport - AJUSTEMENT) : roueGauche(true, rapport);
 	
@@ -223,16 +223,39 @@ void PWM::tournerAGauche(){
 
 void PWM::tourner90Droite(uint8_t rapport){
 
-	roueGauche(false, rapport);
-	roueDroite(true, rapport);
+	roueGauche(true, rapport);
+	roueDroite(false, rapport);
 	_delay_ms(850);
 	arreter();
 }
 
 void PWM::tourner90Gauche(uint8_t rapport){
 
-	roueGauche(true, rapport);
-	roueDroite(false, rapport);
+	roueGauche(false, rapport);
+	roueDroite(true, rapport);
 	_delay_ms(900);
 	arreter();
 }
+
+//section1
+void PWM::avancerTimer(uint8_t valeur, uint32_t timer){
+	pwm.arreter();
+    _delay_ms(500);
+	startMinuterie(0xFF);
+	while(TCNT1 < valeur*timer)
+        pwm.avancer(timer);
+    stopMinuterie();
+    resetMinuterie();
+}
+
+void PWM::tourner90Precis(uint8_t direc, uint8_t rapport){
+	pwm.arreter();
+    _delay_ms(500);
+	if( direc == 0 )
+        pwm.tourner90Gauche(rapport);
+	else
+		pwm.tourner90Droite(rapport);
+	
+}
+
+

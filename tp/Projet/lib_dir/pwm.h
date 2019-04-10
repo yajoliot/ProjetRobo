@@ -6,7 +6,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include "debug.h"
-
+#include "Minuterie.h"
 
 
 
@@ -50,6 +50,12 @@ class PWM{
         void ajustementReculerADroite();
         void tourner90Gauche(uint8_t rapport);
         void tourner90Droite(uint8_t rapport);
+
+        //section1
+
+        void avancerTimer(uint8_t valeur, uint8_t timer);
+        void tourner90Precis(uint8_t direc, uint8_t rapport);
+
 
 
 };
