@@ -175,25 +175,6 @@ void PWM::avancementAjuste(uint8_t &rapport, uint8_t valueMap) {
 	}
 }
 
-void PWM::avancementAjuste(uint8_t &rapport, uint8_t valueMap) {
-	// roueDroite(true, VITESSE_MAX);
-	// roueGauche(true, VITESSE_MAX);
-	
-	if(valueMap == 4 || valueMap == 31){
-		rapport = VITESSE_DEFAULT;
-		this->avancer(rapport);
-	} else if(valueMap == 6 || valueMap == 2 || valueMap == 3 || valueMap == 1){
-		rapport = rapport - 1 > VITESSE_DEFAULT-85 ? rapport - 1: rapport;
-		roueDroite(true, VITESSE_DEFAULT);
-		roueGauche(true, rapport);
-
-	} else if(valueMap == 12 || valueMap == 8 || valueMap == 24 || valueMap == 16) {
-		rapport = rapport - 1 > VITESSE_DEFAULT-85 ? rapport - 1: rapport;
-		roueDroite(true, rapport);
-		roueGauche(true, VITESSE_DEFAULT);
-
-	}
-}
 
 
 
@@ -259,22 +240,22 @@ void PWM::tourner90Gauche(uint8_t rapport){
 
 //section1
 void PWM::avancerTimer(uint8_t valeur, uint32_t timer){
-	pwm.arreter();
+	arreter();
     _delay_ms(500);
 	startMinuterie(0xFF);
 	while(TCNT1 < valeur*timer)
-        pwm.avancer(timer);
+        avancer(timer);
     stopMinuterie();
     resetMinuterie();
 }
 
 void PWM::tourner90Precis(uint8_t direc, uint8_t rapport){
-	pwm.arreter();
+	arreter();
     _delay_ms(500);
 	if( direc == 0 )
-        pwm.tourner90Gauche(rapport);
+        tourner90Gauche(rapport);
 	else
-		pwm.tourner90Droite(rapport);
+		tourner90Droite(rapport);
 	
 }
 
@@ -287,6 +268,7 @@ void PWM::avancementLeger(uint8_t &rapport, uint8_t valueMap) {
 		rapport = VITESSE_DEFAULT;
 		this->avancer(rapport);
 	} else if( valueMap == 6 ||
+			   valueMap == 2 ||
 			   valueMap == 3 ){
 
 		rapport = rapport - 1 > VITESSE_DEFAULT-85 ? rapport - 1: rapport;
@@ -295,8 +277,7 @@ void PWM::avancementLeger(uint8_t &rapport, uint8_t valueMap) {
 
 	} else if(valueMap == 12 ||
 			  valueMap == 8 ||
-			  valueMap == 24 || 
-			  valueMap == 16) {
+			  valueMap == 24) {
 
 		rapport = rapport - 1 > VITESSE_DEFAULT-85 ? rapport - 1: rapport;
 		roueDroite(true, rapport);

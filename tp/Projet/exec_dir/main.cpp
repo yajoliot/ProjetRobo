@@ -27,8 +27,9 @@ int main() {
     DDRB = 0xFF;
 
     uint8_t rapport = pwm.getVitesseDefault();
+    uint8_t ralenti = rapport >> 1;
 
-    enum etats {LIGNE, COURBE, BLOCK, TOURNANTGAUCHE, TOUNANTDROIT};
+    enum etats {LIGNE, COURBE, BLOCK, TOURNANTGAUCHE, TOURNANTDROIT};
     etats etat = LIGNE;
     uint8_t valueMap;
     
@@ -41,7 +42,6 @@ int main() {
         uint8_t valueMap = lineTracker.getValueMap();
         PORTC = valueMap;
 
-        if()
         if(compteurD > 3){
             etat = COURBE;
         } else if(compteurG > 3){
@@ -61,32 +61,34 @@ int main() {
             compteurD = 0;
         } else if( valueMap == 12 ){
             compteurD += 1;
-            competeurG = 0;
+            compteurG = 0;
         }
 
         switch(etat){
             case LIGNE:
-                pwm.avancerLeger(rapport, valueMap);
+                pwm.avancementLeger(rapport, valueMap);
             break;
             case TOURNANTGAUCHE:
                 pwm.tourner90Precis(0, rapport);
                 etat = LIGNE;
             break;
 
-            case TOUNANTDROIT:
+            case TOURNANTDROIT:
                 pwm.tourner90Precis(1, rapport);
                 etat = LIGNE;
             break;
             case COURBE:
-                pwm.avancerLeger((rapport >> 1), valueMap);
+                pwm.avancementLeger(ralenti, valueMap);
             break;
             case BLOCK:
-                
+                startMinuterie(0xFF);
                 while(TCNT1 < 0x1F){
                     lineTracker.updateValueMap();
                     valueMap = lineTracker.getValueMap();
-                    pwm.avancerLeger(rapport, valueMap);
+                    pwm.avancementLeger(rapport, valueMap);
                 }
+                stopMinuterie();
+                resetMinuterie();
 
                 etat = LIGNE;
 
