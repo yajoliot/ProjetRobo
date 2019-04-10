@@ -1,4 +1,4 @@
-#include <PWM.h>
+#include "pwm.h"
 
 
 PWM::PWM(){
@@ -43,6 +43,10 @@ uint8_t PWM::getDirectionDroite(){
 }
 uint8_t PWM::getVitesseDefault(){
 	return VITESSE_DEFAULT;
+}
+
+uint8_t PWM::getVitesseTournage(){
+	return vitesseTournage;
 }
 
 
@@ -152,22 +156,25 @@ void PWM::avancer(uint8_t rapport) {
 }
 
 void PWM::avancementAjuste(uint8_t &rapport, uint8_t valueMap) {
-
+	// roueDroite(true, VITESSE_MAX);
+	// roueGauche(true, VITESSE_MAX);
+	
 	if(valueMap == 4 || valueMap == 31){
 		rapport = VITESSE_DEFAULT;
 		this->avancer(rapport);
 	} else if(valueMap == 6 || valueMap == 2 || valueMap == 3 || valueMap == 1){
-		rapport = rapport + 1 < VITESSE_MAX ? rapport + 1: rapport;
-		roueDroite(true, rapport);
-		roueGauche(true, VITESSE_DEFAULT);
-
-	} else if(valueMap == 12 || valueMap == 8 || valueMap == 24 || valueMap == 16) {
-		rapport = rapport + 1 < VITESSE_MAX ? rapport + 1: rapport;
+		rapport = rapport - 1 > VITESSE_DEFAULT-85 ? rapport - 1: rapport;
 		roueDroite(true, VITESSE_DEFAULT);
 		roueGauche(true, rapport);
 
+	} else if(valueMap == 12 || valueMap == 8 || valueMap == 24 || valueMap == 16) {
+		rapport = rapport - 1 > VITESSE_DEFAULT-85 ? rapport - 1: rapport;
+		roueDroite(true, rapport);
+		roueGauche(true, VITESSE_DEFAULT);
+
 	}
 }
+
 
 
 
@@ -200,6 +207,8 @@ void PWM::tournerADroite(){
 }
 
 
+
+
 void PWM::tournerAGauche(){
 	// Tourner a gauche : bloquer la roue gauche et faire tourner vers l'avant la roue droite
 	OCR0B = 0;
@@ -211,4 +220,42 @@ void PWM::tournerAGauche(){
 	rapportDroite = OCR0A;
 
 }
+
+void PWM::tourner90Droite(uint8_t rapport){
+
+	roueGauche(true, rapport);
+	roueDroite(false, rapport);
+	_delay_ms(845);
+	arreter();
+}
+
+void PWM::tourner90Gauche(uint8_t rapport){
+
+	roueGauche(false, rapport);
+	roueDroite(true, rapport);
+	_delay_ms(855);
+	arreter();
+}
+
+//section1
+void PWM::avancerTimer(uint8_t valeur, uint32_t timer){
+	arreter();
+    _delay_ms(500);
+	startMinuterie(0xFF);
+	while(TCNT1 < valeur*timer)
+        avancer(timer);
+    stopMinuterie();
+    resetMinuterie();
+}
+
+void PWM::tourner90Precis(uint8_t direc, uint8_t rapport){
+	arreter();
+    _delay_ms(500);
+	if( direc == 0 )
+        tourner90Gauche(rapport);
+	else
+		tourner90Droite(rapport);
+	
+}
+
 

@@ -35,6 +35,7 @@ class Robot {
         void RunCMD2();
         void RunCMD3();
         void RunCMD4();
+        void RunCMDCoin();
 };
 
 #endif
