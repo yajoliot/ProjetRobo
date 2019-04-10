@@ -1,4 +1,5 @@
 #include "Robot.h"
+#include "debug.h"
     
 volatile etats etat = INIT;
 
@@ -48,18 +49,19 @@ void Robot::Run(uint8_t IRCom){
 }
 
 void Robot::RunCMD1(){
+
     
 }
 
 void Robot::RunCMD2(){
+
     
 }
 
 void Robot::RunCMD3(){
 
     enum etats2 {INIT2,ANTI_REBOND, DIST_1, DIST_2};
-    
-    
+
     volatile etats2 etat2 = INIT2;
 
     DDRC = 0xFF;
@@ -76,7 +78,6 @@ void Robot::RunCMD3(){
     for(;;){
 
         lineTracker->updateValueMap();
-        PORTC = lineTracker->getValueMap();
         if(lineTracker->getValueMap() == 0x1F && !analyse){
             etat = INTWAIT;
             analyse = true;
@@ -125,7 +126,6 @@ void Robot::RunCMD3(){
                                 lineTracker->getValueMap() == 0x18)){
 
                             lineTracker->updateValueMap();
-                            PORTC = lineTracker->getValueMap();
                             pwm->avancementAjuste(rapport, lineTracker->getValueMap());
                         }
                         if(lineTracker->getValueMap() == 0x07 || lineTracker->getValueMap() == 0x06) //if found left
@@ -193,5 +193,102 @@ void Robot::RunCMD3(){
 }
 
 void Robot::RunCMD4(){
-    
+    enum etats {LIGNE_DROITE, TOURNE_GAUCHE, TOURNE_DROITE, PRE_BOITE, BOITE, POST_BOITE, ARRETE};
+    int etat = LIGNE_DROITE;
+    DDRC = 0xFF;
+    DDRB = 0xFF;
+    uint8_t rapport = pwm->getVitesseDefault();
+    bool boolBoite = false;
+    bool tournerGauche = false;
+    bool tournerDroite = false;
+    uint8_t valueMap;
+
+    for(;;){
+        DEBUG_PARAMETER_VALUE((uint8_t*)"état", &etat);
+
+        lineTracker->updateValueMap();
+        valueMap = lineTracker->getValueMap();
+        PORTC = valueMap;
+        
+
+
+        if((valueMap == 4 || 
+            valueMap == 6 ||
+            valueMap == 12 || 
+            valueMap == 8 || 
+            valueMap == 2 || 
+            valueMap == 3 || 
+            valueMap == 24 ||
+            valueMap == 1 || 
+            valueMap == 16) && 
+            !boolBoite){
+
+            etat = LIGNE_DROITE;
+        }
+        else if((valueMap == 7 || valueMap == 15 || (valueMap == 0 && tournerGauche)) && !boolBoite){
+            etat = TOURNE_GAUCHE;
+            tournerGauche = true;
+            tournerDroite = false;
+        }
+        else if((valueMap == 28 || valueMap == 30 || (valueMap == 0 && tournerDroite)) && !boolBoite){
+            etat = TOURNE_DROITE;
+            tournerGauche = false;
+            tournerDroite = true;
+        }
+        
+        //TODO: AJOUTER LE CAS VALUEMAP == 0
+        
+        //Conditions pour entrer dans la boite
+        else if (valueMap == 31 && !boolBoite) {
+            etat = PRE_BOITE;
+        }
+        
+
+        switch(etat){
+            case LIGNE_DROITE:
+                    pwm->avancementAjuste(rapport, valueMap);
+                break;
+            
+            case TOURNE_GAUCHE:
+
+                    pwm->tournantGauche(rapport, valueMap);
+                break;
+
+            case TOURNE_DROITE:
+                    pwm->tournantDroite(rapport, valueMap);
+                break;
+
+            case PRE_BOITE:
+                    while(lineTracker->getValueMap() == 31){
+                        pwm->avancer(pwm->getVitesseDefault());
+                        lineTracker->updateValueMap();
+                    }
+                    boolBoite = true;
+                    etat = BOITE;
+                break;
+
+            case BOITE : 
+                    while( !(lineTracker->getValueMap() == 31) ){
+                        pwm->boite(rapport, pwm->getVitesseDefault());
+                        lineTracker->updateValueMap();
+                    }
+                    etat = POST_BOITE;
+                    
+                break;
+
+            case POST_BOITE:
+                    while(lineTracker->getValueMap() == 31){
+                        pwm->avancer(pwm->getVitesseDefault());
+                        lineTracker->updateValueMap();
+                    }
+                    boolBoite = false;
+                    etat = LIGNE_DROITE;
+                break;
+            
+            case ARRETE:
+                    pwm->arreter();
+                break;
+        }
+        
+    }
 }

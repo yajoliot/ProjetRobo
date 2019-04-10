@@ -1,4 +1,5 @@
 #include "LineTracker.h"
+#include "pwm.h"
 
 /*void isr_INIT() {
     
@@ -62,12 +63,16 @@ void LineTracker::updateValueMap(){
         
         //DEBUG_PARAMETER_VALUE((uint8_t*)"readValue->value", &this->valueMap);
     }
+
+    PORTC = getValueMap();
     
 }
 
 uint8_t LineTracker::getValueMap(){
     return valueMap;
 }
+
+
 
 
 
