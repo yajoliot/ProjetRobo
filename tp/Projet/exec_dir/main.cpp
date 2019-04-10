@@ -78,7 +78,9 @@ int main() {
                 etat = LIGNE;
             break;
             case COURBE:
-                pwm.avancementLeger(ralenti, valueMap);
+                while(valueMap == )
+                    pwm.avancementLeger(ralenti, valueMap);
+                
             break;
             case BLOCK:
                 startMinuterie(0xFF);
