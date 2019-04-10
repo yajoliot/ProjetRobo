@@ -1,18 +1,21 @@
 #include "LineTracker.h"
-#include <util/delay.h>
-#include "PWM.h"
+#include "pwm.h"
 
 class Robot {
     private:
-
-        PWM controlPWM;
-        LineTracker lineTracker;
-        //InfraredCom robot2;
-        //uint8_t startingCorner;
+        //Minuterie
+        //SIRC sirc;
+        PWM* pwm;
+        LineTracker* lineTracker;
+        
 
     public:
+
         Robot();
-        void Run();
-
-
+        void Run(uint8_t IRCom);
+        void RunCMD1();
+        void RunCMD2();
+        void RunCMD3();
+        void RunCMD4();
 };
+
