@@ -1,4 +1,26 @@
 #include "Robot.h"
+    
+volatile etats etat = INIT;
+
+ void isr_INIT() {
+
+    DDRD = 0x00;
+    DDRB = 0xff;
+
+    cli ();
+
+    EIMSK |= (1 << INT0);
+
+    EICRA |= (1 << ISC01) | (1 << ISC00); // EICRA = EICRA | (1 << ISC01)
+
+    sei();
+}
+
+void * operator new(size_t size)
+{
+  return malloc(size);
+}
+
 
 Robot::Robot(){
     pwm = new PWM();
@@ -34,9 +56,10 @@ void Robot::RunCMD2(){
 }
 
 void Robot::RunCMD3(){
-    enum etats {INIT, INTWAIT, ANALYSE, WAIT_TILL_END, END};
+
     enum etats2 {INIT2,ANTI_REBOND, DIST_1, DIST_2};
-    volatile etats etat = INIT;
+    
+    
     volatile etats2 etat2 = INIT2;
 
     DDRC = 0xFF;
@@ -80,17 +103,27 @@ void Robot::RunCMD3(){
                     break;
 
                     case ANTI_REBOND:
+
                         pwm->avancementAjuste(rapport, lineTracker->getValueMap());
-                        if(lineTracker->getValueMap() == 0x04 || lineTracker->getValueMap() == 0x06 || lineTracker->getValueMap() == 0x0C){
+
+                        if(lineTracker->getValueMap() == 0x04 || 
+                           lineTracker->getValueMap() == 0x06 || 
+                           lineTracker->getValueMap() == 0x0C){
+                            
                             etat2 = DIST_1;
+
                         }
+
                         _delay_ms(1);
                     break;
 
                     case DIST_1:
                         startMinuterie(duree);
-                        while(!(lineTracker->getValueMap() == 0x1C
-                            || lineTracker->getValueMap() == 0x07 || lineTracker->getValueMap() == 0x03 || lineTracker->getValueMap() == 0x18)){
+                        while(!(lineTracker->getValueMap() == 0x1C || 
+                                lineTracker->getValueMap() == 0x07 || 
+                                lineTracker->getValueMap() == 0x03 ||  
+                                lineTracker->getValueMap() == 0x18)){
+
                             lineTracker->updateValueMap();
                             PORTC = lineTracker->getValueMap();
                             pwm->avancementAjuste(rapport, lineTracker->getValueMap());
