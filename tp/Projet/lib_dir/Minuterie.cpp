@@ -33,5 +33,5 @@ void stopMinuterie(){
 
 void resetMinuterie ()
 {
-    TCNT &= 0x00;
+    TCNT1 &= 0x00;
 }
