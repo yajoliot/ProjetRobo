@@ -10,7 +10,6 @@ void startMinuterie (uint16_t duree){
 
     // interruption après la durée spécifiée
 
-    TCNT1 = 0 ;
 
     OCR1A = duree;
 
