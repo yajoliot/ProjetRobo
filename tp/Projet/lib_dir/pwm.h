@@ -39,6 +39,7 @@ class PWM{
         void avancementAjuste(uint8_t &rapport, uint8_t valueMap);
         void reculer(uint8_t rapport);
         void arreter();
+        void arreterMilieuLigne();
         void tournerADroite();
         void tournerAGauche();
         void tournantGauche(uint8_t &rapport, uint8_t valueMap);

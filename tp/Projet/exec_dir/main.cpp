@@ -18,21 +18,24 @@
 int main() {
     PWM pwm;
     LineTracker lineTracker;
-    PIEZO_INIT(DDD4, DDD5, 50);
     
-
-    DDRA = 0x00;
+    
     DDRC = 0xFF;
     DDRB = 0xFF;
 
     uint8_t rapport = pwm.getVitesseDefault();
     uint8_t duree = 0xFF;
-
-    enum etats {INIT, ANALYSE_IR}
-    enum aStates {IR_WAIT, P1P2P3 ,P4P5P6, P7P8P9}
-    uint32_t rapport3Inch;
+    
+    enum etats {INIT, DEUX, TROIS, QUATRE,CINQ, SIX, SEPT,FIN};
+   //enlever milieu 
+    enum aStates {IR_WAIT, P1P2P3 ,P4P5P6, P7P8P9, lol, GOTO_S3};
+    uint32_t rapport3Inch = 0;
     etats etat = INIT;
-    aStates state = IR_WAIT;
+    uint16_t temps;
+    uint8_t random = 0x00;
+
+    //IMPORTANT À CHANGER **************************`````
+    aStates state = P1P2P3;
     uint8_t valueMap;
     
 
@@ -41,172 +44,83 @@ int main() {
         lineTracker.updateValueMap();
         uint8_t valueMap = lineTracker.getValueMap();
         PORTC = valueMap;
-
+        //DEBUG_PARAMETER_VALUE((uint8_t*)
         switch(etat){
             case INIT:
-                pwm.avancementAjuste(rapport, valueMap);
                 startMinuterie(duree);
+                pwm.avancer(rapport);
+                
+                temps = TCNT1;
                 if(valueMap == 0x1F){
-                    pwm.arreter();
-                    rapport3Inch = (TCNT*7.62)/10.3;
-                    etat = ANALYSE_IR;
-                }
-
-                stopMinuterie();
-                resetMinuterie();
-
-            break;
-
-            case ANALYSE_IR:
-
-                switch(state){
-
-                    case IR_WAIT:
-                    if(sirc_receiver.getCmd() == 0x00 ||
-                    sirc_receiver.getCmd() == 0x01 ||
-                    sirc_receiver.getCmd() == 0x02 ){
-                        state = P1P2P3;
-                    } else if (sirc_receiver.getCmd() == 0x03 ||
-                    sirc_receiver.getCmd() == 0x04 ||
-                    sirc_receiver.getCmd() == 0x05 ) {
-                        state = P4P5P6;
-                    } else {
-                        state = P7P8P9;
-                    }
+                    pwm.arreterMilieuLigne();
                     
+                    temps = TCNT1;
+                    rapport3Inch =  (temps >> 1) - (temps >> 4);
+                    stopMinuterie();
+                    resetMinuterie();
 
-                    case P1P2P3:
+                   
+                    etat = DEUX;
+                }
+            break;
 
-                        startMinuterie(duree);
-                        while(TCNT < 3*rapport3Inch)
-                            pwm.avancer2*(rapport);
-                        stopMinuterie();
-                        resetMinuterie();
-                        pwm.tourner90Gauche(rapport);
-                        if(sirc_receiver.getCmd() == 0x00){
-                            startMinuterie(duree);
-                            while(TCNT < 4*rapport3Inch)
-                                pwm.avancer2*(rapport);
-                            stopMinuterie();
-                            resetMinuterie();
-                        } else if(sirc_receiver.getCmd() == 0x01){
-                            startMinuterie(duree);
-                            while(TCNT < 3*rapport3Inch)
-                                pwm.avancer2*(rapport);
-                            stopMinuterie();
-                            resetMinuterie();
-                        } else {
-                            startMinuterie(duree);
-                            while(TCNT < 2*rapport3Inch)
-                                pwm.avancer2*(rapport);
-                            stopMinuterie();
-                            resetMinuterie();
-                        }
-
-                    break;
-
-                    case P4P5P6:
-
-                        while(TCNT < 2*rapport3Inch)
-                            pwm.avancer(rapport);
-                        stopMinuterie();
-                        resetMinuterie();
-                        if(sirc_receiver.getCmd() == 0x03){
-                            startMinuterie(duree);
-                            while(TCNT < 4*rapport3Inch)
-                                pwm.avancer2*(rapport);
-                            stopMinuterie();
-                            resetMinuterie();
-                        } else if(sirc_receiver.getCmd() == 0x04){
-                            startMinuterie(duree);
-                            while(TCNT < 3*rapport3Inch)
-                                pwm.avancer2*(rapport);
-                            stopMinuterie();
-                            resetMinuterie();
-                        } else {
-                            startMinuterie(duree);
-                            while(TCNT < 2*rapport3Inch)
-                                pwm.avancer2*(rapport);
-                            stopMinuterie();
-                            resetMinuterie();
-
-                    break;
+            case DEUX:
+                startMinuterie(duree);
+                pwm.avancer(rapport);
+                if(TCNT1 > 2*rapport3Inch){
+                    pwm.arreterMilieuLigne();
+                    etat = TROIS;
+                    stopMinuterie();
+                    resetMinuterie();
+                }
                     
-                    case P7P8P9:
-
-                        while(TCNT < 2*rapport3Inch)
-                            pwm.avancer(rapport);
-                        stopMinuterie();
-                        resetMinuterie();
-                        if(sirc_receiver.getCmd() == 0x06){
-                            startMinuterie(duree);
-                            while(TCNT < 4*rapport3Inch)
-                                pwm.avancer2*(rapport);
-                            stopMinuterie();
-                            resetMinuterie();
-                        } else if(sirc_receiver.getCmd() == 0x07){
-                            startMinuterie(duree);
-                            while(TCNT < 3*rapport3Inch)
-                                pwm.avancer2*(rapport);
-                            stopMinuterie();
-                            resetMinuterie();
-                        } else {
-                            startMinuterie(duree);
-                            while(TCNT < 2*rapport3Inch)
-                                pwm.avancer2*(rapport);
-                            stopMinuterie();
-                            resetMinuterie();
-                    break;
-
-                }
-
-                stopMinuterie();
-                resetMinuterie();
-                state = WAIT;
-
-            break;
-
-            case WAIT:
-                tourner90Droite(rapport);
-                playNote(45, 3000);
-                state = GOTO_S3;
-                
-            break;
-
-            case GOTO_S3:
-                
-                tourner90Droite(rapport);
-                if(sirc_receiver.getCmd() == 0x02 ||
-                sirc_receiver.getCmd() == 0x05 ||
-                sirc_receiver.getCmd() == 0x08 ){
-                    startMinuterie(duree);
-                    while(TCNT < 2*rapport3Inch)
-                        avancer(rapport);
-                } else  if(sirc_receiver.getCmd() == 0x01 ||
-                sirc_receiver.getCmd() == 0x04 ||
-                sirc_receiver.getCmd() == 0x07 ) {
-                    startMinuterie(duree);
-                    while(TCNT < 3*rapport3Inch)
-                        avancer(rapport);
-                } else {
-                    startMinuterie(duree);
-                    while(TCNT < 4*rapport3Inch)
-                        avancer(rapport);
-                }
-                stopMinuterie();
-                resetMinuterie();
-                tourner90Gauche(rapport);
-                while(valueMap = 0x00){
-                    pwm.avancer(rapport);
-                }
-
-                pwm.avancementAjuste(rapport, valueMap);
                 
 
             break;
+            
+
+            case TROIS:
+                pwm.tourner90Gauche(rapport);
+                etat = QUATRE;
+            break;
+
+            case QUATRE:
+                startMinuterie(duree);
+                pwm.avancer(rapport);
+                if(TCNT1 > 3*rapport3Inch){
+                    etat = CINQ;
+                    stopMinuterie();
+                    resetMinuterie();
+                }
+            break;
+
+            case CINQ:
+                pwm.tourner90Droite(rapport);
+                _delay_ms(3000);
+                pwm.tourner90Droite(rapport);
+                etat = SIX;
+            break;
+
+            case SIX:
+                startMinuterie(duree);
+                pwm.avancer(rapport);
+                if(TCNT1 > 3*rapport3Inch){
+                    etat = SEPT;
+                    stopMinuterie();
+                    resetMinuterie();
+                }
+            break;
+
+            case SEPT:
+                pwm.tourner90Gauche(rapport);
+                pwm.arreterMilieuLigne();
+                etat = FIN;
+            break;
 
 
-                
+            
+
+           
         }
         
     }

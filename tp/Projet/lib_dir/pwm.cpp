@@ -120,7 +120,7 @@ void PWM::tournantDroite(uint8_t &rapport, uint8_t valueMap){
 }
 
 void PWM::boite(uint8_t &rapport, uint8_t valueMap){
-	DEBUG_PARAMETER_VALUE((uint8_t*)"PRE_BOITE", &valueMap);
+	// DEBUG_PARAMETER_VALUE((uint8_t*)"PRE_BOITE", &valueMap);
 	if(valueMap == 31 || valueMap == 0){
 		rapport = VITESSE_DEFAULT; 
 		avancer(rapport);
@@ -148,11 +148,9 @@ void PWM::boite(uint8_t &rapport, uint8_t valueMap){
 
 void PWM::avancer(uint8_t rapport) {
 
-	roueDroite(true, rapport);
+	roueGauche(true, rapport);
 	//ajustement du pwm pour avancer en ligne droite
-	rapport - AJUSTEMENT > 0 ? roueGauche(true, rapport - AJUSTEMENT) : roueGauche(true, rapport);
-	
-
+	rapport - AJUSTEMENT > 0 ? roueDroite(true, rapport - AJUSTEMENT) : roueDroite(true, rapport);
 }
 
 void PWM::avancementAjuste(uint8_t &rapport, uint8_t valueMap) {
@@ -192,6 +190,19 @@ void PWM::arreter(){
 	rapportDroite = OCR0A;
 }
 
+void PWM::arreterMilieuLigne(){
+	roueDroite(false, VITESSE_DEFAULT);
+	roueGauche(false, VITESSE_DEFAULT);
+
+	_delay_ms(125);
+	
+	OCR0A = 0;
+	OCR0B = 0;
+
+	rapportGauche = OCR0B;
+	rapportDroite = OCR0A;
+}
+
 // Rotation 
 
 void PWM::tournerADroite(){
@@ -223,16 +234,16 @@ void PWM::tournerAGauche(){
 
 void PWM::tourner90Droite(uint8_t rapport){
 
-	roueGauche(false, rapport);
-	roueDroite(true, rapport);
-	_delay_ms(300);
+	roueGauche(true, 150);
+	roueDroite(false, 150);
+	_delay_ms(900);
 	arreter();
 }
 
 void PWM::tourner90Gauche(uint8_t rapport){
 
-	roueGauche(true, rapport);
-	roueDroite(false, rapport);
-	_delay_ms(300);
+	roueGauche(false, 150);
+	roueDroite(true, 150 +10);
+	_delay_ms(900);
 	arreter();
 }
