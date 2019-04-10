@@ -1,11 +1,12 @@
 #include "Robot.h"
+#include "../exec_dir/main.cpp"
 
 Robot::Robot(){
     pwm = new PWM();
     lineTracker = new LineTracker();
 }
 
-void Robot::Run(uInt8_t IRCom){
+void Robot::Run(uint8_t IRCom){
     switch(IRCom){
         case 0x00:
             RunCMD1();
@@ -239,7 +240,7 @@ void Robot::RunCMD4(){
 
             case BOITE : 
                     while( !(lineTracker->getValueMap() == 31) ){
-                        pwm->boite(rapport, temporaire);
+                        pwm->boite(rapport, lineTracker->getValueMap());
                         lineTracker->updateValueMap();
                     }
                     etat = POST_BOITE;

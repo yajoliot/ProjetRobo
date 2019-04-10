@@ -16,6 +16,7 @@
  #include "LineTracker.h"
  #include "debug.h"
  #include "Minuterie.h"
+ #include "../lib_dir/robot.h"
 
 
 

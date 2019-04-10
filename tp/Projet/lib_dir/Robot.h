@@ -10,9 +10,13 @@
  #include "usart.h"
  #include "bytecode.h"
  #include "util.h"
- #include "LineTracker.h"
+ 
  #include "debug.h"
  #include "Minuterie.h"
+
+ #ifndef LineTracker
+
+extern enum etats {INIT, INTWAIT, ANALYSE, WAIT_TILL_END, END};
 
 class Robot {
     private:
