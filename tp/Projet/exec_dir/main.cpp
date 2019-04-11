@@ -26,75 +26,54 @@ int main() {
     DDRC = 0xFF;
     DDRB = 0xFF;
 
-    uint8_t rapport = pwm.getVitesseDefault();
-    uint8_t ralenti = rapport >> 1;
+    uint8_t rapport = pwm.getVitesseDefault() + 100;
+    uint8_t ralenti = (rapport >> 2);
 
-    enum etats {LIGNE, COURBE, BLOCK, TOURNANTGAUCHE, TOURNANTDROIT};
+    enum etats {LIGNE, COURBE1, COURBE2};
     etats etat = LIGNE;
     uint8_t valueMap;
     
-    uint8_t compteurG = 0;
-    uint8_t compteurD = 0;
+    uint32_t compteurG = 0;
+    uint32_t compteurD = 0;
 
     for(;;){
     
         lineTracker.updateValueMap();
-        uint8_t valueMap = lineTracker.getValueMap();
+        valueMap = lineTracker.getValueMap();
         PORTC = valueMap;
 
         if(compteurD > 3){
-            etat = COURBE;
-        } else if(compteurG > 3){
-            etat = COURBE;
-        } else if( valueMap == 7 ||
-                   valueMap == 15 ){
-            pwm.arreter();
-            etat = TOURNANTGAUCHE;
-        } else if( valueMap == 28 ||
-                   valueMap == 30 ){
-            pwm.arreter();
-            etat = TOURNANTDROIT;
-        }
-        
-        if( valueMap == 6 ){
-            compteurG += 1;
-            compteurD = 0;
-        } else if( valueMap == 12 ){
-            compteurD += 1;
-            compteurG = 0;
-        }
+            etat = COURBE1;
+        } else if(compteurG > 1200){
+            etat = COURBE2;
+        } 
 
         switch(etat){
             case LIGNE:
-                pwm.avancementLeger(rapport, valueMap);
+                pwm.avancementAjuste(rapport, valueMap);
+                if(valueMap == 1 ||
+                   valueMap == 2 ||
+                   valueMap == 3 ||
+                   valueMap == 6 ||
+                   valueMap == 7 ){
+                       compteurG ++;
+                   } else if( valueMap == 16 ||
+                              valueMap == 24 ||
+                              valueMap == 12 ) {
+                        compteurG = 0;
+                    }
             break;
-            case TOURNANTGAUCHE:
-                pwm.tourner90Precis(0, rapport);
-                etat = LIGNE;
-            break;
-
-            case TOURNANTDROIT:
-                pwm.tourner90Precis(1, rapport);
-                etat = LIGNE;
-            break;
-            case COURBE:
-                while(valueMap == )
-                    pwm.avancementLeger(ralenti, valueMap);
-                
-            break;
-            case BLOCK:
-                startMinuterie(0xFF);
-                while(TCNT1 < 0x1F){
-                    lineTracker.updateValueMap();
-                    valueMap = lineTracker.getValueMap();
-                    pwm.avancementLeger(rapport, valueMap);
-                }
-                stopMinuterie();
-                resetMinuterie();
-
-                etat = LIGNE;
+            case COURBE1:
 
             break;
+            case COURBE2:
+                pwm.avancementAjuste(ralenti, valueMap);
+                PORTC = 0xFF;
+                if( valueMap == 4){
+                        etat = LIGNE;
+                    }
+            break;
+            
         }
         
         
