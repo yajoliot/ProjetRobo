@@ -56,6 +56,9 @@ class PWM{
         void avancerTimer(uint8_t valeur, uint8_t timer);
         void tourner90Precis(uint8_t direc, uint8_t rapport);
 
+        //section4 ralentissement
+        void avancerLeger(uint8_t &rapport, uint8_t valueMap);
+
 
 
 };

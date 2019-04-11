@@ -175,6 +175,26 @@ void PWM::avancementAjuste(uint8_t &rapport, uint8_t valueMap) {
 	}
 }
 
+void PWM::avancementAjuste(uint8_t &rapport, uint8_t valueMap) {
+	// roueDroite(true, VITESSE_MAX);
+	// roueGauche(true, VITESSE_MAX);
+	
+	if(valueMap == 4 || valueMap == 31){
+		rapport = VITESSE_DEFAULT;
+		this->avancer(rapport);
+	} else if(valueMap == 6 || valueMap == 2 || valueMap == 3 || valueMap == 1){
+		rapport = rapport - 1 > VITESSE_DEFAULT-85 ? rapport - 1: rapport;
+		roueDroite(true, VITESSE_DEFAULT);
+		roueGauche(true, rapport);
+
+	} else if(valueMap == 12 || valueMap == 8 || valueMap == 24 || valueMap == 16) {
+		rapport = rapport - 1 > VITESSE_DEFAULT-85 ? rapport - 1: rapport;
+		roueDroite(true, rapport);
+		roueGauche(true, VITESSE_DEFAULT);
+
+	}
+}
+
 
 
 
@@ -258,4 +278,30 @@ void PWM::tourner90Precis(uint8_t direc, uint8_t rapport){
 	
 }
 
+//section4 ralentissement
+void PWM::avancementLeger(uint8_t &rapport, uint8_t valueMap) {
+	// roueDroite(true, VITESSE_MAX);
+	// roueGauche(true, VITESSE_MAX);
+	
+	if(valueMap == 4 ){
+		rapport = VITESSE_DEFAULT;
+		this->avancer(rapport);
+	} else if( valueMap == 6 ||
+			   valueMap == 3 ){
+
+		rapport = rapport - 1 > VITESSE_DEFAULT-85 ? rapport - 1: rapport;
+		roueDroite(true, VITESSE_DEFAULT);
+		roueGauche(true, rapport);
+
+	} else if(valueMap == 12 ||
+			  valueMap == 8 ||
+			  valueMap == 24 || 
+			  valueMap == 16) {
+
+		rapport = rapport - 1 > VITESSE_DEFAULT-85 ? rapport - 1: rapport;
+		roueDroite(true, rapport);
+		roueGauche(true, VITESSE_DEFAULT);
+
+	}
+}
 
