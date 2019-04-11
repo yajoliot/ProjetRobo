@@ -14,6 +14,7 @@ class PWM{
     private:
         const uint8_t AJUSTEMENT = 7;
         const uint8_t VITESSE_MAX = 255;
+
         uint8_t VITESSE_DEFAULT = 150;
         uint8_t vitesseTournage = 130;
         uint8_t rapportGauche,
@@ -50,14 +51,13 @@ class PWM{
         void ajustementReculerADroite();
         void tourner90Gauche(uint8_t rapport);
         void tourner90Droite(uint8_t rapport);
-
+        
+        void rotateDroite(uint8_t rapport);
+        void rotateGauche(uint8_t rapport);
         //section1
 
         void avancerTimer(uint8_t valeur, uint32_t timer);
         void tourner90Precis(uint8_t direc, uint8_t rapport);
-
-        //section4 ralentissement
-        void avancementLeger(uint8_t &rapport, uint8_t valueMap);
 
 
 
