@@ -385,6 +385,7 @@ void Robot::RunCMD4(){
     bool boolBoite = false;
     bool tournerGauche = false;
     bool tournerDroite = false;
+    uint8_t nbBoites = 0;
 
     for(;;){
         
@@ -470,6 +471,7 @@ void Robot::RunCMD4(){
                 break;
 
             case POST_BOITE:
+                    nbBoites++;
                     while(lineTracker.getValueMap() == 31){
                         uint8_t temporaire = lineTracker.getValueMap();
                         DEBUG_PARAMETER_VALUE((uint8_t*)"POST_BOITE", &temporaire);
@@ -477,11 +479,14 @@ void Robot::RunCMD4(){
                         lineTracker.updateValueMap();
                     }
                     boolBoite = false;
-                    etat = LIGNE_DROITE;
+                    if(nbBoites >= 3)
+                        etat = ARRETE;
+                    else
+                        etat = LIGNE_DROITE;
                 break;
             
             case ARRETE:
-                    pwm.arreter();
+                    RunCMDCoin();
                 break;
         }
         
@@ -489,7 +494,7 @@ void Robot::RunCMD4(){
     
 }
 
-void RunCMDCoin(){
+void Robot::RunCMDCoin(){
     PWM pwm;
     LineTracker lineTracker;
     enum etats {INIT, TOURNANT_GAUCHE, DROIT, AJUSTEMENT, TOURNER, END};
@@ -521,6 +526,8 @@ void RunCMDCoin(){
         break;
 
         case TOURNANT_GAUCHE:
+            pwm.arreter();
+            _delay_ms(100);
             DEBUG_INFO((uint8_t*) "tournantGauche");
             pwm.avancer(pwm.getVitesseDefault());
             if(valueMap == 0)
@@ -546,9 +553,9 @@ void RunCMDCoin(){
 
         case AJUSTEMENT:
             DEBUG_INFO((uint8_t*) "AJUSTEMENT");
-            pwm.avancementAjuste(rapport, valueMap);
+            pwm.avancer(rapport);
             startMinuterie(duree);
-            if(TCNT1 >= ((temps) + (temps>>2))) {
+            if(TCNT1 >= (temps) - (temps >> 2)) {
                 etat = TOURNER;
                 stopMinuterie();
                 resetMinuterie();
@@ -559,16 +566,16 @@ void RunCMDCoin(){
 
         case TOURNER:
             DEBUG_INFO((uint8_t*) "TOURNER");
-            pwm.tourner90Gauche(pwm.getVitesseDefault());
+            pwm.tourner90Precis(0,pwm.getVitesseDefault());
             if(antiRebond){
-                _delay_ms(750); //antirebond pour ne pas lire le '4' de la petite ligne
+                _delay_ms(300); //antirebond pour ne pas lire le '4' de la petite ligne
                 lineTracker.updateValueMap();
                 valueMap = lineTracker.getValueMap();
                 antiRebond = false;
             }
             
             if(valueMap == 4){
-                pwm.tourner90Droite(pwm.getVitesseDefault());
+                pwm.rotateDroite(pwm.getVitesseDefault());
                 _delay_ms(250);
                 pwm.arreter();
                 etat = END;
@@ -576,7 +583,7 @@ void RunCMDCoin(){
         break;
 
         case END:
-            
+            RunCMD1();
         break;
                 
 

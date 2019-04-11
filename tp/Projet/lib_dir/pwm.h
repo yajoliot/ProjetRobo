@@ -52,7 +52,8 @@ class PWM{
         void tourner90Gauche(uint8_t rapport);
         void tourner90Droite(uint8_t rapport);
         
-
+        void rotateDroite(uint8_t rapport);
+        void rotateGauche(uint8_t rapport);
         //section1
 
         void avancerTimer(uint8_t valeur, uint32_t timer);

@@ -258,4 +258,15 @@ void PWM::tourner90Precis(uint8_t direc, uint8_t rapport){
 	
 }
 
+void PWM::rotateGauche(uint8_t rapport){
+	roueGauche(false, rapport);
+	roueDroite(true, rapport);
+}
+
+void PWM::rotateDroite(uint8_t rapport){
+	roueGauche(true, rapport);
+	roueDroite(false, rapport);
+}
+
+
 

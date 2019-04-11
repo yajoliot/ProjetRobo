@@ -24,6 +24,6 @@ ISR(INT0_vect){
 
 int main() {
     Robot robot = Robot();
-    robot.RunCMD1();
+    robot.RunCMD4();
 
 }
