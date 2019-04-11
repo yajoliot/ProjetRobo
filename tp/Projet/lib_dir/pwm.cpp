@@ -261,8 +261,8 @@ void PWM::tourner90Precis(uint8_t direc, uint8_t rapport){
 
 //section4 ralentissement
 void PWM::avancementLeger(uint8_t &rapport, uint8_t valueMap) {
-	// roueDroite(true, VITESSE_MAX);
-	// roueGauche(true, VITESSE_MAX);
+	roueDroite(true, VITESSE_MAX);
+	roueGauche(true, VITESSE_MAX);
 	
 	if(valueMap == 4 ){
 		rapport = VITESSE_DEFAULT;
