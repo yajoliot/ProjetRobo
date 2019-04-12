@@ -7,3 +7,5 @@ volatile bool low_edge = false;
 enum whose{SENDER, RECEIVER};
 volatile whose turn = SENDER;
 volatile uint16_t count_ = 0x0000;
+
+volatile bool timer_end = false;
