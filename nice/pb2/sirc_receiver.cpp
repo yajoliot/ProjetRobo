@@ -12,60 +12,33 @@
 #include "sirc_constantes.h"
 #include "ISR.h"
 
-// // ISR(TIMER1_OVF_vect){
-// // 	timer_ended = true;
-// // }
+//PCINT1_vect for the PORTB
+volatile uint8_t pna4602m = 0x00;
+ISR(PCINT3_vect){
+	pna4602m ^= _BV(0);
+	//high edge
+	if(pna4602m & _BV(0)){
+		high_edge = true;
+	}//low edge
+	else{
+		low_edge = true;
+	}
+	DEBUG_INFO((uint8_t*)"!!!!!!!!!! got something");
+}
 
+void detectHeader(){
+	if(low_edge){
+		startMinuterie();
+		OCR1A = 20000//2500us
+	}
+}
 
-// ISR(TIMER2_OVF_vect){
-//     overflow_count++;
-//     if(overflow_count>=OVERFLOW_COUNT_TO_45_MS){
-//         overflow_count = 0x0000;
-//         SIRC_SENDER::end45msTimer();
-//         reach_end_45_ms = TRUE;
-//     }
-// }
+void detect
 
-// // ISR(TIMER1_OVF_vect){
-// // 	count_++;
-// // }
-
-// //PCINT1_vect for the PORTB
-// ISR(PCINT3_vect){
-// 	//Sensor will come out on PINB6-7. Rising edge stimulation. If need for falling edge do: !(PINB & 0xC0)
-// 	edge_detected = true;
-// 	DEBUG_INFO((uint8_t*)"got something");
-// }
-
-// void sender_func(){
-//     //DEBUG_FUNCTION_CALL((uint8_t*)"ISR(TIMER1_OVF_vect)");
-//     count++;
-//     //DEBUG_PARAMETER_VALUE((uint8_t*)"count",(void*)&count);
-
-//     //Need to put this stop logic here otherwise ISR is too quick!
-//     if(count>=CYCLES_PER_T){
-//         //Reset count to 0
-//         count = 0x00;
-
-//         //Stop the PWM
-//         SIRC_SENDER::disableSender();
-
-//         //Set the boolean for the ISR setting function
-//         reach_end_T = TRUE;
-//     }
-// }
-
-// ISR(TIMER1_OVF_vect)
-// {
-// 	switch(turn){
-// 		case SENDER: sender_func();
-// 		case RECEIVER: count_++;
-// 	}
-// }
 
 void setup(){
 	//Enable that PINB6-7 will trigger an ISR event on any change (edge change i guess)
-	PCMSK1 |= _BV(PCINT30);//_BV(PCINT14) | _BV(PCINT15);
+	PCMSK3 |= _BV(PCINT30);//PCMSK1 |= _BV(PCINT14) | _BV(PCINT15);
 	//Enable the whole PINB to trigger the interrupt
 	PCICR |= _BV(PCIE3);//_BV(PCIE1);
 }
@@ -108,29 +81,18 @@ int main(){
     EICRA |= (1 << ISC01);
     sei();
 
-	//unit test
-
- //    PIEZO_INIT(DDD5, DDD7);
- //   	for(;;){
-	// 	PLAY_NOTE(key);
-	// 	_delay_ms(30);
-	// 	key++;
-	// 	if(key==81){
-	// 		key=45;
-	// 	}
+	// for(;!a;){
+	unitTest_PNA4602M();
 	// }
-
-	for(;!a;){
-		unitTest_PNA4602M();
-	}	
+	abort();
 }
 
 void unitTest_PNA4602M(){
 	SIRC_SENDER sirc;
 	sirc.transmit(0x01, 0x02);
 	//if ISR is triggered
-	uint8_t tmp = PIND & 0x40;
-	DEBUG_PARAMETER_VALUE((uint8_t*)"//////////////// PORTD6",&tmp);
+	// uint8_t tmp = PIND & 0x40;
+	// DEBUG_PARAMETER_VALUE((uint8_t*)"//////////////// PORTD6",&tmp);
 	if(edge_detected){
 		PIEZO_INIT(DDD5, DDD7);
 	   	for(;;){
