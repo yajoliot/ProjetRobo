@@ -1,10 +1,10 @@
 #include "minuterie.h"
 
-minuterie::MINUTERIE::MINUTERIE(minuterie_configuration configuration_){
+MINUTERIE::MINUTERIE(minuterie_configuration configuration_){
 	*configuration = configuration_;
 }
 
-minuterie::MINUTERIE::~MINUTERIE(){
+MINUTERIE::~MINUTERIE(){
 	free(configuration);
 }
 
@@ -14,7 +14,7 @@ minuterie::MINUTERIE::~MINUTERIE(){
 //65535 * 8 = 0.5s/8 = 0.065535s
 //65535 * 1 = 0.00819s
 
-void minuterie::MINUTERIE::startMinuterie(uint16_t){
+void MINUTERIE::startMinuterie(uint16_t duree){
     OCR2A = duree;
 
     //TCCR2A |= (1 << COM2A1);
@@ -26,13 +26,13 @@ void minuterie::MINUTERIE::startMinuterie(uint16_t){
 
 }
 
-void minuterie::MINUTERIE::stopMinuterie(){
-    TCCR1B &= ~(1 << CS12);
-    TCCR1B &= ~(1 << CS11);
-    TCCR1B &= ~(1 << CS10);
+void MINUTERIE::stopMinuterie(){
+    TCCR2B &= ~(1 << CS22);
+    TCCR2B &= ~(1 << CS21);
+    TCCR2B &= ~(1 << CS20);
 }
 
-void minuterie::MINUTERIE::resetMinuterie(){
-    TCNT1 = 0x0000;
+void MINUTERIE::resetMinuterie(){
+    TCNT2 = 0x0000;
 }
 

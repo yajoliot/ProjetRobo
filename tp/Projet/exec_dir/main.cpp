@@ -4,7 +4,7 @@
 
 #include "minuterie.h"
 
-using minuterie;
+
 
 PORTC = 0xFF;
 
