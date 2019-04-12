@@ -170,9 +170,10 @@ int main(){
     EIMSK |= (1 << INT0);
     EICRA |= (1 << ISC01);
     sei();
-
+    SIRC_SENDER sirc;
 	for(;!a;){
-		unitTest_PNA4602M();
+		sirc.transmit(0x01,0x02);
+		// unitTest_PNA4602M();
 	}
 	abort();
 }
