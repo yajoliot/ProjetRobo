@@ -85,6 +85,7 @@ ISR(TIMER1_OVF_vect)
 
     //Need to put this stop logic here otherwise ISR is too quick!
     if(count>=CYCLES_PER_T){
+        DEBUG_INFO((uint8_t*)"/////// overflow!");
         //Reset count to 0
         count = 0x00;
 
@@ -198,6 +199,7 @@ void transmitLowBit(){
 }
 
 void transmitHeader(){
+    DEBUG_FUNCTION_CALL((uint8_t*)"transmitHeader()");
     //Four Cycles @ Hi
     for(uint8_t i=0x00 ; i<0x04 ; i++){
         transmitOneCycle(HIGH_MODE);
@@ -223,12 +225,12 @@ void transmitBits(uint8_t command_, uint8_t size_){
 }
 
 void transmitCommand(uint8_t command_){
-    //DEBUG_FUNCTION_CALL((uint8_t*)"transmitCommand(uint8_t command_)");
+    DEBUG_FUNCTION_CALL((uint8_t*)"transmitCommand(uint8_t command_)");
     transmitBits(command_, COMMAND_SIZE);
 }
 
 void transmitAddress(uint8_t address_){
-    //DEBUG_FUNCTION_CALL((uint8_t*)"transmitAddress(uint8_t address_)");
+    DEBUG_FUNCTION_CALL((uint8_t*)"transmitAddress(uint8_t address_)");
     transmitBits(address_, ADDRESS_SIZE);
 }
 
