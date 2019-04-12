@@ -12,11 +12,24 @@
 
 class PWM{
     private:
-        const uint8_t AJUSTEMENT = 7;
+        
+        //Constantes d'ajustement des roues afin de faire en sorte que le robot
+        //avance en ligne droite
+        const uint8_t AJUSTEMENT_DROITE = 7;
+        const uint8_t AJUSTEMENT_GAUCHE = 0;
+
+        //Diminution minimale possible d'une roue pour ajuster sa trajectoire
+        const uint8_t DIMINUTION_MINIMALE =85;
+        
+        //Vitesse maximale
         const uint8_t VITESSE_MAX = 255;
 
+        //Vitesse par defaut
         uint8_t VITESSE_DEFAULT = 150;
+        
+        
         uint8_t vitesseTournage = 130;
+
         uint8_t rapportGauche,
         rapportDroite,
         directionGauche,
@@ -52,6 +65,8 @@ class PWM{
         void tourner90Gauche(uint8_t rapport);
         void tourner90Droite(uint8_t rapport);
         
+
+        void ralentissementGauche(uint8_t &rapport, uint8_t valueMap);
         void rotateDroite(uint8_t rapport);
         void rotateGauche(uint8_t rapport);
         //section1
