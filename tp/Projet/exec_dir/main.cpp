@@ -116,6 +116,7 @@ int main() {
 //Port Setup
 
     DDRD = 0xFF;
+    PORTD = 0x01;
      
 //PWM Setup
 
@@ -136,7 +137,6 @@ int main() {
 
     transmit(command, address);
     
-
     DEBUG_INFO((uint8_t*)"END OF PROGRAM");
 }
 
@@ -146,9 +146,9 @@ void setupSIRC(){
     TCCR1A |= _BV(WGM12) | _BV(COM1A0);
     //TCCR1B |= _BV(CS10);
     
-    //Set the frequency : 40 kHz
+    //Set the frequency : 38 kHz
     //The following value is what we will use to set the "one"
-    OCR1A = 0x63;
+    OCR1A = 0x68;
 
 }
 
