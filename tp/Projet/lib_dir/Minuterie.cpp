@@ -14,8 +14,16 @@ minuterie::MINUTERIE::~MINUTERIE(){
 //65535 * 8 = 0.5s/8 = 0.065535s
 //65535 * 1 = 0.00819s
 
-void minuterie::MINUTERIE::startMinuterie(){
-    
+void minuterie::MINUTERIE::startMinuterie(uint16_t){
+    OCR2A = duree;
+
+    //TCCR2A |= (1 << COM2A1);
+    //TCCR2A |= (1 << COM2A0);
+    TCCR2B |= (1 << WGM20);
+    TCCR2B |= (1 << CS20);
+    TCCR2B |= (1 << CS22);
+    TCCR2C = 0;
+
 }
 
 void minuterie::MINUTERIE::stopMinuterie(){

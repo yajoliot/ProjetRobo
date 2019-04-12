@@ -57,7 +57,7 @@ namespace minuterie{
 		public:
 			MINUTERIE(minuterie_configuration configuration_);
 			~MINUTERIE();
-			startMinuterie();
+			startMinuterie(uint16_t);
 			stopMinuterie();
 			resetMinuterie();
 		private:
