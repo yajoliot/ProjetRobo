@@ -88,8 +88,8 @@ ISR(TIMER2_OVF_vect){
 
 ////////////////////////////////// RECEIVER //////////////////////////////////
 
-volatile bool high_edge;
-volatile bool low_edge;
+volatile bool high_edge = false;
+volatile bool low_edge = false;
 volatile uint8_t pna4602m = 0x00;
 ISR(PCINT3_vect){
     // _delay_ms(30);
@@ -121,7 +121,7 @@ int main() {
      
 //PWM Setup
 
-    setupSIRC(); //enable/disable as you need
+    // setupSIRC(); //enable/disable as you need
 
 //Global interrupt setup
 
