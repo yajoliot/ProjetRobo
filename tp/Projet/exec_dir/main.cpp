@@ -10,7 +10,7 @@
 
 
 extern volatile etats etat;
- 
+extern volatile bool boolISR;
 
 
 //ISR POUR SECTION3 (RunCMD3())
@@ -18,12 +18,15 @@ ISR(INT0_vect){
     _delay_ms(30);
     if(PIND & 0x04){
         etat = ANALYSE;
+        boolISR = !boolISR;
     }
+
     
 }
 
 int main() {
     Robot robot = Robot();
-    robot.test();
+    
+    robot.Run(0x01);
 
 }

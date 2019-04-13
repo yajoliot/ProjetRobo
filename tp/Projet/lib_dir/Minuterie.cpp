@@ -20,9 +20,17 @@ void startMinuterie (uint16_t duree){
     TCCR1B |= (1 << CS12);
     TCCR1C = 0;
 
-    TIMSK1 |= (1 << OCIE1A);
+    
 
 
+}
+
+void resetRegisters(){
+    TCCR1A &= ~(1 << COM1A1);
+    TCCR1A &= ~(1 << COM1A0);
+    TCCR1B &= ~(1 << WGM10);
+    TCCR1B &= ~(1 << CS10);
+    TCCR1B &= ~(1 << CS12);
 }
 
 void stopMinuterie(){

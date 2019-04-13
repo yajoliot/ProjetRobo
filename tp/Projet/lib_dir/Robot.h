@@ -6,13 +6,15 @@
 #include "Minuterie.h"
 
 typedef enum {           /* <--- the type definition */
-  INIT = 1, 
-  INTWAIT = 2, 
-  ANALYSE = 3,
-  WAIT_TILL_END = 4,
-  END = 5
+  INIT = 0, 
+  INTWAIT = 1, 
+  ANALYSE = 2,
+  WAIT_TILL_END = 3,
+  END = 4,
+  NEXT = 5
 } etats;
 
+extern volatile bool boolISR;
 extern volatile etats etat;
 
 class Robot {
@@ -21,14 +23,17 @@ class Robot {
         //SIRC sirc;
 
         
-
-        PWM* pwm;
-        LineTracker* lineTracker;
+        uint8_t IRCom = 0;
+        uint8_t nCMD = 0;
+        PWM pwm;
+        LineTracker lineTracker;
         
 
     public:
 
         Robot();
+        ~Robot();
+        void operator delete(void* obj);
         void* operator new(size_t size);
         void Run(uint8_t IRCom);
         void RunCMD1();
