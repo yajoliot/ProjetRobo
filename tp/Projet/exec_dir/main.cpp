@@ -90,8 +90,9 @@ ISR(TIMER2_OVF_vect){
 
 volatile bool high_edge = false;
 volatile bool low_edge = false;
-volatile uint8_t pna4602m = 0x00;
-ISR(PCINT3_vect){
+volatile uint8_t pna4602m = 0x01;
+ISR(PCINT2_vect){
+    DEBUG_PARAMETER_VALUE((uint8_t*)"pna4602m", (void*)&pna4602m);
     // _delay_ms(30);
     // if(PIND & 0x40){
     //     DEBUG_INFO((uint8_t*)"DEBOUNCE WORKED!");
@@ -106,34 +107,37 @@ ISR(PCINT3_vect){
      high_edge = false;
      low_edge = true;
     }
-    DEBUG_PARAMETER_VALUE((uint8_t*)"pna4602m", (void*)&pna4602m);
 }
+
+void enablePCINT();
+void disablePCINT();
+void receiveHeader();
 
 /////////////////////////////////////////////////////////////////////////////
 
 int main() {
-    // DEBUG_INFO((uint8_t*)"START OF PROGRAM");
-
 //Port Setup
-
+    DDRC = 0xDF;
     DDRD = 0xFF;
-    PORTD = 0x01;
+    DDRB = 0xFF;
      
 //PWM Setup
-
-    // setupSIRC(); //enable/disable as you need
 
 //Global interrupt setup
 
     sei();
 
 //Test function is below
+    for(;;){
+        receiveHeader();    
+    }
+}
 
-    // for(;;){
-        transmit(0x01, 0x00);
-    // }
-    
-    // DEBUG_INFO((uint8_t*)"END OF PROGRAM");
+/////////////////////////////////////////////////////////////////////////////
+
+void startMinuterie(){
+    //enable timer1
+    TCCR1B |= _BV(CS10);
 }
 
 ////////////////////////////////// SENDER //////////////////////////////////
@@ -257,8 +261,35 @@ void end45msTimer(){
 
 ////////////////////////////////// RECEIVER //////////////////////////////////
 
-void receiveHeader(){
+#define _1620ms 12960
+#define _2400ms 19200
+#define _4020ms 32160
 
+void receiveHeader(){
+    enablePCINT();
+    while(high_edge){_delay_ms(0);DEBUG_INFO((uint8_t*)"nice");}
+    //we got a low edge
+    startMinuterie();
+    while(TCNT1 <= _2400ms){_delay_ms(0);}
+    while(TCNT1 <= _4020ms){//only gets 2 cycle to get a try
+        PORTB = 0x02;
+        if(high_edge){
+            PORTB = 0x01;
+            break;
+        }
+    }
+}
+
+void enablePCINT(){
+    //Enable that PINB6-7 will trigger an ISR event on any change (edge change i guess)
+    PCMSK2 |= _BV(PCINT21);//PCMSK1 |= _BV(PCINT14) | _BV(PCINT15);
+    //Enable the whole PINB to trigger the interrupt
+    PCICR |= _BV(PCIE2);//_BV(PCIE1);
+}
+
+void disablePCINT(){
+    PCMSK2 &= ~(_BV(PCINT21));
+    PCICR &= ~(_BV(PCIE2));
 }
 
 /////////////////////////////////////////////////////////////////////////////
