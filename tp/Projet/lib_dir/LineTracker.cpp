@@ -61,7 +61,7 @@ void LineTracker::updateValueMap(){
         else
             this->valueMap &= ~(shifter << i);
         
-        DEBUG_PARAMETER_VALUE((uint8_t*)"readValue->value", &this->valueMap);
+        //DEBUG_PARAMETER_VALUE((uint8_t*)"readValue->value", &this->valueMap);
         valueMap = valueMap << 3;
         valueMap = valueMap >> 3;
     }

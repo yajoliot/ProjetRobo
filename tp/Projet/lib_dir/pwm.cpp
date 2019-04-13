@@ -86,7 +86,7 @@ void PWM::roueDroite(bool direction,uint8_t rapport){
 
 
 void PWM::tournantGauche(uint8_t &rapport, uint8_t valueMap){
-	rapport = 125;
+	rapport = getVitesseDefault();
 	if(valueMap == 7 || valueMap == 3|| valueMap == 15){
 		roueGauche(true, rapport/2);
 		roueDroite(true, rapport);
@@ -103,13 +103,13 @@ void PWM::tournantGauche(uint8_t &rapport, uint8_t valueMap){
 }
 
 void PWM::tournantDroite(uint8_t &rapport, uint8_t valueMap){
-	rapport = 125;
+	rapport = getVitesseDefault();
 	if(valueMap == 28 || valueMap == 24 || valueMap == 30){
 		roueDroite(true, rapport/2);
 		roueGauche(true, rapport);
 	}
 	else if (valueMap == 16) {
-		roueDroite(true, rapport/2);
+		roueDroite(true, rapport/3);
 		roueGauche(true, rapport);
 	}
 	else if (valueMap == 0) {
@@ -120,7 +120,6 @@ void PWM::tournantDroite(uint8_t &rapport, uint8_t valueMap){
 }
 
 void PWM::boite(uint8_t &rapport, uint8_t valueMap){
-	DEBUG_PARAMETER_VALUE((uint8_t*)"PRE_BOITE", &valueMap);
 	if(valueMap == 31 || valueMap == 0){
 		rapport = VITESSE_DEFAULT; 
 		avancer(rapport);
@@ -129,7 +128,6 @@ void PWM::boite(uint8_t &rapport, uint8_t valueMap){
 		if(rapport == 0){
 		}else
 			rapport -= 1;
-		DEBUG_PARAMETER_VALUE((uint8_t*)"PRE_BOITE", &rapport);
 		roueGauche(true, VITESSE_DEFAULT);
 		roueDroite(true, rapport);
 	}
@@ -234,7 +232,7 @@ void PWM::tournerAGauche(){
 	OCR0B = 0;
 	PORTD &= ~(1 << PB5);
 	OCR0A= 255; // A determiner avec le robot
-	_delay_ms(800); // A determiner avec le robot
+	_delay_ms(900); // A determiner avec le robot
 
 	rapportGauche = OCR0B;
 	rapportDroite = OCR0A;
@@ -245,7 +243,7 @@ void PWM::tourner90Droite(uint8_t rapport){
 
 	roueGauche(true, rapport);
 	roueDroite(false, rapport);
-	_delay_ms(845);
+	_delay_ms(950);
 	arreter();
 }
 
@@ -253,24 +251,24 @@ void PWM::tourner90Gauche(uint8_t rapport){
 
 	roueGauche(false, rapport);
 	roueDroite(true, rapport);
-	_delay_ms(855);
+	_delay_ms(890);
 	arreter();
 }
 
 //section1
 void PWM::avancerTimer(uint8_t valeur, uint32_t timer){
 	arreter();
-    _delay_ms(500);
-	startMinuterie(0xFF);
-	while(TCNT1 < valeur*timer)
-        avancer(timer);
+    _delay_ms(300);
+	startMinuterie(0xFFFF);
+	while(TCNT1 <= valeur * timer)
+        avancer(getVitesseDefault());
     stopMinuterie();
     resetMinuterie();
 }
 
 void PWM::tourner90Precis(uint8_t direc, uint8_t rapport){
 	arreter();
-    _delay_ms(500);
+    _delay_ms(300);
 	if( direc == 0 )
         tourner90Gauche(rapport);
 	else

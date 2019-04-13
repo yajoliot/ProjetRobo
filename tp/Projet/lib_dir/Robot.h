@@ -4,6 +4,7 @@
 #include "LineTracker.h"
 #include "pwm.h"
 #include "Minuterie.h"
+#include "piezo.h"
 
 typedef enum {           /* <--- the type definition */
   INIT = 0, 
