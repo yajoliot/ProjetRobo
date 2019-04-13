@@ -86,32 +86,32 @@ ISR(TIMER2_OVF_vect){
 
 
 //For one T worth of time -> 600 us / 25 us = 24 cycles
-#define CYCLES_PER_T 0x18 //24
+// #define CYCLES_PER_T 0x18 //24
 
-volatile uint8_t count = 0x00;
-volatile uint8_t reach_end_T = FALSE;
+// volatile uint8_t count = 0x00;
+// volatile uint8_t reach_end_T = FALSE;
 
 
-//This ISR is to get a cycle done (T or 600 microseconds)
-ISR(TIMER1_OVF_vect)
-{
-    //DEBUG_FUNCTION_CALL((uint8_t*)"ISR(TIMER1_OVF_vect)");
-    count++;
-    //DEBUG_PARAMETER_VALUE((uint8_t*)"count",(void*)&count);
+// //This ISR is to get a cycle done (T or 600 microseconds)
+// ISR(TIMER1_OVF_vect)
+// {
+//     //DEBUG_FUNCTION_CALL((uint8_t*)"ISR(TIMER1_OVF_vect)");
+//     count++;
+//     //DEBUG_PARAMETER_VALUE((uint8_t*)"count",(void*)&count);
 
-    //Need to put this stop logic here otherwise ISR is too quick!
-    if(count>=CYCLES_PER_T){
-        DEBUG_INFO((uint8_t*)"/////// overflow!");
-        //Reset count to 0
-        count = 0x00;
+//     //Need to put this stop logic here otherwise ISR is too quick!
+//     if(count>=CYCLES_PER_T){
+//         DEBUG_INFO((uint8_t*)"/////// overflow!");
+//         //Reset count to 0
+//         count = 0x00;
 
-        //Stop the PWM
-        disableSIRC();
+//         //Stop the PWM
+//         disableSIRC();
 
-        //Set the boolean for the ISR setting function
-        reach_end_T = TRUE;
-    }
-}
+//         //Set the boolean for the ISR setting function
+//         reach_end_T = TRUE;
+//     }
+// }
 
 void transmitBit(uint8_t bit);
 
