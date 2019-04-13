@@ -57,9 +57,11 @@
 #define FALSE 0x00
 #define TRUE 0x01
 
-void transmitOneCycle(uint8_t mode);
-void transmitHighBit();
-void transmitLowBit();
+////////////////////////////////// SENDER //////////////////////////////////
+
+
+void transmitBit(uint8_t bit);
+void transmitBits(uint8_t command_, uint8_t size_);
 void transmitHeader();
 void transmitCommand(uint8_t command_);
 void transmitAddress(uint8_t address_);
@@ -84,39 +86,33 @@ ISR(TIMER2_OVF_vect){
     }
 }
 
+////////////////////////////////// RECEIVER //////////////////////////////////
 
-//For one T worth of time -> 600 us / 25 us = 24 cycles
-// #define CYCLES_PER_T 0x18 //24
+volatile bool high_edge;
+volatile bool low_edge;
+volatile uint8_t pna4602m = 0x00;
+ISR(PCINT3_vect){
+    // _delay_ms(30);
+    // if(PIND & 0x40){
+    //     DEBUG_INFO((uint8_t*)"DEBOUNCE WORKED!");
+    // }
+    pna4602m ^= _BV(0);
+    // high edge
+    if(pna4602m & _BV(0)){
+     high_edge = true;
+     low_edge = false;
+    }//low edge
+    else{
+     high_edge = false;
+     low_edge = true;
+    }
+    DEBUG_PARAMETER_VALUE((uint8_t*)"pna4602m", (void*)&pna4602m);
+}
 
-// volatile uint8_t count = 0x00;
-// volatile uint8_t reach_end_T = FALSE;
-
-
-// //This ISR is to get a cycle done (T or 600 microseconds)
-// ISR(TIMER1_OVF_vect)
-// {
-//     //DEBUG_FUNCTION_CALL((uint8_t*)"ISR(TIMER1_OVF_vect)");
-//     count++;
-//     //DEBUG_PARAMETER_VALUE((uint8_t*)"count",(void*)&count);
-
-//     //Need to put this stop logic here otherwise ISR is too quick!
-//     if(count>=CYCLES_PER_T){
-//         DEBUG_INFO((uint8_t*)"/////// overflow!");
-//         //Reset count to 0
-//         count = 0x00;
-
-//         //Stop the PWM
-//         disableSIRC();
-
-//         //Set the boolean for the ISR setting function
-//         reach_end_T = TRUE;
-//     }
-// }
-
-void transmitBit(uint8_t bit);
+/////////////////////////////////////////////////////////////////////////////
 
 int main() {
-    DEBUG_INFO((uint8_t*)"START OF PROGRAM");
+    // DEBUG_INFO((uint8_t*)"START OF PROGRAM");
 
 //Port Setup
 
@@ -133,20 +129,14 @@ int main() {
 
 //Test function is below
 
-    //dummy command
-    // uint8_t command = 0x01;
-    //dummy address
-    // uint8_t address = 0x02; //this will get ignored if in MODE_1
-
-    //Tested function
-
-    // transmit(command, address);
     // for(;;){
         transmit(0x01, 0x00);
     // }
     
-    DEBUG_INFO((uint8_t*)"END OF PROGRAM");
+    // DEBUG_INFO((uint8_t*)"END OF PROGRAM");
 }
+
+////////////////////////////////// SENDER //////////////////////////////////
 
 void openPin(){
     TCCR1A |= _BV(COM1A0);
@@ -264,14 +254,12 @@ void end45msTimer(){
     TCCR2B &= ~(_BV(CS20));
     TIMSK2 &= ~(_BV(TOIE2));
 }
-// #define ALLOWED_COMMAND_BITS 0x0F
-// #define ALLOWED_ADDRESS_BITS 0x01
 
-// int8_t SIRC::makePacket(uint8_t command_, uint8_t address_) {
-//     if( command_ & ~(ALLOWED_COMMAND_BITS ) ) 
-//        return -1
-//     if( address_ & ~(ALLOWED_ADDRESS_BITS) ) 
-//        return -1   
-//     return ( (command_ << 1) | address_ ) 
-// }
+////////////////////////////////// RECEIVER //////////////////////////////////
+
+void receiveHeader(){
+
+}
+
+/////////////////////////////////////////////////////////////////////////////
 
