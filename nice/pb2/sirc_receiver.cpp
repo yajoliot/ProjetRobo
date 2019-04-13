@@ -34,25 +34,30 @@ void sender_func(){
 
 ISR(TIMER1_OVF_vect)
 {
-	switch(turn){
-		case SENDER: sender_func();
-		case RECEIVER: timer_end = true;
-	}
+	// PORTD ^= 0x01;
+	// switch(turn){
+	// 	case SENDER: sender_func();
+	// 	case RECEIVER: timer_end = true;
+	// }
 }
 
 //PCINT1_vect for the PORTB
 volatile uint8_t pna4602m = 0x00;
 ISR(PCINT3_vect){
-	pna4602m ^= _BV(0);
-	//high edge
-	if(pna4602m & _BV(0)){
-		high_edge = true;
-		low_edge = false;
-	}//low edge
-	else{
-		high_edge = false;
-		low_edge = true;
+	_delay_ms(30);
+	if(PIND & 0x40){
+		DEBUG_INFO((uint8_t*)"DEBOUNCE WORKED!");
 	}
+	// pna4602m ^= _BV(0);
+	// //high edge
+	// if(pna4602m & _BV(0)){
+	// 	high_edge = true;
+	// 	low_edge = false;
+	// }//low edge
+	// else{
+	// 	high_edge = false;
+	// 	low_edge = true;
+	// }
 	DEBUG_INFO((uint8_t*)"!!!!!!!!!! got something");
 }
 
@@ -160,7 +165,8 @@ uint8_t key = 45;
 
 int main(){
 	//setup ports
-	DDRD = 0xBB; //1011 1011
+	DDRD = 0xFF;
+	// DDRD = 0xBB; //1011 1011
 	DDRA = 0xFF;
 	DDRB = 0x3F; //2 last one in input
 
@@ -170,11 +176,19 @@ int main(){
     EIMSK |= (1 << INT0);
     EICRA |= (1 << ISC01);
     sei();
-    SIRC_SENDER sirc;
-	for(;!a;){
-		sirc.transmit(0x01,0x02);
-		// unitTest_PNA4602M();
-	}
+
+    //Set the registers : CTC mode, Toggle on Compare, No prescaler
+    TCCR1A |= _BV(COM1B0);
+    // TCCR1B |= _BV(CS10);
+    
+    //Set the frequency : 38 kHz
+    //The following value is what we will use to set the "one"
+    OCR1B = 104;
+
+    //Non 0 value for the prescaler enables the timer
+    TCCR1B |= _BV(CS10) | _BV(WGM12);
+    //Enable counter overflow interrupt 
+    // TIMSK1 |= _BV(TOIE1); 
 	abort();
 }
 
