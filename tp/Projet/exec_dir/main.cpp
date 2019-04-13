@@ -148,12 +148,13 @@ int main() {
     // transmit(command, address);
     // for(;;){
     for(;;){
-        if(nice){
-            transmit(0x01, 0x00);
-            nice = false;
-        }else{
-            transmit(0x00,0x00);
-        }
+        // if(nice){
+        //     transmit(0x01, 0x00);
+        //     nice = false;
+        // }else{
+        //     transmit(0x00,0x00);
+        // }
+        transmit(0x00,0x00);
     }
     // }
     
