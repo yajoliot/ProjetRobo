@@ -90,46 +90,56 @@ ISR(TIMER2_OVF_vect){
 
 volatile bool high_edge = false;
 volatile bool low_edge = false;
-volatile uint8_t pna4602m = 0x00;
-ISR(PCINT2_vect){
-    // DEBUG_PARAMETER_VALUE((uint8_t*)"pna4602m", (void*)&pna4602m);
-    // _delay_ms(30);
-    // if(PIND & 0x40){
-    //     DEBUG_INFO((uint8_t*)"DEBOUNCE WORKED!");
-    // }
-    pna4602m ^= _BV(0);
-    // high edge
-    if(pna4602m & _BV(0)){
-     high_edge = true;
-     low_edge = false;
-    }//low edge
-    else{
-     high_edge = false;
-     low_edge = true;
+volatile uint8_t prev_pin_value;
+ISR(PCINT2_vect, ISR_NAKED){
+    cli();
+    if(prev_pin_value == 0x20){
+        //edge from hi to lo
+        low_edge = true;
+    }else/*prev_pin_value == 0x00*/{
+        high_edge = true;
     }
 }
 
 void enablePCINT();
 void disablePCINT();
-void receiveHeader();
+// void receiveHeader();
+void verifyHeader();
 
 /////////////////////////////////////////////////////////////////////////////
+
+#define _600us 4800
+#define _860us 6880
+#define _880us 7040
 
 int main() {
 //Port Setup
     DDRC = 0xDF;
     DDRD = 0xFF;
     DDRB = 0xFF;
-     
-//PWM Setup
 
 //Global interrupt setup
 
     sei();
 
+//setup
+
+    uint8_t tmp = PINC & 0x20;
+    DEBUG_PARAMETER_VALUE((uint8_t*)"PINC", &tmp); //either 0x20 or 0x00;
+    prev_pin_value = tmp;
+    enablePCINT();
 //Test function is below
     for(;;){
-        receiveHeader();    
+        if(verifyHeader()){
+            //delay 600 ms
+            // startMinuterie();
+            // while(TCNT1 <=_880us){
+            //     sei();
+            //     if(low_edge){
+            //         low_edge = false;
+            //     }
+            // }
+        }
     }
 }
 
@@ -269,9 +279,30 @@ void end45msTimer(){
 
 ////////////////////////////////// RECEIVER //////////////////////////////////
 
+
+
 #define _1620us 12960
 #define _2400us 19200
 #define _4020us 32160
+
+bool verifyHeader(){
+    if(low_edge){
+        low_edge = false;
+        _delay_us(2400);
+        startMinuterie();
+        sei();
+        while(TCNT1 <= _4020us){
+            if(high_edge){
+                high_edge = false;
+                while(TCNT1!=_4020us){}
+                stopMinuterie();
+                resetMinuterie();
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
 void receiveHeader(){
     pna4602m = PINC & 0x20 ? 0x01 : 0x00;
