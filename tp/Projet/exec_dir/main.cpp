@@ -90,9 +90,9 @@ ISR(TIMER2_OVF_vect){
 
 volatile bool high_edge = false;
 volatile bool low_edge = false;
-volatile uint8_t pna4602m = 0x01;
+volatile uint8_t pna4602m = 0x00;
 ISR(PCINT2_vect){
-    DEBUG_PARAMETER_VALUE((uint8_t*)"pna4602m", (void*)&pna4602m);
+    // DEBUG_PARAMETER_VALUE((uint8_t*)"pna4602m", (void*)&pna4602m);
     // _delay_ms(30);
     // if(PIND & 0x40){
     //     DEBUG_INFO((uint8_t*)"DEBOUNCE WORKED!");
@@ -138,6 +138,14 @@ int main() {
 void startMinuterie(){
     //enable timer1
     TCCR1B |= _BV(CS10);
+}
+
+void stopMinuterie(){
+    TCCR1B &= ~(_BV(CS10));
+}
+
+void resetMinuterie(){
+    TCNT1 = 0x0000;
 }
 
 ////////////////////////////////// SENDER //////////////////////////////////
@@ -261,22 +269,55 @@ void end45msTimer(){
 
 ////////////////////////////////// RECEIVER //////////////////////////////////
 
-#define _1620ms 12960
-#define _2400ms 19200
-#define _4020ms 32160
+#define _1620us 12960
+#define _2400us 19200
+#define _4020us 32160
 
 void receiveHeader(){
+    pna4602m = PINC & 0x20 ? 0x01 : 0x00;
     enablePCINT();
-    while(high_edge){_delay_ms(0);DEBUG_INFO((uint8_t*)"nice");}
+    while(high_edge){_delay_us(0);//DEBUG_INFO((uint8_t*)"nice");}
+    //DEBUG_INFO((uint8_t*)"we out");
     //we got a low edge
     startMinuterie();
-    while(TCNT1 <= _2400ms){_delay_ms(0);}
+    while(TCNT1 <= _2400ms){ _delay_us(0);}
     while(TCNT1 <= _4020ms){//only gets 2 cycle to get a try
-        PORTB = 0x02;
+        //DEBUG_INFO((uint8_t*)"rip");
         if(high_edge){
-            PORTB = 0x01;
+            //DEBUG_INFO((uint8_t*)"im faster");
+            disablePCINT();
+            stopMinuterie(); 
+            resetMinuterie();
+            high_edge = false;
             break;
         }
+    }
+}
+
+#define _1200us 9600 
+#define _1940us 15520
+
+void receiveBit(){
+    pna4602m = PINC & 0x20 ? 0x01 : 0x00;
+    enablePCINT();
+    startMinuterie();
+    while(TCNT1 <= _1200us){_delay_us(0);}
+    while(TCNT1 <= _1940us){
+        if(high_edge)
+    }
+}
+
+#define _600us 4800
+#define _860us 6880
+#define _880us 7040
+
+void receiveBits(){
+    receiveHeader(); startMinuterie();
+    while(high_edge && TNCT1 < _600us){ _delay_us(0); }
+    //after this there is a low dge
+    for(uint8_t i=0 ; i<COMMAND_SIZE ; i++){
+        receiveBit();
+        while(high_edge && TNCT1 < 880us){ _delay_us(0); }
     }
 }
 
