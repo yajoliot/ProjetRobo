@@ -25,8 +25,8 @@ class Robot {
         
         uint8_t IRCom = 0;
         uint8_t nCMD = 0;
-        PWM pwm;
-        LineTracker lineTracker;
+        PWM* pwm;
+        LineTracker* lineTracker;
         
 
     public:

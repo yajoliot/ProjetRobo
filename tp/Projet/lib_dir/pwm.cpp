@@ -88,11 +88,11 @@ void PWM::roueDroite(bool direction,uint8_t rapport){
 void PWM::tournantGauche(uint8_t &rapport, uint8_t valueMap){
 	rapport = 125;
 	if(valueMap == 7 || valueMap == 3|| valueMap == 15){
-		roueGauche(true, rapport/1.5);
+		roueGauche(true, rapport);
 		roueDroite(true, rapport);
 	}
 	else if (valueMap == 1) {
-		roueGauche(true, rapport/2);
+		roueGauche(true, rapport/3);
 		roueDroite(true, rapport);
 	}
 	else if (valueMap == 0) {
@@ -105,7 +105,7 @@ void PWM::tournantGauche(uint8_t &rapport, uint8_t valueMap){
 void PWM::tournantDroite(uint8_t &rapport, uint8_t valueMap){
 	rapport = 125;
 	if(valueMap == 28 || valueMap == 24 || valueMap == 30){
-		roueDroite(true, rapport/1.5);
+		roueDroite(true, rapport);
 		roueGauche(true, rapport);
 	}
 	else if (valueMap == 16) {
