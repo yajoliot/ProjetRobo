@@ -88,7 +88,7 @@ void PWM::roueDroite(bool direction,uint8_t rapport){
 void PWM::tournantGauche(uint8_t &rapport, uint8_t valueMap){
 	rapport = 125;
 	if(valueMap == 7 || valueMap == 3|| valueMap == 15){
-		roueGauche(true, rapport);
+		roueGauche(true, rapport/2);
 		roueDroite(true, rapport);
 	}
 	else if (valueMap == 1) {
@@ -105,7 +105,7 @@ void PWM::tournantGauche(uint8_t &rapport, uint8_t valueMap){
 void PWM::tournantDroite(uint8_t &rapport, uint8_t valueMap){
 	rapport = 125;
 	if(valueMap == 28 || valueMap == 24 || valueMap == 30){
-		roueDroite(true, rapport);
+		roueDroite(true, rapport/2);
 		roueGauche(true, rapport);
 	}
 	else if (valueMap == 16) {
@@ -183,12 +183,12 @@ void PWM::ralentissementGauche(uint8_t &rapport, uint8_t valueMap) {
 		rapport = VITESSE_DEFAULT;
 		this->avancer(rapport);
 	} else if(valueMap == 6 || valueMap == 2 || valueMap == 3 || valueMap == 1){
-		rapport = rapport - 8 > VITESSE_DEFAULT-85 ? rapport - 8: rapport;
+		rapport = rapport - 6 > VITESSE_DEFAULT-85 ? rapport - 8: rapport;
 		roueDroite(true, rapport + 25);
 		roueGauche(true, rapport);
 
 	} else if(valueMap == 12 || valueMap == 8 || valueMap == 24 || valueMap == 16) {
-		rapport = rapport - 8 > VITESSE_DEFAULT-85 ? rapport - 8: rapport;
+		rapport = rapport - 6 > VITESSE_DEFAULT-85 ? rapport - 8: rapport;
 		roueDroite(true, rapport);
 		roueGauche(true, rapport + 25);
 

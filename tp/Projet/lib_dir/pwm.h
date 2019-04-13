@@ -25,7 +25,7 @@ class PWM{
         static const uint8_t VITESSE_MAX = 255;
 
         //Vitesse par defaut
-        uint8_t VITESSE_DEFAULT = 125;
+        uint8_t VITESSE_DEFAULT = 130;
         
         
         uint8_t vitesseTournage = 130;

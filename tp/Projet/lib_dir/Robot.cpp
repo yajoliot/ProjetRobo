@@ -251,59 +251,20 @@ void Robot::RunCMD1(){
 
 void Robot::RunCMD2(){
     
-    enum states {LIGNE_DROITE, TOURNE_GAUCHE, TOURNE_DROITE, NEXT};
-    int etat = LIGNE_DROITE;
-    enum vitesses {NORMAL, RALENTISSEMENT_GAUCHE, RALENTISSEMENT};
-    int vitesse = RALENTISSEMENT_GAUCHE;
+    enum states {INIT, TOURNE_DROITE, COIN, TOURNE_GAUCHE, NEXT};
+    int etat = INIT;
     DDRC = 0xFF;
     DDRB = 0xFF;
     uint8_t rapport = pwm->getVitesseDefault(); // à changer pas bon -xavie
-    bool tournerGauche = false;
-    bool tournerDroite = false;
-    bool boolGauche = 0;
-    uint8_t nbBoites = 0;
     bool loop = true;
 
     for(;loop;){
         
         lineTracker->updateValueMap();
         uint8_t valueMap = lineTracker->getValueMap();
-        PORTC = valueMap;
         
 
         //TODO:  mettre dans une fonction
-        if((valueMap == 4)&& boolGauche){
-            etat = NEXT;
-        }
-        
-        else if((valueMap == 4 || 
-            valueMap == 6 ||
-            valueMap == 12 || 
-            valueMap == 8 || 
-            valueMap == 2 || 
-            valueMap == 3 || 
-            valueMap == 24 ||
-            valueMap == 1 || 
-            valueMap == 16)){
-            etat = LIGNE_DROITE;
-            tournerGauche = true;
-            tournerDroite = false;
-            // tournerGauche = false;
-            // tournerDroite = false;
-        }
-        else if(valueMap == 7 || valueMap == 15 || (valueMap == 0 && tournerGauche)){
-            etat = TOURNE_GAUCHE;
-            boolGauche = true;
-            tournerGauche = true;
-            tournerDroite = false;
-        }
-        else if(valueMap == 28 || valueMap == 30 || (valueMap == 0 && tournerDroite)){
-            etat = TOURNE_DROITE;
-            
-            vitesse = NORMAL;
-            tournerGauche = false;
-            tournerDroite = true;
-        }
         
         //TODO: AJOUTER LE CAS VALUEMAP == 0
         
@@ -311,25 +272,39 @@ void Robot::RunCMD2(){
         
         //TODO:  mettre dans une fonction
         switch(etat){
-            case LIGNE_DROITE:
-                if (vitesse == NORMAL)
-                    pwm->avancementAjuste(rapport, valueMap);
-                else if (vitesse == RALENTISSEMENT_GAUCHE){
-                    pwm->ralentissementGauche(rapport, valueMap);
-                }else 
-                    pwm->avancementAjuste(rapport, valueMap);
+            case INIT:
+                pwm->ralentissementGauche(rapport, valueMap);
+                if(valueMap == 24 || valueMap == 28 || valueMap == 30 || valueMap == 31){
+                    etat = TOURNE_DROITE;
+                }
             break;
             
-            case TOURNE_GAUCHE:
-                DEBUG_PARAMETER_VALUE((uint8_t*)"TOURNE GAUCHE", &valueMap);
+            case TOURNE_DROITE:
                 //TODO:  mettre dans une fonction
-                pwm->tournantGauche(rapport, valueMap);
+                while(valueMap != 4){
+                    lineTracker->updateValueMap();
+                    valueMap = lineTracker->getValueMap();
+                    pwm->tournantDroite(rapport, valueMap);
+                }
+                etat = COIN;
             break;
 
-            case TOURNE_DROITE:
+            case COIN:
                     //TODO:  mettre dans une fonction
-                pwm->tournantDroite(rapport, valueMap);
+                pwm->ralentissementGauche(rapport, valueMap);
+                if(valueMap == 3 || valueMap == 7 || valueMap == 15 || valueMap == 31)
+                    etat = TOURNE_GAUCHE;
             break;
+
+            case TOURNE_GAUCHE:
+                while(valueMap != 4){
+                    lineTracker->updateValueMap();
+                    valueMap = lineTracker->getValueMap();
+                    pwm->tournantGauche(rapport, valueMap);
+                }
+                etat = NEXT;
+            break;
+
             case NEXT:
                 loop = false;
                 DEBUG_PARAMETER_VALUE((uint8_t*)"NEXT", &valueMap);
@@ -508,7 +483,7 @@ void Robot::RunCMD3(){
 }
 
 void Robot::RunCMD4(){
-    enum states {LIGNE_DROITE, TOURNE_GAUCHE, TOURNE_DROITE, PRE_BOITE, BOITE, POST_BOITE, NEXT};
+    enum states {LIGNE_DROITE, TOURNE_GAUCHE, TOURNE_DROITE, PRE_BOITE, BOITE, POST_BOITE, PRE_NEXT, NEXT};
     int etat = LIGNE_DROITE;
     DDRC = 0xFF;
     DDRB = 0xFF;
@@ -581,8 +556,6 @@ void Robot::RunCMD4(){
                     //TODO: à mettre dans fonction à part
                 
                     while(lineTracker->getValueMap() == 31){
-                        uint8_t temporaire = lineTracker->getValueMap();
-                        DEBUG_PARAMETER_VALUE((uint8_t*)"PRE_BOITE", &temporaire);
                         pwm->avancer(pwm->getVitesseDefault());
                         lineTracker->updateValueMap();
                     }
@@ -593,9 +566,9 @@ void Robot::RunCMD4(){
             case BOITE : 
                     //TODO: à mettre dans fonction à part
                     while( !(lineTracker->getValueMap() == 31) ){
-                        uint8_t temporaire = lineTracker->getValueMap();
-                        DEBUG_PARAMETER_VALUE((uint8_t*)"BOITE", &temporaire);
-                        pwm->boite(rapport, temporaire);
+                        lineTracker->updateValueMap();
+                        valueMap = lineTracker->getValueMap();
+                        pwm->boite(rapport, valueMap);
                         lineTracker->updateValueMap();
                     }
                     etat = POST_BOITE;
@@ -605,8 +578,6 @@ void Robot::RunCMD4(){
             case POST_BOITE:
                     nbBoites++;
                     while(lineTracker->getValueMap() == 31){
-                        uint8_t temporaire = lineTracker->getValueMap();
-                        DEBUG_PARAMETER_VALUE((uint8_t*)"POST_BOITE", &temporaire);
                         pwm->avancer(pwm->getVitesseDefault());
                         lineTracker->updateValueMap();
                     }
