@@ -84,6 +84,11 @@ ISR(TIMER2_OVF_vect){
     }
 }
 
+volatile bool nice = false;
+ISR(INT0_vect){
+    nice = true;
+}
+
 
 //For one T worth of time -> 600 us / 25 us = 24 cycles
 // #define CYCLES_PER_T 0x18 //24
@@ -142,7 +147,14 @@ int main() {
 
     // transmit(command, address);
     // for(;;){
-        transmit(0x01, 0x00);
+    for(;;){
+        if(nice){
+            transmit(0x01, 0x00);
+            nice = false;
+        }else{
+            transmit(0x00,0x00);
+        }
+    }
     // }
     
     DEBUG_INFO((uint8_t*)"END OF PROGRAM");
