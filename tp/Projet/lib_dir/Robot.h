@@ -17,6 +17,7 @@ typedef enum {           /* <--- the type definition */
 
 extern volatile bool boolISR;
 extern volatile etats etat;
+extern volatile pointCounterISR;
 
 class Robot {
     private:

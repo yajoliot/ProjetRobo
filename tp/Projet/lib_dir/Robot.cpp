@@ -3,6 +3,7 @@
     
 volatile etats etat = INIT;
 volatile bool boolISR = false;
+volatile pointCounterISR = 0;
 
 void isr_INIT() {
 
@@ -96,8 +97,7 @@ void Robot::RunCMD1(){
     uint8_t valueMap;
     bool loop = true;
 
-    //tempSirc temp replacemtn for ir receiver
-    uint8_t tempSirc = 0x00;
+    uint8_t pointIR = 0x00;
     
 
     for(;loop;){
@@ -124,31 +124,35 @@ void Robot::RunCMD1(){
                 switch(etat_analyze){
 
                     case IR_WAIT:
-                        if( tempSirc == 0x00 ||
-                            tempSirc == 0x01 ||
-                            tempSirc == 0x02 ){
+                        startMinuterie(0xFFFF);
+                        //allow time to increment pointer and receive ir
+                        while(TCNT1 < 0x9FFF){}
+
+                        if( pointIR == 0x00 ||
+                            pointIR == 0x01 ||
+                            pointIR == 0x02 ){
                             
                             etat_analyze = P1P2P3;
 
-                        } else if ( tempSirc == 0x03 ||
-                                    tempSirc == 0x04 ||
-                                    tempSirc == 0x05 ) {
+                        } else if ( pointIR == 0x03 ||
+                                    pointIR == 0x04 ||
+                                    pointIR == 0x05 ) {
 
                             etat_analyze = P4P5P6;
 
                         } else {
                             etat_analyze = P7P8P9;
-                        }    
+                        }
                     break;
 
                     case P1P2P3:
                         
                         pwm->avancerTimer(3, rapport3Inch);
 
-                        if(tempSirc == 0x00){
+                        if(pointIR == 0x00){
                             pwm->tourner90Precis(0, rapport);
                             pwm->avancerTimer(4, rapport3Inch);
-                        } else if(tempSirc == 0x01){
+                        } else if(pointIR == 0x01){
                             pwm->tourner90Precis(0, rapport);
                             pwm->avancerTimer(3, rapport3Inch);
                         } else {
@@ -162,10 +166,10 @@ void Robot::RunCMD1(){
 
                         pwm->avancerTimer(2, rapport3Inch);
 
-                        if(tempSirc == 0x03){
+                        if(pointIR == 0x03){
                             pwm->tourner90Precis(0, rapport);
                             pwm->avancerTimer(4, rapport3Inch);
-                        } else if(tempSirc == 0x04){
+                        } else if(pointIR == 0x04){
                             pwm->tourner90Precis(0, rapport);
                             pwm->avancerTimer(3, rapport3Inch);
                         } else {
@@ -179,10 +183,10 @@ void Robot::RunCMD1(){
 
                         pwm->avancerTimer(1, rapport3Inch);
 
-                        if(tempSirc == 0x06){
+                        if(pointIR == 0x06){
                             pwm->tourner90Precis(0, rapport);
                             pwm->avancerTimer(4, rapport3Inch);
-                        } else if(tempSirc == 0x07){
+                        } else if(pointIR == 0x07){
                             pwm->tourner90Precis(0, rapport);
                             pwm->avancerTimer(3, rapport3Inch);
                         } else {
@@ -198,24 +202,28 @@ void Robot::RunCMD1(){
             break;
 
             case WAIT:
+
                 pwm->tourner90Precis(1, rapport);
-                _delay_ms(3000); //playNote(45, 3000);
+                PIEZO_INIT(DDD4, DDD5, 50);
+                PLAY_NOTE(45, 3000);
+                pwm->tourner90Precis(1, rapport);
+                PLAY_NOTE(45, 3000);
+                resetRegisters();
                 etat = GOTO_S3;
                 
             break;
 
             case GOTO_S3:
                 
-                pwm->tourner90Droite(rapport);
-                if( tempSirc == 0x02 ||
-                    tempSirc == 0x05 ||
-                    tempSirc == 0x08 ){
+                if( pointIR == 0x02 ||
+                    pointIR == 0x05 ||
+                    pointIR == 0x08 ){
 
                     pwm->avancerTimer(2, rapport3Inch);
 
-                } else  if( tempSirc == 0x01 ||
-                            tempSirc == 0x04 ||
-                            tempSirc == 0x07 ) {
+                } else  if( pointIR == 0x01 ||
+                            pointIR == 0x04 ||
+                            pointIR == 0x07 ) {
                     pwm->avancerTimer(3, rapport3Inch);
                 } else {
                     pwm->avancerTimer(4, rapport3Inch);
@@ -567,6 +575,7 @@ void Robot::RunCMD4(){
             
             case NEXT:
                     loop = false;
+                    pointCounterISR = 0;
                 break;
         }
         
@@ -647,13 +656,7 @@ void Robot::RunCMDCoin(){
         break;
                 
 
-     }
-
+        }
     }
 }
 
-void Robot::test(){
-
-
-    
-}
