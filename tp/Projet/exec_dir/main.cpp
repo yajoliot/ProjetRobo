@@ -92,7 +92,7 @@ ISR(PCINT2_vect){
         //edge from hi to lo
         prev_pin_value = 0x00;
         // //VERIFY HEADER!
-        headerDetected = verifyHeader();
+        // headerDetected = verifyHeader();
         // if(headerDetected){
         //     for(;;){
         //         PORTB = 0x01;
@@ -105,7 +105,7 @@ ISR(PCINT2_vect){
         // highEdge = true;
         prev_pin_value = 0x20;
     }
-    // PORTD = prev_pin_value;
+    // PORTD = prev_pin_value; 
 }
 
 void testFunction(){
@@ -169,19 +169,9 @@ bool verifyHeader(){
 
 uint8_t readBit(){
     stopMinuterie(); resetMinuterie(); startMinuterie();
-    while((PINC & 0x20) == 0x00){
-        if(PINC & 0x20){
-            while(PINC & 0x20){
-                if((PINC & 0x20) == 0x00){
-                    //end cycle
-                }
-            }
-        }
-        break;
-    }
+    while((PINC & 0x20) == 0x00){}
+    while(PINC & 0x20){}
     stopMinuterie();
-    PORTD = (uint8_t)(TCNT1 >> 8);
-    PORTA = (uint8_t)TCNT1;
     if(TCNT1 < threshold){
         return 0; // 0
     }else if( TCNT1 >= threshold){
