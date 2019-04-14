@@ -17,11 +17,11 @@ typedef enum {           /* <--- the type definition */
 
 extern volatile bool boolISR;
 extern volatile etats etat;
-extern volatile pointCounterISR;
+extern volatile uint8_t pointCounterISR;
+extern volatile uint8_t cornerCounterISR;
 
 class Robot {
     private:
-        //Minuterie
         //SIRC sirc;
 
         
@@ -44,6 +44,7 @@ class Robot {
         void RunCMD4();
         void RunCMDCoin();
         void test();
+        uint8_t receive();
 };
 
 #endif

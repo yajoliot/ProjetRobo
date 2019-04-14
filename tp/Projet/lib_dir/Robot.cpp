@@ -3,7 +3,8 @@
     
 volatile etats etat = INIT;
 volatile bool boolISR = false;
-volatile pointCounterISR = 0;
+volatile uint8_t pointCounterISR = 0;
+volatile uint8_t cornerCounterISR = 0;
 
 void isr_INIT() {
 
@@ -31,7 +32,17 @@ Robot::Robot(){
 }
 
 Robot::~Robot(){
-   
+   delete pwm;
+   delete lineTracker;
+}
+
+
+uint8_t Robot::receive(){
+    startMinuterie(0xFFFF);
+    while(TCNT1 < 0xCFFF){
+        //receiveIR
+    }
+    if(pointCounter != 0)
 }
 
 void Robot::Run(uint8_t IRCom){
@@ -80,7 +91,6 @@ void Robot::Run(uint8_t IRCom){
 
 void Robot::RunCMD1(){
 
-    //PIEZO_INIT(DDD4, DDD5, 50); Le piezo Fuck avc TCCR1A de minuterie
     
 
     DDRC = 0xFF;
@@ -204,10 +214,14 @@ void Robot::RunCMD1(){
             case WAIT:
 
                 pwm->tourner90Precis(1, rapport);
-                PIEZO_INIT(DDD4, DDD5, 50);
-                PLAY_NOTE(45, 3000);
+                PIEZO_INIT(DDD5, DDD7, 50);
+                PLAY_NOTE(45, 1);
+                _delay_ms(3000);
+                setVolume(0);
                 pwm->tourner90Precis(1, rapport);
-                PLAY_NOTE(45, 3000);
+                setVolume(50);
+                _delay_ms(3000);
+                setVolume(0);
                 resetRegisters();
                 etat = GOTO_S3;
                 
@@ -527,10 +541,14 @@ void Robot::RunCMD4(){
 
             case PRE_BOITE:
             //por le son
-                PIEZO_INIT(DDD4, DDD5, 50);
-                PLAY_NOTE(45, 50);
+                PIEZO_INIT(DDD5, DDD7, 50);
+                PLAY_NOTE(45, 1);
+                _delay_ms(50);
+                setVolume(0);
                 _delay_ms(20);
-                PLAY_NOTE(45, 50);
+                setVolume(50);
+                _delay_ms(50);
+                setVolume(0);
                 resetRegisters();
 
                 while(valueMap == 15 || valueMap == 30 || valueMap == 31){
@@ -554,10 +572,14 @@ void Robot::RunCMD4(){
 
             case POST_BOITE:
                 //pour le son
-                PIEZO_INIT(DDD4, DDD5, 50);
-                PLAY_NOTE(45, 50);
+                PIEZO_INIT(DDD5, DDD7, 50);
+                PLAY_NOTE(45, 1);
+                _delay_ms(50);
+                setVolume(0);
                 _delay_ms(20);
-                PLAY_NOTE(45, 50);
+                setVolume(50);
+                _delay_ms(50);
+                setVolume(0);
                 resetRegisters();
                 
                     nbBoites++;
