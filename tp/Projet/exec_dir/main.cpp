@@ -92,7 +92,7 @@ ISR(PCINT2_vect){
         //edge from hi to lo
         prev_pin_value = 0x00;
         // //VERIFY HEADER!
-        // headerDetected = verifyHeader();
+        headerDetected = verifyHeader();
         // if(headerDetected){
         //     for(;;){
         //         PORTB = 0x01;
