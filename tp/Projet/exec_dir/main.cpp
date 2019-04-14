@@ -156,7 +156,7 @@ int main() {
         //     transmit(0x00,0x00);
         // }
 
-        transmit(0x07,0x00);
+        transmit(0x0A,0x00);
     // }
     // }
     
