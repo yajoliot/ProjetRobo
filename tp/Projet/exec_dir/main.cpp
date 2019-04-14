@@ -56,6 +56,7 @@ void setPrescaler(uint8_t pos){
 
 ////////////////////////////////// RECEIVER //////////////////////////////////
 
+#define _500us 4000
 #define _600us 4800
 #define _860us 6880
 #define _880us 7040
@@ -90,25 +91,21 @@ ISR(PCINT2_vect){
     if(prev_pin_value == 0x20){
         //edge from hi to lo
         prev_pin_value = 0x00;
-        //VERIFY HEADER!
+        // //VERIFY HEADER!
         headerDetected = verifyHeader();
-        if(headerDetected){
-            uint8_t a = readBits(COMMAND_SIZE);
-            PORTD = a;
-            for(;;){
-                PORTB = 0x01;
-                _delay_ms(3000);
-                PORTB = 0x00;
-                _delay_ms(3000);
-            }   
-        }else{
-            PORTB = 0x00;
-        }
+        // if(headerDetected){
+        //     for(;;){
+        //         PORTB = 0x01;
+        //         _delay_ms(3000);
+        //         PORTB = 0x00;
+        //         _delay_ms(3000);
+        //     }   
+        // }
     }else/*prev_pin_value == 0x00*/{
         // highEdge = true;
         prev_pin_value = 0x20;
     }
-    // PORTD = prev_pin_value;
+    PORTD = prev_pin_value;
 }
 
 void testFunction(){
@@ -125,24 +122,48 @@ void testFunction(){
 }
 
 bool verifyHeader(){
+
         stopMinuterie(); resetMinuterie(); startMinuterie();
-        while(TCNT1 < _2400us && (prev_pin_value == 0x00)){ prev_pin_value = (PINC & 0x20); }
-        while((prev_pin_value == 0x00) && (TCNT1 <= _3862us)){//TCNT1 <= _3862us
-            //polling
+        while(TCNT1 < _1200us){
             prev_pin_value = (PINC & 0x20);
             if(prev_pin_value == 0x20){
-                stopMinuterie(); resetMinuterie(); startMinuterie();
-                while(TCNT1 < _600us && (prev_pin_value == 0x20)){ prev_pin_value = (PINC & 0x20); }
-                while((prev_pin_value == 0x20) && (TCNT1 <= _880us)){
-                    prev_pin_value = (PINC & 0x20);
-                    if(prev_pin_value == 0x00){
-                        stopMinuterie(); resetMinuterie();   
-                        return true;
-                    }
-                }
+                return false;
             }
         }
-        return false;
+
+        stopMinuterie(); resetMinuterie();
+        while((PINC & 0x20)== 0x00){}
+
+        startMinuterie();
+        while(TCNT1 < 4000){
+            prev_pin_value = (PINC & 0x20);
+            if(prev_pin_value == 0x00){
+                return false;
+            }
+        }
+
+        stopMinuterie(); resetMinuterie();
+        while(PINC & 0x20){}
+        prev_pin_value = 0x00;
+        return true;
+
+
+        // while((prev_pin_value == 0x00) && (TCNT1 <= _3862us)){//TCNT1 <= _3862us
+        //     //polling
+        //     prev_pin_value = (PINC & 0x20);
+        //     if(prev_pin_value == 0x20){
+        //         stopMinuterie(); resetMinuterie(); startMinuterie();
+        //         while(TCNT1 < _600us && (prev_pin_value == 0x20)){ prev_pin_value = (PINC & 0x20); }
+        //         while((prev_pin_value == 0x20) && (TCNT1 <= _880us)){
+        //             prev_pin_value = (PINC & 0x20);
+        //             if(prev_pin_value == 0x00){
+        //                 stopMinuterie(); resetMinuterie();   
+        //                 return true;
+        //             }
+        //         }
+        //     }
+        // }
+        // return false;
 }
 
 uint8_t readBit(){
