@@ -30,10 +30,7 @@ extern volatile bool usePointISR;
 #define petit 0x01 //dummy values
 #define grand 0x02 //dummy values
 
-DDRA = 0x00;
-DDRB = 0xFF;
-DDRC = 0xFF;
-DDRD = 0xFB;
+
 
 
 ISR(INT0_vect){
@@ -70,11 +67,16 @@ ISR(PCINT2_vect){
 
 
 int main() {
+
+  DDRA = 0x00;
+  DDRB = 0xFF;
+  DDRC = 0xFF;
+  DDRD = 0xFC;
    
    Robot robot;
    robot.isr_INIT();
 
-   robot.Run(0x00);
+   robot.Run(0x01);
 
 }
 

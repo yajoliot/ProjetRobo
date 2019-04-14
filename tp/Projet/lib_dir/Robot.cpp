@@ -11,8 +11,6 @@ volatile bool usePointISR = false;
 
 void Robot::isr_INIT() {
 
-    DDRD = 0x00;
-    DDRB = 0xff;
 
     cli ();
 
@@ -95,9 +93,6 @@ void Robot::RunCMD1(){
 
     
 
-    DDRC = 0xFF;
-    DDRB = 0xFF;
-
     uint8_t rapport = pwm.getVitesseDefault();
     uint8_t duree = 0xFF;
 
@@ -136,15 +131,19 @@ void Robot::RunCMD1(){
                 switch(etat_analyze){
 
                     case IR_WAIT:
-                        while(usePointISR == false){
+                        startMinuterie(0xFFFF);
+                        while(TCNT1 < 0x7FFF){
                             pwm.arreter();
-                            if(headerVerified()){
-                                pointIR = readBits(COMMAND_SIZE) - 1;
+                            if(false/*headerVerified()*/){
+                                pointIR = readBits(COMMAND_SIZE);
                             }
                         }
 
+
                         if (usePointISR == true){
                             pointIR = pointCounterISR - 1;
+                        } else {
+                            pointIR--;
                         }
 
                         if( pointIR == 0x00 ||
@@ -288,8 +287,6 @@ void Robot::RunCMD2(){
     
     enum states {INIT, TOURNE_DROITE, COIN, TOURNE_GAUCHE, NEXT};
     int etat = INIT;
-    DDRC = 0xFF;
-    DDRB = 0xFF;
     uint8_t rapport = pwm.getVitesseDefault(); // à changer pas bon -xavie
     bool loop = true;
     uint8_t valueMap;
@@ -301,20 +298,21 @@ void Robot::RunCMD2(){
     
         switch(etat){
             case INIT:
-                pwm.ralentissementGauche(rapport, valueMap);
+                pwm.avancementAjuste(rapport, valueMap);
                 if(valueMap == 24 || valueMap == 28 || valueMap == 30 || valueMap == 31){
                     etat = TOURNE_DROITE;
                 }
             break;
             
             case TOURNE_DROITE:
+
                 pwm.tournantDroite(rapport, valueMap);
                 if(valueMap == 4)
                 etat = COIN;
             break;
 
             case COIN:
-                pwm.ralentissementGauche(rapport, valueMap);
+                pwm.avancementAjuste(rapport, valueMap);
                 if(valueMap == 3 || valueMap == 7 || valueMap == 15 || valueMap == 31)
                     etat = TOURNE_GAUCHE;
             break;
@@ -342,9 +340,6 @@ void Robot::RunCMD3(){
     enum etats2 {INIT2,ANTI_REBOND, DIST_1, DIST_2};
 
     volatile etats2 etat2 = INIT2;
-
-    DDRC = 0xFF;
-    DDRB = 0xFF;
     isr_INIT();
     uint16_t duree  = 0xFFFF;
     uint16_t distTime1 = 0;
@@ -504,8 +499,6 @@ void Robot::RunCMD3(){
 void Robot::RunCMD4(){
     enum states {INIT, TOURNE_GAUCHE, LIGNE_DROITE,  PRE_BOITE, BOITE, POST_BOITE, NEXT};
     int etat = INIT;
-    DDRC = 0xFF;
-    DDRB = 0xFF;
     uint8_t rapport = pwm.getVitesseDefault(); // à changer pas bon -xavier
     uint8_t nbBoites = 0;
     bool loop = true;
@@ -622,8 +615,6 @@ void Robot::RunCMD4(){
 void Robot::RunCMDCoin(){
     enum etats {INIT, TOURNANT_GAUCHE, DROIT, AJUSTEMENT, TOURNER, NEXT};
     etats etat = INIT;
-    DDRC = 0xFF;
-    DDRB = 0xFF;
     uint8_t rapport = pwm.getVitesseDefault(); 
     uint16_t duree = 0xFFFF;
     uint8_t valueMap;
