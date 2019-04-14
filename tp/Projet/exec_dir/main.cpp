@@ -30,6 +30,11 @@ extern volatile bool usePointISR;
 #define petit 0x01 //dummy values
 #define grand 0x02 //dummy values
 
+DDRA = 0x00;
+DDRB = 0xFF;
+DDRC = 0xFF;
+DDRD = 0xFB;
+
 
 ISR(INT0_vect){
     _delay_ms(30);
