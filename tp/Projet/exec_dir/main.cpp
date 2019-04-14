@@ -119,6 +119,7 @@ ISR(INT0_vect){
 // }
 
 void transmitBit(uint8_t bit);
+void transmitEndBit();
 
 int main() {
     // DEBUG_INFO((uint8_t*)"START OF PROGRAM");
@@ -156,6 +157,7 @@ int main() {
         // }
 
     transmitHeader();
+    transmitEndBit();
         // transmit(0x07,0x00);
     // }
     // }
