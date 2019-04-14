@@ -156,9 +156,7 @@ int main() {
         //     transmit(0x00,0x00);
         // }
 
-    transmitHeader();
-    transmitEndBit();
-        // transmit(0x07,0x00);
+        transmit(0x07,0x00);
     // }
     // }
     
@@ -263,7 +261,7 @@ void transmit(uint8_t command_, uint8_t address_){
         transmitHeader();
         transmitCommand(command_);
         transmitAddress(address_);
-        // transmitEndBit();
+        transmitEndBit();
         //wait till end of 45 ms
         while(!reach_end_45_ms){}
         //reset the boolean for 45 ms
