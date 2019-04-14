@@ -65,6 +65,8 @@ void setPrescaler(uint8_t pos){
 #define _2400us 19200
 #define _3862us 31000
 
+
+
 //this function is much less efficient than the #defines...
 uint16_t calculateCyclesToWaste_us(uint16_t microseconds){
     return microseconds<<3;
@@ -74,6 +76,7 @@ uint16_t calculateCyclesToWaste_us(uint16_t microseconds){
     // return miliseconds
 // }
 
+uint8_t read(uint8_t size);
 bool verifyHeader();
 bool isInfraredSending();
 volatile bool highEdge = false;
@@ -87,15 +90,16 @@ ISR(PCINT2_vect){
         //edge from hi to lo
         // lowEdge = true;
         prev_pin_value = 0x00;
-        // if(isInfraredSending()){
         //     //VERIFY HEADER!
-        //     headerDetected = verifyHeader();
+        headerDetected = verifyHeader();
         // }
-        // if(headerDetected){
-        //     PORTB = 0x01;
-        // }else{
-        //     PORTB = 0x00;
-        // }
+        if(headerDetected){
+            PORTD = ((read(COMMAND_SIZE)) << 4);
+            PORTB = 0x01;
+            for(;;){}
+        }else{
+            PORTB = 0x00;
+        }
     }else/*prev_pin_value == 0x00*/{
         // highEdge = true;
         prev_pin_value = 0x20;
@@ -106,7 +110,7 @@ ISR(PCINT2_vect){
 
 void testFunction(){
     PORTD = 0x00;
-    startMinuterie();
+    stopMinuterie(); resetMinuterie(); startMinuterie();
     while(TCNT1 < 4000){
     }
     stopMinuterie();resetMinuterie(); 
@@ -117,65 +121,72 @@ void testFunction(){
     stopMinuterie();resetMinuterie();
 }
 
-bool isInfraredSending(){
-    //woot
-    _delay_ms(413);
-    OCR1A=12740; stopMinuterie(); resetMinuterie(); startMinuterie();//no need for startMinuterie()
-    prev_pin_value = (PINC & 0x20);
-    while((TIFR1 & _BV(TOV1))==0x00 && prev_pin_value == 0x20 && TCNT1 <= OCR1A){
-        prev_pin_value = (PINC & 0x20);
-    }
-    if(prev_pin_value == 0x20){
-        return true;
-    }else{
-        return false;
-    }
-
-}
-
 bool verifyHeader(){
-        OCR1A = _3862us;
-        resetMinuterie(); startMinuterie();
+        stopMinuterie(); resetMinuterie(); startMinuterie();
         while(TCNT1 < _2400us){ _delay_us(0); }
-        while(((TIFR1 & _BV(TOV1))==0x00 && prev_pin_value == 0x00) /*&& TCNT1 >= _2400us*/){
+        while((prev_pin_value == 0x00) && (TCNT1 <= _3862us)){//TCNT1 <= _3862us
             //polling
             prev_pin_value = (PINC & 0x20);
-            if(prev_pin_value){
-                stopMinuterie(); resetMinuterie();
-
-                    //                uint8_t a = 0x10;
-                    // while(a){
-                    //     PORTD |= _BV(4);
-                    //     _delay_us(30);
-                    //     PORTD &= ~(_BV(4));
-                    //     _delay_us(30);
-                    //     a--;
-                    // }
-                OCR1A = _880us;
-                startMinuterie();
+            if(prev_pin_value == 0x20){
+                stopMinuterie(); resetMinuterie(); startMinuterie();
                 while(TCNT1 < _600us){ _delay_us(0); }
-                while((TIFR1 & _BV(TOV1))==0x00 && prev_pin_value == 0x20 /*&& TCNT1 >= _600us*/){
+                while((prev_pin_value == 0x20) && (TCNT1 <= _880us)){
                     prev_pin_value = (PINC & 0x20);
                     if(prev_pin_value == 0x00){
-                    // uint8_t a = 0x10;
-                    // while(a){
-                    //     PORTD |= _BV(4);
-                    //     _delay_us(30);
-                    //     PORTD &= ~(_BV(4));
-                    //     _delay_us(30);
-                    //     a--;
-                    // }
                         stopMinuterie(); resetMinuterie();
                         return true;
                     }
                 }
-                TIFR1 |= _BV(TOV1);
             }
         }
-        TIFR1 |= _BV(TOV1);
         return false;
 }
 
+uint8_t readBit(){
+    stopMinuterie(); resetMinuterie(); startMinuterie();
+    _delay_us(600);
+    while((prev_pin_value == 0x00) && (TCNT1 <= _880us)){
+        prev_pin_value = (PINC & 0x20);
+        if(prev_pin_value == 0x20){
+            _delay_us(600);
+            while((prev_pin_value == 0x20) && (TCNT1 <= _880us)){
+                prev_pin_value = (PINC & 0x20);
+                if(prev_pin_value == 0x00){
+                    PORTB = 0x02;
+                    _delay_ms(1000);
+                    return 1;
+                }
+            }
+        }
+    }
+    stopMinuterie(); resetMinuterie(); startMinuterie();
+    _delay_us(600);
+    while((prev_pin_value == 0x00) && (TCNT1 <= _880us)){
+        prev_pin_value = (PINC & 0x20);
+        if(prev_pin_value == 0x20){
+            _delay_us(600);
+            while((prev_pin_value == 0x20) && (TCNT1 <= _880us)){
+                prev_pin_value = (PINC & 0x20);
+                if(prev_pin_value == 0x00){
+                    return 2;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+uint8_t read(uint8_t size){
+    uint8_t result = 0x00;
+    for(uint8_t i=0 ; i<size ; i++){
+        result = result << i;
+        uint8_t bit = readBit();
+        if(bit==0){}
+        else
+            result |= (readBit()-1);
+    }
+    return result;
+}
 
 void enablePCINT();
 void disablePCINT();
@@ -195,10 +206,11 @@ int main() {
     DEBUG_PARAMETER_VALUE((uint8_t*)"PINC", &tmp); //either 0x20 or 0x00;
     prev_pin_value = tmp;
     PORTD = prev_pin_value;
-    // enablePCINT();
+    sei();
+    enablePCINT();
 //Test function is below
     for(;;){
-        testFunction();
+        // testFunction();
         // if(headerDetected){
         //     headerDetected = false;
         // }
@@ -207,20 +219,7 @@ int main() {
             // disablePCINT();
             // abort();
         // }
-        // disablePCINT();
-        // uint8_t tmp = PINC & 0x20;
-        // DEBUG_PARAMETER_VALUE((uint8_t*)"PINC", &tmp); 
-        // enablePCINT();
-        // if(verifyHeader()){
-            //delay 600 ms
-            // startMinuterie();
-            // while(TCNT1 <=_880us){
-            //     sei();
-            //     if(low_edge){
-            //         low_edge = false;
-            //     }
-            // }
-        // }
+
     }
 }
 
