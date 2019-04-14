@@ -68,7 +68,7 @@ void setPrescaler(uint8_t pos){
 
 #define lo_borne 14080 // 14.4k
 #define hi_borne 22928 //23k
-#define threshold 0//18504
+#define threshold 19200//18504
 
 
 //this function is much less efficient than the #defines...
@@ -228,72 +228,6 @@ int main() {
 }
 
 ////////////////////////////////// RECEIVER //////////////////////////////////
-
-// bool verifyHeader(){
-//     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-//     {
-//         if(low_edge){
-//             low_edge = false;
-//             _delay_us(2400);
-//             startMinuterie();
-//         }
-//     }
-//     while(TCNT1 <= _4020us){
-//         if(high_edge){
-//             ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-//             {
-//                 high_edge = false;
-//                 while(TCNT1!=_4020us){}
-//                 stopMinuterie();
-//                 resetMinuterie();
-//                 return true;
-//             }
-//         }
-//     }
-//     return false;
-// }
-
-// void receiveHeader(){
-//     pna4602m = PINC & 0x20 ? 0x01 : 0x00;
-//     enablePCINT();
-//     while(high_edge){_delay_us(0);//DEBUG_INFO((uint8_t*)"nice");}
-//     //DEBUG_INFO((uint8_t*)"we out");
-//     //we got a low edge
-//     startMinuterie();
-//     while(TCNT1 <= _2400ms){ _delay_us(0);}
-//     while(TCNT1 <= _4020ms){//only gets 2 cycle to get a try
-//         //DEBUG_INFO((uint8_t*)"rip");
-//         if(high_edge){
-//             //DEBUG_INFO((uint8_t*)"im faster");
-//             disablePCINT();
-//             stopMinuterie(); 
-//             resetMinuterie();
-//             high_edge = false;
-//             break;
-//         }
-//     }
-// }
-
-
-// void receiveBit(){
-//     pna4602m = PINC & 0x20 ? 0x01 : 0x00;
-//     enablePCINT();
-//     startMinuterie();
-//     while(TCNT1 <= _1200us){_delay_us(0);}
-//     while(TCNT1 <= _1940us){
-//         if(high_edge)
-//     }
-// }
-
-// void receiveBits(){
-//     receiveHeader(); startMinuterie();
-//     while(high_edge && TNCT1 < _600us){ _delay_us(0); }
-//     //after this there is a low dge
-//     for(uint8_t i=0 ; i<COMMAND_SIZE ; i++){
-//         receiveBit();
-//         while(high_edge && TNCT1 < 880us){ _delay_us(0); }
-//     }
-// }
 
 void enablePCINT(){
     //Enable that PINB6-7 will trigger an ISR event on any change (edge change i guess)
