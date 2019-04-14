@@ -66,9 +66,15 @@ void setPrescaler(uint8_t pos){
 #define _2400us 19200
 #define _3862us 31000
 
-#define lo_borne 14080 // 14.4k
-#define hi_borne 22928 //23k
-#define threshold 19200//18504
+
+#define threshold 11840//18504 
+
+//(GREEN -> NOTHING -> GREEN):
+// 0 bit:      - 35k-37.5k
+// 1 bit:      - 
+//(GREEN -> RED -> GREEN):
+// 0 bit:      - 
+// 1 bit:      -  
 
 
 //this function is much less efficient than the #defines...
@@ -80,6 +86,7 @@ uint16_t calculateCyclesToWaste_us(uint16_t microseconds){
     // return miliseconds
 // }
 
+uint8_t readBit();
 uint8_t readBits(uint8_t length);
 bool verifyHeader();
 bool isInfraredSending();
@@ -93,7 +100,16 @@ ISR(PCINT2_vect){
         prev_pin_value = 0x00;
         // //VERIFY HEADER!
         headerDetected = verifyHeader();
-        // if(headerDetected){
+        if(headerDetected){
+            uint8_t tmp;
+            tmp = readBits(COMMAND_SIZE);
+            // tmp=readBit();
+            // readBit();
+            // readBit();
+            // readBit();
+            PORTD = tmp;
+            for(;;){_delay_ms(300); PORTB = 0x02;}
+        }
         //     for(;;){
         //         PORTB = 0x01;
         //         _delay_ms(3000);
@@ -145,7 +161,7 @@ bool verifyHeader(){
         stopMinuterie(); resetMinuterie();
         while(PINC & 0x20){}
         prev_pin_value = 0x00;
-    PORTB = 0x01;
+        PORTB = 0x02;
         return true;
 
 
@@ -170,8 +186,8 @@ bool verifyHeader(){
 uint8_t readBit(){
     stopMinuterie(); resetMinuterie(); startMinuterie();
     while((PINC & 0x20) == 0x00){}
-    while(PINC & 0x20){}
     stopMinuterie();
+    while(PINC & 0x20){}
     if(TCNT1 < threshold){
         return 0; // 0
     }else if( TCNT1 >= threshold){
