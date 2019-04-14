@@ -223,7 +223,7 @@ void Robot::RunCMD1(){
 
                 pwm.tourner90Precis(1, rapport);
                 PIEZO_INIT(DDD5, DDD7, 50);
-                PLAY_NOTE(45, 1);
+                PLAY_NOTE(45);
                 _delay_ms(3000);
                 setVolume(0);
                 pwm.tourner90Precis(1, rapport);
@@ -549,7 +549,7 @@ void Robot::RunCMD4(){
             case PRE_BOITE:
             //por le son
                 PIEZO_INIT(DDD5, DDD7, 50);
-                PLAY_NOTE(45, 1);
+                PLAY_NOTE(45);
                 _delay_ms(50);
                 setVolume(0);
                 _delay_ms(20);
@@ -580,7 +580,7 @@ void Robot::RunCMD4(){
             case POST_BOITE:
                 //pour le son
                 PIEZO_INIT(DDD5, DDD7, 50);
-                PLAY_NOTE(45, 1);
+                PLAY_NOTE(45);
                 _delay_ms(50);
                 setVolume(0);
                 _delay_ms(20);
