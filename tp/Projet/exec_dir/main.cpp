@@ -76,46 +76,66 @@ void resetMinuterie(){
 
 #define _600us 4800
 #define _860us 6880
-#define _880us 7040
 #define _1200us 9600 
-#define _1940us 15520
+#define _1986us 15888
 #define _1620us 12960
 #define _2400us 19200
-#define _3862us 30896
+#define _3862us 31000
 
 //this function is much less efficient than the #defines...
 uint16_t calculateCyclesToWaste_us(uint16_t microseconds){
     return microseconds<<3;
 }
 
-uint16_t calculateCyclesToWaste_ms(uint16_t miliseconds){
+// uint16_t calculateCyclesToWaste_ms(uint16_t miliseconds){
     // return miliseconds
-}
+// }
 
-volatile bool high_edge = false;
-volatile bool low_edge = false;
+volatile bool highEdge = false;
+volatile bool lowEdge = false;
+volatile bool headerDetected = false;
 volatile uint8_t prev_pin_value;
 ISR(PCINT2_vect){
-    if(prev_pin_value == (PINC & 0x20)){
-        return;
-    }
+    PORTD |= (_BV(7));
     if(prev_pin_value == 0x20){
         //edge from hi to lo
-        low_edge = true;
+        lowEdge = true;
         prev_pin_value = 0x00;
         //VERIFY HEADER!
-        startMinuterie();
         OCR1A = _3862us;
+        startMinuterie();
+    
+        while(TCNT1 < _2400us){_delay_us(0);}
         while( ((TIFR1 & _BV(TOV1))==0x00) && TCNT1 >= _2400us ){
             if(PINC & 0x20){
-                PORTD = 0x80;
-                _delay_us(1000);
-                PORTD = 0x00;
+                stopMinuterie(); resetMinuterie();
+
+                OCR1A = _860us;
+                startMinuterie();
+                while(TCNT1 < _600us){}
+                while(((TIFR1 & _BV(TOV1))==0x00) && TCNT1 >= _600us){
+                    if(PINC & 0x20){
+                                            uint8_t a = 0x10;
+                    while(a){
+                        PORTD |= _BV(4);
+                        _delay_us(30);
+                        PORTD &= ~(_BV(4));
+                        _delay_us(30);
+                        a--;
+                    }
+                        stopMinuterie(); resetMinuterie();
+                        headerDetected = true;
+                    }else{
+                    }
+                }
+                TIFR1 |= _BV(TOV1);
+            }else{
             }
         }
+        TIFR1 |= _BV(TOV1);
 
     }else/*prev_pin_value == 0x00*/{
-        high_edge = true;
+        highEdge = true;
         prev_pin_value = 0x20;
     }
     PORTD = prev_pin_value;  
@@ -148,6 +168,11 @@ int main() {
     enablePCINT();
 //Test function is below
     for(;;){
+        if(headerDetected)
+        {
+            disablePCINT();
+            abort();
+        }
         // disablePCINT();
         // uint8_t tmp = PINC & 0x20;
         // DEBUG_PARAMETER_VALUE((uint8_t*)"PINC", &tmp); 
