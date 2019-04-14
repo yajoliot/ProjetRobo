@@ -10,6 +10,7 @@ Si la minuterie atteint 2 secondes, elle est arrêtée et un signal correspondan
 0
 */
 
+#include <util/atomic.h>
 #include <avr/io.h>
 #include "Sirc.h"
 #include "Minuterie.h"
@@ -28,9 +29,11 @@ volatile uint8_t compteur = 0;
 #define ADDR 1
 
 ISR(INT0_vect){
+        TCNT1 = 0;
 //    _delay_ms(30);
 //    if(PIND & 0x02){
         //increment counter
+        PORTB ^= 0x01;
         compteur++; compteur = (compteur % 9)+1;  
         //initialize minuterie
         TCCR1B |= _BV(CS10) | _BV(CS12);
@@ -38,14 +41,16 @@ ISR(INT0_vect){
 }
 
 int main(){
-    DDRD = 0xFF;
-    EIMSK |= _BV(INT0);
-    EICRA |= (1 << ISC01);
-    sei();
+    ATOMIC_BLOCK(ATOMIC_FORCEON){
+        DDRB = 0xFF;
+        DDRD = 0xFB;
+        EIMSK |= _BV(INT0);
+        EICRA |= (1 << ISC01); 
+    }
 
     for(;;){
         if(TCNT1 == TOP){
-            PORTB = 0x01;
+            PORTB = 0x02;
             setupSIRC();
             transmit(compteur, ADDR);
             resetRegisters();

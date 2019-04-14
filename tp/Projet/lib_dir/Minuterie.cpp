@@ -35,6 +35,7 @@ void resetRegisters(){
     TCCR1B &= ~(1 << WGM12);
     TCCR1B &= ~(1 << WGM13);
     TCCR1B &= ~(1 << CS10);
+    TCCR1B &= ~(1 << CS11);
     TCCR1B &= ~(1 << CS12);
 
 }
