@@ -31,14 +31,11 @@ Robot::Robot(){}
 
 uint8_t Robot::receive(){
     uint8_t result = 0;
-    startMinuterie(0xFFFF);
     while(useCornerISR == false){
         if(headerVerified()){
             result = readBits(COMMAND_SIZE);
         }
     }
-    stopMinuterie();
-    resetMinuterie();
 
     if(cornerCounterISR != 0){
 
