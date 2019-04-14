@@ -147,7 +147,7 @@ int main() {
 
     // transmit(command, address);
     // for(;;){
-    for(;;){
+    // for(;;){
         // if(nice){
         //     transmit(0x01, 0x00);
         //     nice = false;
@@ -155,7 +155,7 @@ int main() {
         //     transmit(0x00,0x00);
         // }
         transmit(0x07,0x00);
-    }
+    // }
     // }
     
     DEBUG_INFO((uint8_t*)"END OF PROGRAM");
@@ -246,6 +246,10 @@ void transmitAddress(uint8_t address_){
     transmitBits(address_, ADDRESS_SIZE);
 }
 
+void transmitEndBit(){
+    transmitBit(1);
+}
+
 void transmit(uint8_t command_, uint8_t address_){
     // DEBUG_FUNCTION_CALL((uint8_t*)"transmit()");
     for(uint8_t i=0x00 ; i<0x03 ; i++){
@@ -255,6 +259,7 @@ void transmit(uint8_t command_, uint8_t address_){
         transmitHeader();
         transmitCommand(command_);
         transmitAddress(address_);
+        // transmitEndBit();
         //wait till end of 45 ms
         while(!reach_end_45_ms){}
         //reset the boolean for 45 ms
