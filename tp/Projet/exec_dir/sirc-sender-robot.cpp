@@ -12,7 +12,7 @@ Si la minuterie atteint 2 secondes, elle est arrêtée et un signal correspondan
 
 #include <avr/io.h>
 #include "Sirc.h"
-
+#include "Minuterie.h"
 
 ISR(TIMER2_OVF_vect){
     overflow_count++;
@@ -45,9 +45,9 @@ int main(){
             PORTB = 0x01;
             setupSIRC();
             transmit(compteur, ADDR);
+            resetRegisters();
             compteur = 0x00;
-            TCCR1B &= ~(_BV(CS10));
-            TCCR1B &= ~(_BV(CS12));
+
             TCNT1 = 0x0000;
         }
     }
