@@ -8,23 +8,7 @@
 #include "del.h"
 #include "debug.h"
 
-/*
- ==================================================== 
-                    CONFIGURATIONS                    
- ==================================================== 
-  1 - Command only (4 bits)                           
-  2 - Command and Address (4 bits and 1 bit)          
-  3 - Command and Address 12 bit (7 bits and 5 bits)  
- ==================================================== 
-*/
-
-//Relics of the past
-
-// #define COMMAND_SIZE 0x07 //We can probably set our own command size to something like 4 bits since 9 commands fits right in 4 bits
-// #define ADDRESS_SIZE 0x05 //We can probably just use a set address. Therefore there is no need to even set an address. Maybe we should outright not even use it
-
-//Comment and uncomment as you wish. You should only 
-//uncomment one at a time
+/////////////////////////////////////////////////////////////////////////////
 
 #define MODE_1
 // #define MODE_2
@@ -32,7 +16,7 @@
 
 #ifdef MODE_1
 #define COMMAND_SIZE 0x04
-#define ADDRESS_SIZE 0x00 //this forces the for loop to exit immediately! the compiler should optimize this part of the code and thus the address bits will never be transferred no matter what!
+#define ADDRESS_SIZE 0x00
 #endif
 #ifdef MODE_2
 #define COMMAND_SIZE 0x04
@@ -43,15 +27,8 @@
 #define ADDRESS_SIZE 0x05
 #endif
 
-//These are useful for the following:
+/////////////////////////////////////////////////////////////////////////////
 
-//Variadic function with address size defined to null, if address size is non null then you append those bits in the 45ms frame.
-// #define TRANSMIT_COMMAND(...) transmitCommand(VARIADIC_TWO(__VA_ARGS__,)
-
-
-/*
- ==================================================== 
-*/
 #define HIGH_MODE 0x01
 #define LOW_MODE 0x00
 
@@ -198,10 +175,6 @@ int main() {
     DDRC = 0xDF;
     DDRD = 0xFF;
     DDRB = 0xFF;
-
-//Global interrupt setup
-
-    sei();
 
 //setup
 
