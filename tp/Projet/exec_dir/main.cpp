@@ -16,6 +16,7 @@
  #include "linetracker.h"
  #include "debug.h"
  #include "Minuterie.h"
+ #include "Robot.h"
 
 
 extern volatile bool boolISR;
@@ -42,7 +43,7 @@ int main() {
    
    uint8_t cornerValue = 0;
    Robot robot;
-   isr_INIT();
+   robot.isr_INIT();
    cornerValue = robot.receive();
 
    robot.Run(cornerValue);

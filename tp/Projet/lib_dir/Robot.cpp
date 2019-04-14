@@ -6,7 +6,7 @@ volatile bool boolISR = false;
 volatile uint8_t pointCounterISR = 0;
 volatile uint8_t cornerCounterISR = 0;
 
-void isr_INIT() {
+void Robot::isr_INIT() {
 
     DDRD = 0x00;
     DDRB = 0xff;
@@ -38,11 +38,16 @@ Robot::~Robot(){
 
 
 uint8_t Robot::receive(){
+    uint8_t result = 0;
     startMinuterie(0xFFFF);
     while(TCNT1 < 0xCFFF){
-        //receiveIR
+        //result = IRReceive();
     }
-    if(pointCounter != 0)
+    if(cornerCounterISR != 0){
+        return cornerCounterISR - 1;
+    } else {
+        return result;
+    }
 }
 
 void Robot::Run(uint8_t IRCom){
