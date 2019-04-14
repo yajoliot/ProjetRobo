@@ -198,8 +198,9 @@ uint8_t readBit(){
 uint8_t readBits(uint8_t length){
     uint8_t result = 0x00;
     for(uint8_t i=0 ; i<length ; i++){
-        result = result << 1;
-        result |= readBit();
+        
+        result |= (readBit() << i);
+
     }
     return result;
 }
