@@ -85,23 +85,36 @@ ISR(PCINT2_vect){
     // PORTD |= (_BV(7));
     if(prev_pin_value == 0x20){
         //edge from hi to lo
-        lowEdge = true;
+        // lowEdge = true;
         prev_pin_value = 0x00;
-        if(isInfraredSending()){
-            //VERIFY HEADER!
-            headerDetected = verifyHeader();
-        }
-        if(headerDetected){
-            PORTB = 0x01;
-        }else{
-            PORTB = 0x00;
-        }
+        // if(isInfraredSending()){
+        //     //VERIFY HEADER!
+        //     headerDetected = verifyHeader();
+        // }
+        // if(headerDetected){
+        //     PORTB = 0x01;
+        // }else{
+        //     PORTB = 0x00;
+        // }
     }else/*prev_pin_value == 0x00*/{
-        highEdge = true;
+        // highEdge = true;
         prev_pin_value = 0x20;
     }
     PORTD = prev_pin_value;
     // reti();
+}
+
+void testFunction(){
+    PORTD = 0x00;
+    startMinuterie();
+    while(TCNT1 < 4000){
+    }
+    stopMinuterie();resetMinuterie(); 
+    PORTD = 0xff;
+    startMinuterie();
+    while(TCNT1 < 4000){
+    }
+    stopMinuterie();resetMinuterie();
 }
 
 bool isInfraredSending(){
@@ -182,12 +195,13 @@ int main() {
     DEBUG_PARAMETER_VALUE((uint8_t*)"PINC", &tmp); //either 0x20 or 0x00;
     prev_pin_value = tmp;
     PORTD = prev_pin_value;
-    enablePCINT();
+    // enablePCINT();
 //Test function is below
     for(;;){
-        if(headerDetected){
-            headerDetected = false;
-        }
+        testFunction();
+        // if(headerDetected){
+        //     headerDetected = false;
+        // }
         // if(headerDetected)
         // {
             // disablePCINT();
