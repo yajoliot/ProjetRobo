@@ -14,5 +14,12 @@ void startMinuterie(uint16_t duree);
 void stopMinuterie();
 void resetMinuterie ();
 void resetRegisters();
+void startMinuterieIR();
+
+void stopMinuterieIR();
+
+void resetMinuterieIR();
+
+void setPrescalerIR(uint8_t pos);
 
 #endif 

@@ -5,6 +5,7 @@
 #include "pwm.h"
 #include "Minuterie.h"
 #include "piezo.h"
+#include "Sirc.h"
 
 typedef enum {           /* <--- the type definition */
   INIT = 0, 
@@ -19,6 +20,8 @@ extern volatile bool boolISR;
 extern volatile etats etat;
 extern volatile uint8_t pointCounterISR;
 extern volatile uint8_t cornerCounterISR;
+extern volatile bool useCornerISR;
+extern volatile bool usePointISR;
 
 class Robot {
     private:
@@ -27,14 +30,13 @@ class Robot {
         
         uint8_t IRCom = 0;
         uint8_t nCMD = 0;
-        PWM* pwm;
-        LineTracker* lineTracker;
+        PWM pwm;
+        LineTracker lineTracker;
         
 
     public:
 
         Robot();
-        ~Robot();
         void operator delete(void* obj);
         void* operator new(size_t size);
         void Run(uint8_t IRCom);

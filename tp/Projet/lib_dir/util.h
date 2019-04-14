@@ -6,6 +6,7 @@
 #endif
 
 #include <util/delay.h>
+#include <stdlib.h>
 
 //custom variadic function defines for piezo
 //source:https://stackoverflow.com/a/9180314
@@ -16,5 +17,6 @@
 
 void variableDelay(uint16_t duration_in_ms);
 void variableDelay25ms(uint8_t iterations);
+
 
 #endif

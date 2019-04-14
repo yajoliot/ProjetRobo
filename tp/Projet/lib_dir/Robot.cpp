@@ -1,10 +1,13 @@
 #include "Robot.h"
 #include "debug.h"
+
     
 volatile etats etat = INIT;
 volatile bool boolISR = false;
 volatile uint8_t pointCounterISR = 0;
 volatile uint8_t cornerCounterISR = 0;
+volatile bool useCornerISR = false;
+volatile bool usePointISR = false;
 
 void Robot::isr_INIT() {
 
@@ -20,38 +23,35 @@ void Robot::isr_INIT() {
     sei();
 }
 
-void * operator new(size_t size)
-{
-  return malloc(size);
-}
 
 
-Robot::Robot(){
-    pwm = new PWM();
-    lineTracker = new LineTracker();
-}
+Robot::Robot(){}
 
-Robot::~Robot(){
-   delete pwm;
-   delete lineTracker;
-}
 
 
 uint8_t Robot::receive(){
     uint8_t result = 0;
     startMinuterie(0xFFFF);
-    while(TCNT1 < 0xCFFF){
-        //result = IRReceive();
+    while(useCornerISR == false){
+        if(headerVerified()){
+            result = readBits(COMMAND_SIZE);
+        }
     }
+    stopMinuterie();
+    resetMinuterie();
+
     if(cornerCounterISR != 0){
+
+        pointCounterISR = 0;
+        usePointISR = false;
         return cornerCounterISR - 1;
     } else {
-        return result;
+        pointCounterISR = 0;
+        return result - 1;
     }
 }
 
 void Robot::Run(uint8_t IRCom){
-    uint8_t valueMap = lineTracker->getValueMap();
     for(;nCMD != 5;){
         switch(IRCom){ //OMG IMPORTANT CHANGER
             case 0x00:
@@ -101,12 +101,12 @@ void Robot::RunCMD1(){
     DDRC = 0xFF;
     DDRB = 0xFF;
 
-    uint8_t rapport = pwm->getVitesseDefault();
+    uint8_t rapport = pwm.getVitesseDefault();
     uint8_t duree = 0xFF;
 
     enum states {INIT, ANALYSE_IR, WAIT, GOTO_S3, NEXT};
     enum aStates {IR_WAIT, P1P2P3 ,P4P5P6, P7P8P9};
-    uint32_t rapport3Inch;
+    uint32_t rapport3Inch = 0;
     states etat = INIT;
     aStates etat_analyze = IR_WAIT;
     uint8_t valueMap;
@@ -117,13 +117,13 @@ void Robot::RunCMD1(){
 
     for(;loop;){
     
-        lineTracker->updateValueMap();
-        uint8_t valueMap = lineTracker->getValueMap();
+        lineTracker.updateValueMap();
+        valueMap = lineTracker.getValueMap();
         PORTC = valueMap;
 
         switch(etat){
             case INIT:
-                pwm->avancementAjuste(rapport, valueMap);
+                pwm.avancementAjuste(rapport, valueMap);
                 startMinuterie(duree);
                 if(valueMap == 0x1F){
                     rapport3Inch = (TCNT1 >> 1) + (TCNT1 >> 2);
@@ -139,9 +139,16 @@ void Robot::RunCMD1(){
                 switch(etat_analyze){
 
                     case IR_WAIT:
-                        startMinuterie(0xFFFF);
-                        //allow time to increment pointer and receive ir
-                        while(TCNT1 < 0x9FFF){}
+                        while(usePointISR == false){
+                            pwm.arreter();
+                            if(headerVerified()){
+                                pointIR = readBits(COMMAND_SIZE) - 1;
+                            }
+                        }
+
+                        if (usePointISR == true){
+                            pointIR = pointCounterISR - 1;
+                        }
 
                         if( pointIR == 0x00 ||
                             pointIR == 0x01 ||
@@ -162,51 +169,51 @@ void Robot::RunCMD1(){
 
                     case P1P2P3:
                         
-                        pwm->avancerTimer(3, rapport3Inch);
+                        pwm.avancerTimer(3, rapport3Inch);
 
                         if(pointIR == 0x00){
-                            pwm->tourner90Precis(0, rapport);
-                            pwm->avancerTimer(4, rapport3Inch);
+                            pwm.tourner90Precis(0, rapport);
+                            pwm.avancerTimer(4, rapport3Inch);
                         } else if(pointIR == 0x01){
-                            pwm->tourner90Precis(0, rapport);
-                            pwm->avancerTimer(3, rapport3Inch);
+                            pwm.tourner90Precis(0, rapport);
+                            pwm.avancerTimer(3, rapport3Inch);
                         } else {
-                            pwm->tourner90Precis(0, rapport);
-                            pwm->avancerTimer(2, rapport3Inch);
+                            pwm.tourner90Precis(0, rapport);
+                            pwm.avancerTimer(2, rapport3Inch);
                         }  
                         etat = WAIT;
                     break;
 
                     case P4P5P6:
 
-                        pwm->avancerTimer(2, rapport3Inch);
+                        pwm.avancerTimer(2, rapport3Inch);
 
                         if(pointIR == 0x03){
-                            pwm->tourner90Precis(0, rapport);
-                            pwm->avancerTimer(4, rapport3Inch);
+                            pwm.tourner90Precis(0, rapport);
+                            pwm.avancerTimer(4, rapport3Inch);
                         } else if(pointIR == 0x04){
-                            pwm->tourner90Precis(0, rapport);
-                            pwm->avancerTimer(3, rapport3Inch);
+                            pwm.tourner90Precis(0, rapport);
+                            pwm.avancerTimer(3, rapport3Inch);
                         } else {
-                            pwm->tourner90Precis(0, rapport);
-                            pwm->avancerTimer(2, rapport3Inch);
+                            pwm.tourner90Precis(0, rapport);
+                            pwm.avancerTimer(2, rapport3Inch);
                         }  
                         etat = WAIT;
                     break;
                     
                     case P7P8P9:
 
-                        pwm->avancerTimer(1, rapport3Inch);
+                        pwm.avancerTimer(1, rapport3Inch);
 
                         if(pointIR == 0x06){
-                            pwm->tourner90Precis(0, rapport);
-                            pwm->avancerTimer(4, rapport3Inch);
+                            pwm.tourner90Precis(0, rapport);
+                            pwm.avancerTimer(4, rapport3Inch);
                         } else if(pointIR == 0x07){
-                            pwm->tourner90Precis(0, rapport);
-                            pwm->avancerTimer(3, rapport3Inch);
+                            pwm.tourner90Precis(0, rapport);
+                            pwm.avancerTimer(3, rapport3Inch);
                         } else {
-                            pwm->tourner90Precis(0, rapport);
-                            pwm->avancerTimer(2, rapport3Inch);
+                            pwm.tourner90Precis(0, rapport);
+                            pwm.avancerTimer(2, rapport3Inch);
                         }  
                         etat = WAIT;        
                     break;
@@ -218,12 +225,12 @@ void Robot::RunCMD1(){
 
             case WAIT:
 
-                pwm->tourner90Precis(1, rapport);
+                pwm.tourner90Precis(1, rapport);
                 PIEZO_INIT(DDD5, DDD7, 50);
                 PLAY_NOTE(45, 1);
                 _delay_ms(3000);
                 setVolume(0);
-                pwm->tourner90Precis(1, rapport);
+                pwm.tourner90Precis(1, rapport);
                 setVolume(50);
                 _delay_ms(3000);
                 setVolume(0);
@@ -238,25 +245,25 @@ void Robot::RunCMD1(){
                     pointIR == 0x05 ||
                     pointIR == 0x08 ){
 
-                    pwm->avancerTimer(2, rapport3Inch);
+                    pwm.avancerTimer(2, rapport3Inch);
 
                 } else  if( pointIR == 0x01 ||
                             pointIR == 0x04 ||
                             pointIR == 0x07 ) {
-                    pwm->avancerTimer(3, rapport3Inch);
+                    pwm.avancerTimer(3, rapport3Inch);
                 } else {
-                    pwm->avancerTimer(4, rapport3Inch);
+                    pwm.avancerTimer(4, rapport3Inch);
                 }
 
-                pwm->tourner90Precis(0, pwm->getVitesseDefault());
-                pwm->arreter();
+                pwm.tourner90Precis(0, pwm.getVitesseDefault());
+                pwm.arreter();
                 _delay_ms(500);
                 while(valueMap == 0x00){
-                    pwm->avancer(rapport);
-                    lineTracker->updateValueMap();
-                    valueMap = lineTracker->getValueMap();
+                    pwm.avancer(rapport);
+                    lineTracker.updateValueMap();
+                    valueMap = lineTracker.getValueMap();
                 }
-                pwm->arreter();
+                pwm.arreter();
                 _delay_ms(3000);
                 etat = NEXT;
                 
@@ -286,37 +293,37 @@ void Robot::RunCMD2(){
     int etat = INIT;
     DDRC = 0xFF;
     DDRB = 0xFF;
-    uint8_t rapport = pwm->getVitesseDefault(); // à changer pas bon -xavie
+    uint8_t rapport = pwm.getVitesseDefault(); // à changer pas bon -xavie
     bool loop = true;
     uint8_t valueMap;
 
     for(;loop;){
         
-        lineTracker->updateValueMap();
-        valueMap = lineTracker->getValueMap();
+        lineTracker.updateValueMap();
+        valueMap = lineTracker.getValueMap();
     
         switch(etat){
             case INIT:
-                pwm->ralentissementGauche(rapport, valueMap);
+                pwm.ralentissementGauche(rapport, valueMap);
                 if(valueMap == 24 || valueMap == 28 || valueMap == 30 || valueMap == 31){
                     etat = TOURNE_DROITE;
                 }
             break;
             
             case TOURNE_DROITE:
-                pwm->tournantDroite(rapport, valueMap);
+                pwm.tournantDroite(rapport, valueMap);
                 if(valueMap == 4)
                 etat = COIN;
             break;
 
             case COIN:
-                pwm->ralentissementGauche(rapport, valueMap);
+                pwm.ralentissementGauche(rapport, valueMap);
                 if(valueMap == 3 || valueMap == 7 || valueMap == 15 || valueMap == 31)
                     etat = TOURNE_GAUCHE;
             break;
 
             case TOURNE_GAUCHE:
-                pwm->tournantGauche(rapport, valueMap);
+                pwm.tournantGauche(rapport, valueMap);
                 if (valueMap == 4)
                     etat = NEXT;
             break;
@@ -345,21 +352,22 @@ void Robot::RunCMD3(){
     uint16_t duree  = 0xFFFF;
     uint16_t distTime1 = 0;
     uint16_t distTime2 = 0;
-    uint16_t compare_value;
+    uint16_t compare_value = 0;
     bool loop = true;
     bool droite = true;
     bool analyse = false;
-    uint8_t valueMap = lineTracker->getValueMap();
+    uint8_t valueMap = lineTracker.getValueMap();
     uint8_t rapport;
 
 
     for(;loop;){
         
-        lineTracker->updateValueMap();
+        lineTracker.updateValueMap();
+        valueMap = lineTracker.getValueMap();
         
         
 
-        if(lineTracker->getValueMap() == 0x1F && !analyse){
+        if(valueMap == 0x1F && !analyse){
             etat = INTWAIT;
             analyse = true;
         }
@@ -367,31 +375,31 @@ void Robot::RunCMD3(){
 
         switch(etat){
             case INIT:
-                pwm->avancementAjuste(rapport, lineTracker->getValueMap());
+                pwm.avancementAjuste(rapport, valueMap);
                 break;
 
             case INTWAIT:
-                pwm->arreter();
-                rapport = pwm->getVitesseDefault();
+                pwm.arreter();
+                rapport = pwm.getVitesseDefault();
                 break;
 
             case ANALYSE:
-                if(lineTracker->getValueMap() == 0x1F){
+                if(valueMap == 0x1F){
                     etat2 = ANTI_REBOND;
                 }
                     
                 switch(etat2){
                     case INIT2:
-                        pwm->avancer(rapport);
+                        pwm.avancer(rapport);
                     break;
 
                     case ANTI_REBOND:
 
-                        pwm->avancer(rapport);
+                        pwm.avancer(rapport);
 
-                        if(lineTracker->getValueMap() == 0x04 || 
-                           lineTracker->getValueMap() == 0x06 || 
-                           lineTracker->getValueMap() == 0x0C){
+                        if(valueMap == 0x04 || 
+                           valueMap == 0x06 || 
+                           valueMap == 0x0C){
                             
                             etat2 = DIST_1;
 
@@ -402,20 +410,27 @@ void Robot::RunCMD3(){
 
                     case DIST_1:
                         startMinuterie(duree);
-                        while(!(lineTracker->getValueMap() == 0x1C || 
-                                lineTracker->getValueMap() == 0x07 || 
-                                lineTracker->getValueMap() == 0x03 ||  
-                                lineTracker->getValueMap() == 0x18 ||
-                                lineTracker->getValueMap() == 0x01 ||
-                                lineTracker->getValueMap() == 0x10 ||
-                                lineTracker->getValueMap() == 0x0F ||
-                                lineTracker->getValueMap() == 0x1E
-                                 )){
+                        while(!(valueMap == 0x1C || 
+                                valueMap == 0x07 || 
+                                valueMap == 0x03 ||  
+                                valueMap == 0x18 ||
+                                valueMap == 0x01 ||
+                                valueMap == 0x10 ||
+                                valueMap == 0x0F ||
+                                valueMap == 0x1E
+                                )){
+                            lineTracker.updateValueMap();
+                            valueMap = lineTracker.getValueMap();
+                            pwm.avancer(rapport);
 
-                            lineTracker->updateValueMap();
-                            pwm->avancer(rapport);
                         }
-                        if(lineTracker->getValueMap() == 0x01 || lineTracker->getValueMap() == 0x03 ||lineTracker->getValueMap() == 0x07 || lineTracker->getValueMap() == 0x0F ) //if found left
+                        lineTracker.updateValueMap();
+                        valueMap = lineTracker.getValueMap();
+
+                        if( valueMap == 0x01 || 
+                            valueMap == 0x03 ||
+                            valueMap == 0x07 || 
+                            valueMap == 0x0F ) //if found left
                             droite = false;
 
                         distTime1 = TCNT1;
@@ -425,23 +440,23 @@ void Robot::RunCMD3(){
                     case DIST_2:
                         startMinuterie(duree);
                         if(droite){
-                            while(!( 
-                                lineTracker->getValueMap() == 0x07 || 
-                                lineTracker->getValueMap() == 0x03 ||  
-                                lineTracker->getValueMap() == 0x01 ||
-                                lineTracker->getValueMap() == 0x0F)){
-                                lineTracker->updateValueMap();
-                                pwm->avancer(rapport);
+                            while(!( valueMap == 0x07 || 
+                                     valueMap == 0x03 ||  
+                                     valueMap == 0x01 ||
+                                     valueMap == 0x0F)){
+                                lineTracker.updateValueMap();
+                                valueMap = lineTracker.getValueMap();
+                                pwm.avancer(rapport);
                             }
 
                         } else {
-                            while(!(lineTracker->getValueMap() == 0x1C || 
-                                lineTracker->getValueMap() == 0x18 ||
-                                lineTracker->getValueMap() == 0x10 ||
-                                lineTracker->getValueMap() == 0x1E
-                                 )){
-                                lineTracker->updateValueMap();
-                                pwm->avancer(rapport);
+                            while(!(valueMap == 0x1C || 
+                                    valueMap == 0x18 ||
+                                    valueMap == 0x10 ||
+                                    valueMap == 0x1E )){
+                                lineTracker.updateValueMap();
+                                valueMap = lineTracker.getValueMap();
+                                pwm.avancer(rapport);
                             }
                         }
 
@@ -456,15 +471,15 @@ void Robot::RunCMD3(){
             break;
 
             case WAIT_TILL_END:
-                if(lineTracker->getValueMap() == 0x00){
+                if(valueMap == 0x00){
                     etat = END;
-                    pwm->arreter();
+                    pwm.arreter();
                 }
                 compare_value = distTime1;
             break;
 
             case END:
-                pwm->arreter();
+                pwm.arreter();
                 while(boolISR){
                     if( abs(distTime2 - distTime1) < compare_value + compare_value && droite){ 
                         PORTC = 0x08;
@@ -494,17 +509,14 @@ void Robot::RunCMD4(){
     int etat = INIT;
     DDRC = 0xFF;
     DDRB = 0xFF;
-    uint8_t rapport = pwm->getVitesseDefault(); // à changer pas bon -xavier
-    bool boolBoite = false;
-    bool tournerGauche = false;
-    bool tournerDroite = false;
+    uint8_t rapport = pwm.getVitesseDefault(); // à changer pas bon -xavier
     uint8_t nbBoites = 0;
     bool loop = true;
 
     for(;loop;){
         
-        lineTracker->updateValueMap();
-        uint8_t valueMap = lineTracker->getValueMap();
+        lineTracker.updateValueMap();
+        uint8_t valueMap = lineTracker.getValueMap();
         PORTC = valueMap;
         
 
@@ -519,7 +531,7 @@ void Robot::RunCMD4(){
         //TODO:  mettre dans une fonction
         switch(etat){
             case INIT:
-                pwm->avancementAjuste(rapport, valueMap);
+                pwm.avancementAjuste(rapport, valueMap);
                 if(valueMap == 3 || valueMap == 7 || valueMap == 15)
                     etat = TOURNE_GAUCHE;
             break;
@@ -528,9 +540,9 @@ void Robot::RunCMD4(){
                     //TODO:  mettre dans une fonction
                     
                     while(valueMap != 4){
-                        lineTracker->updateValueMap();
-                        valueMap = lineTracker->getValueMap();
-                        pwm->tournantGauche(rapport, valueMap);
+                        lineTracker.updateValueMap();
+                        valueMap = lineTracker.getValueMap();
+                        pwm.tournantGauche(rapport, valueMap);
                     }
                     etat = LIGNE_DROITE;
                     
@@ -538,7 +550,7 @@ void Robot::RunCMD4(){
 
             case LIGNE_DROITE:
                 //TODO:  mettre dans une fonction
-                pwm->avancementAjuste(rapport, valueMap);
+                pwm.avancementAjuste(rapport, valueMap);
                 if(valueMap == 15 || valueMap == 30 || valueMap == 31){
                     etat = PRE_BOITE;
                 }
@@ -557,9 +569,9 @@ void Robot::RunCMD4(){
                 resetRegisters();
 
                 while(valueMap == 15 || valueMap == 30 || valueMap == 31){
-                    lineTracker->updateValueMap();
-                    valueMap = lineTracker->getValueMap();
-                    pwm->avancer(rapport);
+                    lineTracker.updateValueMap();
+                    valueMap = lineTracker.getValueMap();
+                    pwm.avancer(rapport);
                 }
                 etat = BOITE;
             break;
@@ -567,9 +579,9 @@ void Robot::RunCMD4(){
             case BOITE : 
                     //TODO: à mettre dans fonction à part
                     while( !(valueMap == 15 || valueMap == 30 || valueMap == 31) ){
-                        lineTracker->updateValueMap();
-                        valueMap = lineTracker->getValueMap();
-                        pwm->boite(rapport, valueMap);
+                        lineTracker.updateValueMap();
+                        valueMap = lineTracker.getValueMap();
+                        pwm.boite(rapport, valueMap);
                     }
                     etat = POST_BOITE;
                     
@@ -589,9 +601,9 @@ void Robot::RunCMD4(){
                 
                     nbBoites++;
                     while(valueMap == 15 || valueMap == 30 || valueMap == 31){
-                        lineTracker->updateValueMap();
-                        valueMap = lineTracker->getValueMap();
-                        pwm->avancer(rapport);
+                        lineTracker.updateValueMap();
+                        valueMap = lineTracker.getValueMap();
+                        pwm.avancer(rapport);
                     }
 
                     if(nbBoites >= 3)
@@ -615,42 +627,38 @@ void Robot::RunCMDCoin(){
     etats etat = INIT;
     DDRC = 0xFF;
     DDRB = 0xFF;
-    uint8_t rapport = pwm->getVitesseDefault(); 
-    bool boolBoite = false;
-    bool tournerGauche = false;
-    bool tournerDroite = false;
+    uint8_t rapport = pwm.getVitesseDefault(); 
     uint16_t duree = 0xFFFF;
     uint8_t valueMap;
     uint16_t temps;
-    bool antiRebond = true;
     bool loop = true;
 
     for(;loop;){
      
-     lineTracker->updateValueMap();
-     PORTC = lineTracker->getValueMap();
-     valueMap = lineTracker->getValueMap();
+     lineTracker.updateValueMap();
+     PORTC = lineTracker.getValueMap();
+     valueMap = lineTracker.getValueMap();
 
      switch(etat){
 
         case INIT:
             
-            pwm->avancementAjuste(rapport, valueMap);
+            pwm.avancementAjuste(rapport, valueMap);
             if(valueMap == 7 || valueMap == 3 || valueMap == 15)
                 etat = TOURNANT_GAUCHE;
         break;
 
         case TOURNANT_GAUCHE:
-            pwm->arreter();
+            pwm.arreter();
             _delay_ms(100);
-            pwm->avancer(pwm->getVitesseDefault());
+            pwm.avancer(pwm.getVitesseDefault());
             if(valueMap == 0)
                 etat = DROIT;
         break;
 
         case DROIT :
             startMinuterie(duree);
-            pwm->avancer(pwm->getVitesseDefault());
+            pwm.avancer(pwm.getVitesseDefault());
             if(valueMap != 0){
                 temps = TCNT1;
                 etat = AJUSTEMENT;
@@ -662,7 +670,7 @@ void Robot::RunCMDCoin(){
         break;
 
         case AJUSTEMENT:
-            pwm->avancer(rapport);
+            pwm.avancer(rapport);
             startMinuterie(duree);
             if(TCNT1 >= (temps) - (temps >> 2)) {
                 etat = TOURNER;
@@ -674,7 +682,7 @@ void Robot::RunCMDCoin(){
         break;
 
         case TOURNER:
-            pwm->tourner90Precis(0,pwm->getVitesseDefault());
+            pwm.tourner90Precis(0,pwm.getVitesseDefault());
             etat = NEXT;
         break;
 

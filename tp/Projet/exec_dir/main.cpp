@@ -17,12 +17,15 @@
  #include "debug.h"
  #include "Minuterie.h"
  #include "Robot.h"
+ #include "Sirc.h"
 
 
 extern volatile bool boolISR;
 extern volatile etats etat;
 extern volatile uint8_t pointCounterISR;
 extern volatile uint8_t cornerCounterISR;
+extern volatile bool useCornerISR;
+extern volatile bool usePointISR;
 
 #define petit 0x01 //dummy values
 #define grand 0x02 //dummy values
@@ -33,20 +36,39 @@ ISR(INT0_vect){
     if(PIND & 0x04){
         etat = ANALYSE;
     }
-    pointerCounter++;
-    cornerCounter++;
+    pointCounterISR++;
+    cornerCounterISR++;
+    useCornerISR = true;
+    usePointISR = true;
 
+}
+
+ISR(PCINT2_vect){
+    if(prev_pin_value == 0x20){
+        //edge from hi to lo
+        prev_pin_value = 0x00;
+        // //VERIFY HEADER!
+        headerDetected = headerVerified();
+        if(headerDetected){
+            uint8_t tmp;
+            tmp = readBits(COMMAND_SIZE);
+  
+            PORTD = tmp;
+            for(;;){_delay_ms(300); PORTB = 0x02;}
+        }
+    }else/*prev_pin_value == 0x00*/{
+        // highEdge = true;
+        prev_pin_value = 0x20;
+    }
 }
 
 
 int main() {
    
-   uint8_t cornerValue = 0;
    Robot robot;
    robot.isr_INIT();
-   cornerValue = robot.receive();
 
-   robot.Run(cornerValue);
+   robot.Run(0x00);
 
 }
 

@@ -10,8 +10,18 @@ Si la minuterie atteint 2 secondes, elle est arrêtée et un signal correspondan
 0
 */
 
-#include "Minuterie.h"
-#include "
+#include <avr/io.h>
+#include "Sirc.h"
+
+
+ISR(TIMER2_OVF_vect){
+    overflow_count++;
+    if(overflow_count>=OVERFLOW_COUNT_TO_45_MS){
+        overflow_count = 0x0000;
+        end45msTimer();
+        reach_end_45_ms = true;
+    }
+}
 
 volatile uint8_t compteur = 0;
 #define TOP 15625
@@ -28,10 +38,17 @@ ISR(INT0_vect){
 }
 
 int main(){
+    DDRD = 0xFF;
+    sei();
     for(;;){
         if(TCNT1 == TOP){
+            PORTB = 0x01;
+            setupSIRC();
             transmit(compteur, ADDR);
-            compteur = 0;
+            compteur = 0x00;
+            TCCR1B &= ~(_BV(CS10));
+            TCCR1B &= ~(_BV(CS12));
+            TCNT1 = 0x0000;
         }
     }
 }
