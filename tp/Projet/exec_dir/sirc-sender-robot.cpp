@@ -39,7 +39,10 @@ ISR(INT0_vect){
 
 int main(){
     DDRD = 0xFF;
+    EIMSK |= _BV(INT0);
+    EICRA |= (1 << ISC01);
     sei();
+
     for(;;){
         if(TCNT1 == TOP){
             PORTB = 0x01;
