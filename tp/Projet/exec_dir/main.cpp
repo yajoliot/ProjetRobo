@@ -65,6 +65,9 @@ void setPrescaler(uint8_t pos){
 #define _2400us 19200
 #define _3862us 31000
 
+#define lo_borne 14080
+#define hi_borne 22928
+#define threshold 0//18504
 
 
 //this function is much less efficient than the #defines...
@@ -76,7 +79,7 @@ uint16_t calculateCyclesToWaste_us(uint16_t microseconds){
     // return miliseconds
 // }
 
-uint8_t read(uint8_t size);
+uint8_t readBits(uint8_t length);
 bool verifyHeader();
 bool isInfraredSending();
 volatile bool highEdge = false;
@@ -84,19 +87,20 @@ volatile bool lowEdge = false;
 volatile bool headerDetected = false;
 volatile uint8_t prev_pin_value;
 ISR(PCINT2_vect){
-    // cli();
-    // PORTD |= (_BV(7));
     if(prev_pin_value == 0x20){
         //edge from hi to lo
-        // lowEdge = true;
         prev_pin_value = 0x00;
-        //     //VERIFY HEADER!
+        //VERIFY HEADER!
         headerDetected = verifyHeader();
-        // }
         if(headerDetected){
-            PORTD = ((read(COMMAND_SIZE)) << 4);
-            PORTB = 0x01;
-            for(;;){}
+            uint8_t a = readBits(COMMAND_SIZE);
+            PORTD = a;
+            for(;;){
+                PORTB = 0x01;
+                _delay_ms(3000);
+                PORTB = 0x00;
+                _delay_ms(3000);
+            }   
         }else{
             PORTB = 0x00;
         }
@@ -104,8 +108,7 @@ ISR(PCINT2_vect){
         // highEdge = true;
         prev_pin_value = 0x20;
     }
-    PORTD = prev_pin_value;
-    // reti();
+    // PORTD = prev_pin_value;
 }
 
 void testFunction(){
@@ -123,17 +126,17 @@ void testFunction(){
 
 bool verifyHeader(){
         stopMinuterie(); resetMinuterie(); startMinuterie();
-        while(TCNT1 < _2400us){ _delay_us(0); }
+        while(TCNT1 < _2400us && (prev_pin_value == 0x00)){ prev_pin_value = (PINC & 0x20); }
         while((prev_pin_value == 0x00) && (TCNT1 <= _3862us)){//TCNT1 <= _3862us
             //polling
             prev_pin_value = (PINC & 0x20);
             if(prev_pin_value == 0x20){
                 stopMinuterie(); resetMinuterie(); startMinuterie();
-                while(TCNT1 < _600us){ _delay_us(0); }
+                while(TCNT1 < _600us && (prev_pin_value == 0x20)){ prev_pin_value = (PINC & 0x20); }
                 while((prev_pin_value == 0x20) && (TCNT1 <= _880us)){
                     prev_pin_value = (PINC & 0x20);
                     if(prev_pin_value == 0x00){
-                        stopMinuterie(); resetMinuterie();
+                        stopMinuterie(); resetMinuterie();   
                         return true;
                     }
                 }
@@ -144,46 +147,32 @@ bool verifyHeader(){
 
 uint8_t readBit(){
     stopMinuterie(); resetMinuterie(); startMinuterie();
-    _delay_us(600);
-    while((prev_pin_value == 0x00) && (TCNT1 <= _880us)){
-        prev_pin_value = (PINC & 0x20);
-        if(prev_pin_value == 0x20){
-            _delay_us(600);
-            while((prev_pin_value == 0x20) && (TCNT1 <= _880us)){
-                prev_pin_value = (PINC & 0x20);
-                if(prev_pin_value == 0x00){
-                    PORTB = 0x02;
-                    _delay_ms(1000);
-                    return 1;
+    while((PINC & 0x20) == 0x00){
+        if(PINC & 0x20){
+            while(PINC & 0x20){
+                if((PINC & 0x20) == 0x00){
+                    //end cycle
                 }
             }
         }
+        break;
     }
-    stopMinuterie(); resetMinuterie(); startMinuterie();
-    _delay_us(600);
-    while((prev_pin_value == 0x00) && (TCNT1 <= _880us)){
-        prev_pin_value = (PINC & 0x20);
-        if(prev_pin_value == 0x20){
-            _delay_us(600);
-            while((prev_pin_value == 0x20) && (TCNT1 <= _880us)){
-                prev_pin_value = (PINC & 0x20);
-                if(prev_pin_value == 0x00){
-                    return 2;
-                }
-            }
-        }
+    stopMinuterie();
+    if(TCNT1 < threshold){
+        return 0; // 0
+    }else if( TCNT1 >= threshold){
+        return 1; // 1
     }
-    return 0;
 }
 
-uint8_t read(uint8_t size){
+uint8_t readBits(uint8_t length){
     uint8_t result = 0x00;
-    for(uint8_t i=0 ; i<size ; i++){
-        result = result << i;
+    for(uint8_t i=0 ; i<length ; i++){
+        result = result << 1;
         uint8_t bit = readBit();
         if(bit==0){}
-        else
-            result |= (readBit()-1);
+        else//bit==0x01
+            result |= readBit();
     }
     return result;
 }
@@ -205,14 +194,14 @@ int main() {
     uint8_t tmp = PINC & 0x20;
     DEBUG_PARAMETER_VALUE((uint8_t*)"PINC", &tmp); //either 0x20 or 0x00;
     prev_pin_value = tmp;
-    PORTD = prev_pin_value;
+    // PORTD = prev_pin_value;
     sei();
     enablePCINT();
 //Test function is below
     for(;;){
         // testFunction();
         // if(headerDetected){
-        //     headerDetected = false;
+            // headerDetected = false;
         // }
         // if(headerDetected)
         // {
