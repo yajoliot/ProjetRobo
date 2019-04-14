@@ -96,6 +96,9 @@ volatile bool high_edge = false;
 volatile bool low_edge = false;
 volatile uint8_t prev_pin_value;
 ISR(PCINT2_vect){
+    if(prev_pin_value == (PINC & 0x20)){
+        return;
+    }
     if(prev_pin_value == 0x20){
         //edge from hi to lo
         low_edge = true;
@@ -105,7 +108,9 @@ ISR(PCINT2_vect){
         OCR1A = _3862us;
         while( ((TIFR1 & _BV(TOV1))==0x00) && TCNT1 >= _2400us ){
             if(PINC & 0x20){
-
+                PORTD = 0x80;
+                _delay_us(1000);
+                PORTD = 0x00;
             }
         }
 
@@ -162,29 +167,29 @@ int main() {
 
 ////////////////////////////////// RECEIVER //////////////////////////////////
 
-bool verifyHeader(){
-    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-    {
-        if(low_edge){
-            low_edge = false;
-            _delay_us(2400);
-            startMinuterie();
-        }
-    }
-    while(TCNT1 <= _4020us){
-        if(high_edge){
-            ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-            {
-                high_edge = false;
-                while(TCNT1!=_4020us){}
-                stopMinuterie();
-                resetMinuterie();
-                return true;
-            }
-        }
-    }
-    return false;
-}
+// bool verifyHeader(){
+//     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+//     {
+//         if(low_edge){
+//             low_edge = false;
+//             _delay_us(2400);
+//             startMinuterie();
+//         }
+//     }
+//     while(TCNT1 <= _4020us){
+//         if(high_edge){
+//             ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+//             {
+//                 high_edge = false;
+//                 while(TCNT1!=_4020us){}
+//                 stopMinuterie();
+//                 resetMinuterie();
+//                 return true;
+//             }
+//         }
+//     }
+//     return false;
+// }
 
 // void receiveHeader(){
 //     pna4602m = PINC & 0x20 ? 0x01 : 0x00;
