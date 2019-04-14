@@ -65,8 +65,8 @@ void setPrescaler(uint8_t pos){
 #define _2400us 19200
 #define _3862us 31000
 
-#define lo_borne 14080
-#define hi_borne 22928
+#define lo_borne 14080 // 14.4k
+#define hi_borne 22928 //23k
 #define threshold 0//18504
 
 
@@ -158,6 +158,8 @@ uint8_t readBit(){
         break;
     }
     stopMinuterie();
+    PORTD = (uint8_t)(TCNT1 >> 8);
+    PORTA = (uint8_t)TCNT1;
     if(TCNT1 < threshold){
         return 0; // 0
     }else if( TCNT1 >= threshold){
@@ -185,6 +187,7 @@ void disablePCINT();
 
 int main() {
 //Port Setup
+    DDRA = 0xFF;
     DDRC = 0xDF;
     DDRD = 0xFF;
     DDRB = 0xFF;
