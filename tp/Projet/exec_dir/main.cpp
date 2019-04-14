@@ -121,7 +121,7 @@ ISR(INT0_vect){
 void transmitBit(uint8_t bit);
 
 int main() {
-    DEBUG_INFO((uint8_t*)"START OF PROGRAM");
+    // DEBUG_INFO((uint8_t*)"START OF PROGRAM");
 
 //Port Setup
 
@@ -154,11 +154,13 @@ int main() {
         // }else{
         //     transmit(0x00,0x00);
         // }
-        transmit(0x07,0x00);
+
+    transmitHeader();
+        // transmit(0x07,0x00);
     // }
     // }
     
-    DEBUG_INFO((uint8_t*)"END OF PROGRAM");
+    // DEBUG_INFO((uint8_t*)"END OF PROGRAM");
 }
 
 void openPin(){
