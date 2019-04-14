@@ -57,42 +57,22 @@
 #define FALSE 0x00
 #define TRUE 0x01
 
-////////////////////////////////// RECEIVER //////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
-volatile bool high_edge = false;
-volatile bool low_edge = false;
-volatile uint8_t prev_pin_value;
-ISR(PCINT2_vect/*, ISR_NAKED*/){
-    // cli();
-    // _delay_us(100);
-    // if(PINC & 0x20){
-        // DEBUG_INFO((uint8_t*)"debounce works");
-        // reti();        
-    // }
-    if(prev_pin_value == 0x20){
-        // DEBUG_INFO((uint8_t*)"low");
-        //edge from hi to lo
-        low_edge = true;
-        prev_pin_value = 0x00;
-        //VERIFY HEADER!
-        // ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
-        _delay_us(3860);
-        startMinuterie();
-        OCR1A = 16;
-        while()
-        // }
-    }else/*prev_pin_value == 0x00*/{
-        // DEBUG_INFO((uint8_t*)"high");
-        high_edge = true;
-        prev_pin_value = 0x20;
-    }
-    PORTD = prev_pin_value;  
+void startMinuterie(){
+    //enable timer1
+    TCCR1B |= _BV(CS10);
 }
 
-void enablePCINT();
-void disablePCINT();
-// void receiveHeader();
-bool verifyHeader();
+void stopMinuterie(){
+    TCCR1B &= ~(_BV(CS10));
+}
+
+void resetMinuterie(){
+    TCNT1 = 0x0000;
+}
+
+////////////////////////////////// RECEIVER //////////////////////////////////
 
 #define _600us 4800
 #define _860us 6880
@@ -101,7 +81,46 @@ bool verifyHeader();
 #define _1940us 15520
 #define _1620us 12960
 #define _2400us 19200
-#define _4020us 32160
+#define _3862us 30896
+
+//this function is much less efficient than the #defines...
+uint16_t calculateCyclesToWaste_us(uint16_t microseconds){
+    return microseconds<<3;
+}
+
+uint16_t calculateCyclesToWaste_ms(uint16_t miliseconds){
+    // return miliseconds
+}
+
+volatile bool high_edge = false;
+volatile bool low_edge = false;
+volatile uint8_t prev_pin_value;
+ISR(PCINT2_vect){
+    if(prev_pin_value == 0x20){
+        //edge from hi to lo
+        low_edge = true;
+        prev_pin_value = 0x00;
+        //VERIFY HEADER!
+        startMinuterie();
+        OCR1A = _3862us;
+        while( ((TIFR1 & _BV(TOV1))==0x00) && TCNT1 >= _2400us ){
+            if(PINC & 0x20){
+
+            }
+        }
+
+    }else/*prev_pin_value == 0x00*/{
+        high_edge = true;
+        prev_pin_value = 0x20;
+    }
+    PORTD = prev_pin_value;  
+}
+
+
+void enablePCINT();
+void disablePCINT();
+// void receiveHeader();
+bool verifyHeader();
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -139,21 +158,6 @@ int main() {
             // }
         // }
     }
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-void startMinuterie(){
-    //enable timer1
-    TCCR1B |= _BV(CS10);
-}
-
-void stopMinuterie(){
-    TCCR1B &= ~(_BV(CS10));
-}
-
-void resetMinuterie(){
-    TCNT1 = 0x0000;
 }
 
 ////////////////////////////////// RECEIVER //////////////////////////////////
