@@ -4,6 +4,7 @@
  
 #include <util/atomic.h>
 #include <util/delay.h>
+#include <avr/interrupt.h>
 #include "del.h"
 #include "debug.h"
 
@@ -72,10 +73,15 @@ void resetMinuterie(){
     TCNT1 = 0x0000;
 }
 
+void setPrescaler(uint8_t pos){
+    TCCR1B |= _BV(pos);
+}
+
 ////////////////////////////////// RECEIVER //////////////////////////////////
 
 #define _600us 4800
 #define _860us 6880
+#define _880us 7040
 #define _1200us 9600 
 #define _1986us 15888
 #define _1620us 12960
@@ -91,61 +97,99 @@ uint16_t calculateCyclesToWaste_us(uint16_t microseconds){
     // return miliseconds
 // }
 
+bool verifyHeader();
+bool isInfraredSending();
 volatile bool highEdge = false;
 volatile bool lowEdge = false;
 volatile bool headerDetected = false;
 volatile uint8_t prev_pin_value;
 ISR(PCINT2_vect){
-    PORTD |= (_BV(7));
+    // cli();
+    // PORTD |= (_BV(7));
     if(prev_pin_value == 0x20){
         //edge from hi to lo
         lowEdge = true;
         prev_pin_value = 0x00;
-        //VERIFY HEADER!
-        OCR1A = _3862us;
-        startMinuterie();
-    
-        while(TCNT1 < _2400us){_delay_us(0);}
-        while( ((TIFR1 & _BV(TOV1))==0x00) && TCNT1 >= _2400us ){
-            if(PINC & 0x20){
-                stopMinuterie(); resetMinuterie();
-
-                OCR1A = _860us;
-                startMinuterie();
-                while(TCNT1 < _600us){}
-                while(((TIFR1 & _BV(TOV1))==0x00) && TCNT1 >= _600us){
-                    if(PINC & 0x20){
-                                            uint8_t a = 0x10;
-                    while(a){
-                        PORTD |= _BV(4);
-                        _delay_us(30);
-                        PORTD &= ~(_BV(4));
-                        _delay_us(30);
-                        a--;
-                    }
-                        stopMinuterie(); resetMinuterie();
-                        headerDetected = true;
-                    }else{
-                    }
-                }
-                TIFR1 |= _BV(TOV1);
-            }else{
-            }
+        if(isInfraredSending()){
+            //VERIFY HEADER!
+            headerDetected = verifyHeader();
         }
-        TIFR1 |= _BV(TOV1);
-
+        if(headerDetected){
+            PORTB = 0x01;
+        }else{
+            PORTB = 0x00;
+        }
     }else/*prev_pin_value == 0x00*/{
         highEdge = true;
         prev_pin_value = 0x20;
     }
-    PORTD = prev_pin_value;  
+    PORTD = prev_pin_value;
+    // reti();
+}
+
+bool isInfraredSending(){
+    //woot
+    _delay_ms(413);
+    OCR1A=12740; stopMinuterie(); resetMinuterie(); startMinuterie();//no need for startMinuterie()
+    prev_pin_value = (PINC & 0x20);
+    while((TIFR1 & _BV(TOV1))==0x00 && prev_pin_value == 0x20 && TCNT1 <= OCR1A){
+        prev_pin_value = (PINC & 0x20);
+    }
+    if(prev_pin_value == 0x20){
+        return true;
+    }else{
+        return false;
+    }
+
+}
+
+bool verifyHeader(){
+        OCR1A = _3862us;
+        resetMinuterie(); startMinuterie();
+        while(TCNT1 < _2400us){ _delay_us(0); }
+        while(((TIFR1 & _BV(TOV1))==0x00 && prev_pin_value == 0x00) /*&& TCNT1 >= _2400us*/){
+            //polling
+            prev_pin_value = (PINC & 0x20);
+            if(prev_pin_value){
+                stopMinuterie(); resetMinuterie();
+
+                    //                uint8_t a = 0x10;
+                    // while(a){
+                    //     PORTD |= _BV(4);
+                    //     _delay_us(30);
+                    //     PORTD &= ~(_BV(4));
+                    //     _delay_us(30);
+                    //     a--;
+                    // }
+                OCR1A = _880us;
+                startMinuterie();
+                while(TCNT1 < _600us){ _delay_us(0); }
+                while((TIFR1 & _BV(TOV1))==0x00 && prev_pin_value == 0x20 /*&& TCNT1 >= _600us*/){
+                    prev_pin_value = (PINC & 0x20);
+                    if(prev_pin_value == 0x00){
+                    // uint8_t a = 0x10;
+                    // while(a){
+                    //     PORTD |= _BV(4);
+                    //     _delay_us(30);
+                    //     PORTD &= ~(_BV(4));
+                    //     _delay_us(30);
+                    //     a--;
+                    // }
+                        stopMinuterie(); resetMinuterie();
+                        return true;
+                    }
+                }
+                TIFR1 |= _BV(TOV1);
+            }
+        }
+        TIFR1 |= _BV(TOV1);
+        return false;
 }
 
 
 void enablePCINT();
 void disablePCINT();
 // void receiveHeader();
-bool verifyHeader();
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -168,11 +212,14 @@ int main() {
     enablePCINT();
 //Test function is below
     for(;;){
-        if(headerDetected)
-        {
-            disablePCINT();
-            abort();
+        if(headerDetected){
+            headerDetected = false;
         }
+        // if(headerDetected)
+        // {
+            // disablePCINT();
+            // abort();
+        // }
         // disablePCINT();
         // uint8_t tmp = PINC & 0x20;
         // DEBUG_PARAMETER_VALUE((uint8_t*)"PINC", &tmp); 
