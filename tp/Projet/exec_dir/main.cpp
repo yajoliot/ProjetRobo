@@ -145,7 +145,7 @@ bool verifyHeader(){
         stopMinuterie(); resetMinuterie();
         while(PINC & 0x20){}
         prev_pin_value = 0x00;
-    // PORTB = 0x01;
+    PORTB = 0x01;
         return true;
 
 
