@@ -57,60 +57,53 @@
 #define FALSE 0x00
 #define TRUE 0x01
 
-////////////////////////////////// SENDER //////////////////////////////////
-
-
-void transmitBit(uint8_t bit);
-void transmitBits(uint8_t command_, uint8_t size_);
-void transmitHeader();
-void transmitCommand(uint8_t command_);
-void transmitAddress(uint8_t address_);
-void transmit(uint8_t command_, uint8_t address_);
-void enableSIRC();
-void disableSIRC();
-void setupSIRC();
-
-void begin45msTimer();
-void end45msTimer();
-
-#define OVERFLOW_COUNT_TO_45_MS 0x3726 //14118 (in integer value)
-volatile uint16_t overflow_count = 0x0000;
-volatile uint8_t reach_end_45_ms = FALSE;
-
-ISR(TIMER2_OVF_vect){
-    overflow_count++;
-    if(overflow_count>=OVERFLOW_COUNT_TO_45_MS){
-        overflow_count = 0x0000;
-        end45msTimer();
-        reach_end_45_ms = TRUE;
-    }
-}
-
 ////////////////////////////////// RECEIVER //////////////////////////////////
 
 volatile bool high_edge = false;
 volatile bool low_edge = false;
 volatile uint8_t prev_pin_value;
-ISR(PCINT2_vect, ISR_NAKED){
-    cli();
+ISR(PCINT2_vect/*, ISR_NAKED*/){
+    // cli();
+    // _delay_us(100);
+    // if(PINC & 0x20){
+        // DEBUG_INFO((uint8_t*)"debounce works");
+        // reti();        
+    // }
     if(prev_pin_value == 0x20){
+        // DEBUG_INFO((uint8_t*)"low");
         //edge from hi to lo
         low_edge = true;
+        prev_pin_value = 0x00;
+        //VERIFY HEADER!
+        // ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+        _delay_us(3860);
+        startMinuterie();
+        OCR1A = 16;
+        while()
+        // }
     }else/*prev_pin_value == 0x00*/{
+        // DEBUG_INFO((uint8_t*)"high");
         high_edge = true;
+        prev_pin_value = 0x20;
     }
+    PORTD = prev_pin_value;  
 }
 
 void enablePCINT();
 void disablePCINT();
 // void receiveHeader();
-void verifyHeader();
-
-/////////////////////////////////////////////////////////////////////////////
+bool verifyHeader();
 
 #define _600us 4800
 #define _860us 6880
 #define _880us 7040
+#define _1200us 9600 
+#define _1940us 15520
+#define _1620us 12960
+#define _2400us 19200
+#define _4020us 32160
+
+/////////////////////////////////////////////////////////////////////////////
 
 int main() {
 //Port Setup
@@ -127,10 +120,15 @@ int main() {
     uint8_t tmp = PINC & 0x20;
     DEBUG_PARAMETER_VALUE((uint8_t*)"PINC", &tmp); //either 0x20 or 0x00;
     prev_pin_value = tmp;
+    PORTD = prev_pin_value;
     enablePCINT();
 //Test function is below
     for(;;){
-        if(verifyHeader()){
+        // disablePCINT();
+        // uint8_t tmp = PINC & 0x20;
+        // DEBUG_PARAMETER_VALUE((uint8_t*)"PINC", &tmp); 
+        // enablePCINT();
+        // if(verifyHeader()){
             //delay 600 ms
             // startMinuterie();
             // while(TCNT1 <=_880us){
@@ -139,7 +137,7 @@ int main() {
             //         low_edge = false;
             //     }
             // }
-        }
+        // }
     }
 }
 
@@ -158,141 +156,21 @@ void resetMinuterie(){
     TCNT1 = 0x0000;
 }
 
-////////////////////////////////// SENDER //////////////////////////////////
-
-void openPin(){
-    TCCR1A |= _BV(COM1A0);
-}
-
-void closePin(){
-    TCCR1A &= ~(_BV(COM1A0));
-}
-
-void transmitBit(uint8_t bit){
-    openPin();
-    if(bit == 1){
-        enableSIRC();
-        _delay_us(1200);
-        disableSIRC();
-    }else/*bit == 0x01*/{
-        enableSIRC();
-        _delay_us(600);
-        disableSIRC();
-    }
-    closePin();
-    PORTD &= ~(_BV(PD5));
-    //maybe need to set OC1A to 0?
-    _delay_us(600);
-}
-
-void setupSIRC(){
-    //Set the registers : CTC mode, Toggle on Compare, No prescaler
-    // TCCR1A |= _BV(COM1A0);
-    TCCR1B |=  _BV(WGM12);
-    //TCCR1B |= _BV(CS10);
-    
-    //Set the frequency : 38 kHz
-    //The following value is what we will use to set the "one"
-    OCR1A = 0x68;
-}
-
-void enableSIRC(){
-    TCNT1 = 0x0000;
-    //Non 0 value for the prescaler enables the timer
-    TCCR1B |= _BV(CS10);
-    //Enable counter overflow interrupt 
-    // TIMSK1 |= _BV(TOIE1); 
-}
-
-void disableSIRC(){
-    //Sets the only prescaler value we touched to 0
-    TCCR1B &= ~(_BV(CS10));
-    //Disable counter overflow interrupt
-    TIMSK1 &= ~(_BV(TOIE1));
-    // cli();
-}
-
-void transmitBits(uint8_t command_, uint8_t size_){
-    //DEBUG_FUNCTION_CALL((uint8_t*)"transmitBits(uint8_t command_, uint8_t size_)");
-    for(uint8_t i=0x00 ; i<size_ ; i++){
-        //if the bit @ the ith position is 1
-        // uint8_t bitmask = _BV(i);
-        // //DEBUG_PARAMETER_VALUE((uint8_t*)"_BV(i)", &bitmask);
-        if(command_ & _BV(i)){
-            //then transmit a high bit
-            transmitBit(1);
-        }else{
-            transmitBit(0);
-        }
-    }
-}
-
-void transmitHeader(){
-    openPin(); 
-    enableSIRC();
-    _delay_us(2400);
-    disableSIRC();
-    closePin();
-    PORTD &= ~(_BV(PD5));
-    _delay_us(600);
-}
-
-void transmitCommand(uint8_t command_){
-    transmitBits(command_, COMMAND_SIZE);
-}
-
-void transmitAddress(uint8_t address_){
-    transmitBits(address_, ADDRESS_SIZE);
-}
-
-void transmit(uint8_t command_, uint8_t address_){
-    // DEBUG_FUNCTION_CALL((uint8_t*)"transmit()");
-    for(uint8_t i=0x00 ; i<0x03 ; i++){
-        //begin 45 ms timer 3
-        begin45msTimer();
-        //start sending packet
-        transmitHeader();
-        transmitCommand(command_);
-        transmitAddress(address_);
-        //wait till end of 45 ms
-        while(!reach_end_45_ms){}
-        //reset the boolean for 45 ms
-        reach_end_45_ms = FALSE;
-        //send again. for loop seems appropriate here
-    }
-    // DEBUG_FUNCTION_EXIT();
-}
-
-void begin45msTimer(){
-    //Set timer2 to normal mode
-    //WGM22:0 = 0 -> you don't need to do anything. all are initialized at 0
-    //Enable the timer
-    TCCR2B |= _BV(CS20);
-    //Enable counter overflow interrupt 
-    TIMSK2 |= _BV(TOIE2); 
-}
-
-void end45msTimer(){
-    TCCR2B &= ~(_BV(CS20));
-    TIMSK2 &= ~(_BV(TOIE2));
-}
-
 ////////////////////////////////// RECEIVER //////////////////////////////////
 
-
-
-#define _1620us 12960
-#define _2400us 19200
-#define _4020us 32160
-
 bool verifyHeader(){
-    if(low_edge){
-        low_edge = false;
-        _delay_us(2400);
-        startMinuterie();
-        sei();
-        while(TCNT1 <= _4020us){
-            if(high_edge){
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        if(low_edge){
+            low_edge = false;
+            _delay_us(2400);
+            startMinuterie();
+        }
+    }
+    while(TCNT1 <= _4020us){
+        if(high_edge){
+            ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+            {
                 high_edge = false;
                 while(TCNT1!=_4020us){}
                 stopMinuterie();
@@ -304,53 +182,47 @@ bool verifyHeader(){
     return false;
 }
 
-void receiveHeader(){
-    pna4602m = PINC & 0x20 ? 0x01 : 0x00;
-    enablePCINT();
-    while(high_edge){_delay_us(0);//DEBUG_INFO((uint8_t*)"nice");}
-    //DEBUG_INFO((uint8_t*)"we out");
-    //we got a low edge
-    startMinuterie();
-    while(TCNT1 <= _2400ms){ _delay_us(0);}
-    while(TCNT1 <= _4020ms){//only gets 2 cycle to get a try
-        //DEBUG_INFO((uint8_t*)"rip");
-        if(high_edge){
-            //DEBUG_INFO((uint8_t*)"im faster");
-            disablePCINT();
-            stopMinuterie(); 
-            resetMinuterie();
-            high_edge = false;
-            break;
-        }
-    }
-}
+// void receiveHeader(){
+//     pna4602m = PINC & 0x20 ? 0x01 : 0x00;
+//     enablePCINT();
+//     while(high_edge){_delay_us(0);//DEBUG_INFO((uint8_t*)"nice");}
+//     //DEBUG_INFO((uint8_t*)"we out");
+//     //we got a low edge
+//     startMinuterie();
+//     while(TCNT1 <= _2400ms){ _delay_us(0);}
+//     while(TCNT1 <= _4020ms){//only gets 2 cycle to get a try
+//         //DEBUG_INFO((uint8_t*)"rip");
+//         if(high_edge){
+//             //DEBUG_INFO((uint8_t*)"im faster");
+//             disablePCINT();
+//             stopMinuterie(); 
+//             resetMinuterie();
+//             high_edge = false;
+//             break;
+//         }
+//     }
+// }
 
-#define _1200us 9600 
-#define _1940us 15520
 
-void receiveBit(){
-    pna4602m = PINC & 0x20 ? 0x01 : 0x00;
-    enablePCINT();
-    startMinuterie();
-    while(TCNT1 <= _1200us){_delay_us(0);}
-    while(TCNT1 <= _1940us){
-        if(high_edge)
-    }
-}
+// void receiveBit(){
+//     pna4602m = PINC & 0x20 ? 0x01 : 0x00;
+//     enablePCINT();
+//     startMinuterie();
+//     while(TCNT1 <= _1200us){_delay_us(0);}
+//     while(TCNT1 <= _1940us){
+//         if(high_edge)
+//     }
+// }
 
-#define _600us 4800
-#define _860us 6880
-#define _880us 7040
-
-void receiveBits(){
-    receiveHeader(); startMinuterie();
-    while(high_edge && TNCT1 < _600us){ _delay_us(0); }
-    //after this there is a low dge
-    for(uint8_t i=0 ; i<COMMAND_SIZE ; i++){
-        receiveBit();
-        while(high_edge && TNCT1 < 880us){ _delay_us(0); }
-    }
-}
+// void receiveBits(){
+//     receiveHeader(); startMinuterie();
+//     while(high_edge && TNCT1 < _600us){ _delay_us(0); }
+//     //after this there is a low dge
+//     for(uint8_t i=0 ; i<COMMAND_SIZE ; i++){
+//         receiveBit();
+//         while(high_edge && TNCT1 < 880us){ _delay_us(0); }
+//     }
+// }
 
 void enablePCINT(){
     //Enable that PINB6-7 will trigger an ISR event on any change (edge change i guess)
