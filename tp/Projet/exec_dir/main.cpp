@@ -37,6 +37,7 @@ ISR(INT0_vect){
     _delay_ms(30);
     if(PIND & 0x04){
         etat = ANALYSE;
+        DEBUG_PARAMETER_VALUE((uint8_t*)"ISR", (void*) &etat);
         boolISR = true;
         pointCounterISR++;
         cornerCounterISR++;
@@ -75,9 +76,8 @@ int main() {
   DDRD = 0xFC;
    
    Robot robot;
-   robot.isr_INIT();
 
-   robot.Run(0x01);
+   robot.Run(0x03);
 
 }
 

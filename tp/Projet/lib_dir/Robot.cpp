@@ -351,6 +351,7 @@ void Robot::RunCMD3(){
     bool analyse = false;
     uint8_t valueMap = lineTracker.getValueMap();
     uint8_t rapport;
+    isr_INIT();
 
 
     for(;loop;){
@@ -363,6 +364,7 @@ void Robot::RunCMD3(){
         switch(etat){
             case INIT:
                 pwm.avancementAjuste(rapport, valueMap);
+                DEBUG_PARAMETER_VALUE((uint8_t*)"INIT", (void*) & etat);
                 if(valueMap == 0x1F ){
                     etat = INTWAIT;
                 }
@@ -370,11 +372,13 @@ void Robot::RunCMD3(){
 
             case INTWAIT:
                 pwm.arreter();
+                DEBUG_PARAMETER_VALUE((uint8_t*)"ARRETER", (void*) &etat);
                 rapport = pwm.getVitesseDefault();
                 break;
 
             case ANALYSE:
                 boolISR = false;
+                DEBUG_PARAMETER_VALUE((uint8_t*)"ANALYSE", (void*) &etat);
                 usePointISR = false;
                 pointCounterISR = 0;
                 
@@ -382,6 +386,7 @@ void Robot::RunCMD3(){
                 switch(etat2){
                     case INIT2:
                         pwm.avancer(rapport);
+                        DEBUG_PARAMETER_VALUE((uint8_t*)"AVANCER", (void*) &etat);
                         if(valueMap == 0x1F){
                             etat2 = ANTI_REBOND;
                         }
