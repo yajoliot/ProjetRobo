@@ -126,7 +126,7 @@ ISR(PCINT2_vect){
         // highEdge = true;
         prev_pin_value = 0x20;
     }
-    // PORTD = prev_pin_value; 
+    PORTD = prev_pin_value; 
 }
 
 void testFunction(){
