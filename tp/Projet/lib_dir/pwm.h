@@ -15,7 +15,7 @@ class PWM{
         
         //Constantes d'ajustement des roues afin de faire en sorte que le robot
         //avance en ligne droite
-        static const uint8_t AJUSTEMENT_DROITE = 2;
+        static const uint8_t AJUSTEMENT_DROITE = 4;
         static const uint8_t AJUSTEMENT_GAUCHE = 4;
 
         //Diminution minimale possible d'une roue pour ajuster sa trajectoire

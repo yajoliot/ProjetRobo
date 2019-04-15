@@ -124,7 +124,7 @@ void Robot::RunCMD1(){
                 while(valueMap != 0x1F){
                     lineTracker.updateValueMap();
                     valueMap = lineTracker.getValueMap();
-                    pwm.avancer(rapport);
+                    pwm.avancementAjuste(rapport, valueMap);
                     rapport3Inch = (TCNT1 >> 1) + (TCNT1 >> 2);
                     etat = ANALYSE_IR;
                 }

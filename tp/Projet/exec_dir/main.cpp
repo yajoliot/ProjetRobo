@@ -48,23 +48,24 @@ ISR(INT0_vect){
 
 }
 
+static uint8_t cmd = 0x00;
+
 ISR(PCINT2_vect){
     if(prev_pin_value == 0x20){
         //edge from hi to lo
         prev_pin_value = 0x00;
         // //VERIFY HEADER!
-        
-        if(verifyHeader()){
-            uint8_t tmp;
-            tmp = readBits(COMMAND_SIZE);
-  
-            PORTD = tmp;
+        headerDetected = verifyHeader();
+        if(headerDetected){
+            cmd = readBits(COMMAND_SIZE);
         }
     }else/*prev_pin_value == 0x00*/{
         // highEdge = true;
         prev_pin_value = 0x20;
     }
 }
+
+
 
 
 int main() {
@@ -77,20 +78,25 @@ int main() {
   DDRC = 0xDF;
   DDRD = 0xF0;
     
+   PORTC = 0x04;
+   _delay_ms(3000);
+   PORTC = 0x00;
+
+    uint8_t tmp = PINC & 0x20;
+    prev_pin_value = tmp;
+    sei();
+   enablePCINT();
+   while(!headerDetected){}
+    headerDetected = false;
+    disablePCINT();
+    PORTB = 0x02;
+    PORTC = cmd;
+      _delay_ms(3000);
+   PORTC = 0x00;
 
     Robot robot;
-
-    //sei();
-    //enablePCINT();
-
-    robot.isr_INIT();
-    
-    uint8_t tempIR = robot.receive();
-   
-
-    robot.Run(tempIR);
-
-    
+   robot.isr_INIT();
+   robot.Run(cmd-1);
 
     }
 
