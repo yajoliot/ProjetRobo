@@ -41,6 +41,11 @@ ISR(INT0_vect){
 }
 
 int main(){
+        DDRD = 0xFF;
+    PORTD = 0x01;
+     
+
+    
     ATOMIC_BLOCK(ATOMIC_FORCEON){
         DDRB = 0xFF;
         DDRD = 0xFB;

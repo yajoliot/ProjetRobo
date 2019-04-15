@@ -261,7 +261,7 @@ void PWM::avancerTimer(uint8_t valeur, uint32_t timer){
 	arreter();
     _delay_ms(300);
 	startMinuterie(0xFFFF);
-	while(TCNT1 <= valeur * timer)
+	while(TCNT1 < valeur * timer)
         avancer(getVitesseDefault());
     stopMinuterie();
     resetMinuterie();

@@ -52,7 +52,7 @@ extern volatile bool reach_end_45_ms;
 
 uint8_t readBit();
 uint8_t readBits(uint8_t length);
-bool headerVerified();
+bool verifyHeader();
 void enablePCINT();
 void disablePCINT();
 
@@ -62,6 +62,7 @@ void transmitLowBit();
 void transmitHeader();
 void transmitCommand(uint8_t command_);
 void transmitAddress(uint8_t address_);
+void transmitBits(uint8_t command_, uint8_t size_);
 void transmitBit(uint8_t bit);
 void transmitEndBit();
 void transmit(uint8_t command_, uint8_t address_);

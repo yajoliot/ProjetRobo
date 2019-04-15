@@ -35,15 +35,16 @@ extern volatile bool usePointISR;
 
 ISR(INT0_vect){
     _delay_ms(30);
+    
     if(PIND & 0x04){
         etat = ANALYSE;
-        DEBUG_PARAMETER_VALUE((uint8_t*)"ISR", (void*) &etat);
         boolISR = true;
-        pointCounterISR++;
-        cornerCounterISR++;
         useCornerISR = true;
         usePointISR = true;
+        pointCounterISR++;
+        cornerCounterISR++;
     }
+    DEBUG_PARAMETER_VALUE((uint8_t*)"receive",(void*) &cornerCounterISR);
 
 
 }
@@ -53,13 +54,12 @@ ISR(PCINT2_vect){
         //edge from hi to lo
         prev_pin_value = 0x00;
         // //VERIFY HEADER!
-        headerDetected = headerVerified();
-        if(headerDetected){
+        
+        if(verifyHeader()){
             uint8_t tmp;
             tmp = readBits(COMMAND_SIZE);
   
             PORTD = tmp;
-            for(;;){_delay_ms(300); PORTB = 0x02;}
         }
     }else/*prev_pin_value == 0x00*/{
         // highEdge = true;
@@ -70,16 +70,32 @@ ISR(PCINT2_vect){
 
 int main() {
 
+
+
+
   DDRA = 0x00;
   DDRB = 0xFF;
-  DDRC = 0xFF;
-  DDRD = 0xFC;
+  DDRC = 0xDF;
+  DDRD = 0xF0;
+    
+
+    Robot robot;
+
+    //sei();
+    //enablePCINT();
+
+    robot.isr_INIT();
+    
+    uint8_t tempIR = robot.receive();
    
-   Robot robot;
 
-   robot.Run(0x03);
+    robot.Run(tempIR);
 
-}
+    
+
+    }
+
+
 
 
 

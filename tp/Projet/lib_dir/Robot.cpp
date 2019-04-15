@@ -29,20 +29,26 @@ Robot::Robot(){}
 
 uint8_t Robot::receive(){
     uint8_t result = 0;
-
+    DEBUG_PARAMETER_VALUE((uint8_t*)"receive",(void*) (&result));
     startMinuterie(0xFFFF);
-    while(TCNT1 < 0x5FFF){
-        if(headerVerified()){
+    while(TCNT1 < 0x9FFF){
+        DEBUG_PARAMETER_VALUE((uint8_t*)"receive",(void*) &cornerCounterISR);
+        if(false){ //verifyHeader()
+            
+        
             result = readBits(COMMAND_SIZE);
+            DEBUG_PARAMETER_VALUE((uint8_t*)"receive",(void*) &cornerCounterISR);
         }
     }
     stopMinuterie();
     resetMinuterie();
 
-    if(cornerCounterISR != 0){
+    //DEBUG_PARAMETER_VALUE((uint8_t*)"after while",(void*) &cornerCounterISR);
+    if(useCornerISR){
         pointCounterISR = 0;
         usePointISR = false;
         boolISR = false;
+        DEBUG_PARAMETER_VALUE((uint8_t*)"in if",(void*) &cornerCounterISR);
         return cornerCounterISR - 1;
     } else {
         return result - 1;
@@ -112,17 +118,20 @@ void Robot::RunCMD1(){
         lineTracker.updateValueMap();
         valueMap = lineTracker.getValueMap();
         PORTC = valueMap;
-
+        rapport = pwm.getVitesseDefault();
         switch(etat){
             case INIT:
-                pwm.avancementAjuste(rapport, valueMap);
+                
                 startMinuterie(duree);
-                if(valueMap == 0x1F){
+                while(valueMap != 0x1F){
+                    lineTracker.updateValueMap();
+                    valueMap = lineTracker.getValueMap();
+                    pwm.avancer(rapport);
                     rapport3Inch = (TCNT1 >> 1) + (TCNT1 >> 2);
                     etat = ANALYSE_IR;
-                    stopMinuterie();
-                    resetMinuterie();
                 }
+                stopMinuterie();
+                resetMinuterie();
 
             break;
 
@@ -132,12 +141,14 @@ void Robot::RunCMD1(){
 
                     case IR_WAIT:
                         startMinuterie(0xFFFF);
-                        while(TCNT1 < 0x7FFF){
+                        while(TCNT1 < 0x9FFF){
                             pwm.arreter();
-                            if(headerVerified()){
+                            if(false){ //verifyHeader()
                                 pointIR = readBits(COMMAND_SIZE);
                             }
                         }
+                        stopMinuterie();
+                        resetMinuterie();
 
 
                         if (usePointISR == true){
@@ -171,13 +182,13 @@ void Robot::RunCMD1(){
 
                         if(pointIR == 0x00){
                             pwm.tourner90Precis(0, rapport);
-                            pwm.avancerTimer(4, rapport3Inch);
+                            pwm.avancerTimer(3, rapport3Inch);
                         } else if(pointIR == 0x01){
                             pwm.tourner90Precis(0, rapport);
-                            pwm.avancerTimer(3, rapport3Inch);
+                            pwm.avancerTimer(2, rapport3Inch);
                         } else {
                             pwm.tourner90Precis(0, rapport);
-                            pwm.avancerTimer(2, rapport3Inch);
+                            pwm.avancerTimer(1, rapport3Inch);
                         }  
                         etat = WAIT;
                     break;
@@ -315,7 +326,7 @@ void Robot::RunCMD2(){
 
             case COIN:
                 pwm.avancementAjuste(rapport, valueMap);
-                if(valueMap == 3 || valueMap == 7 || valueMap == 15 || valueMap == 31)
+                if(valueMap == 0)
                     etat = TOURNE_GAUCHE;
             break;
 
@@ -458,7 +469,7 @@ void Robot::RunCMD3(){
                                 pwm.avancer(rapport);
                             }
                         }
-
+                        boolISR = false;
                         distTime2 = TCNT1;
                         etat = WAIT_TILL_END;
                         
@@ -479,7 +490,7 @@ void Robot::RunCMD3(){
 
             case END:
                 pwm.arreter();
-                while(boolISR){
+                while(!boolISR){
                     if( abs(distTime2 - distTime1) < compare_value + compare_value && droite){ 
                         PORTC = 0x08;
                     } else if ( abs(distTime2 - distTime1) > compare_value + compare_value && droite) {
