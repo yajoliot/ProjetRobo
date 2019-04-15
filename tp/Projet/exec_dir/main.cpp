@@ -95,18 +95,23 @@ volatile bool lowEdge = false;
 volatile bool headerDetected = false;
 volatile uint8_t prev_pin_value;
 ISR(PCINT2_vect){
+  PORTB = 0x01;
     if(prev_pin_value == 0x20){
+      PORTB = 0x02;
         //edge from hi to lo
         prev_pin_value = 0x00;
         // //VERIFY HEADER!
         headerDetected = verifyHeader();
+        PORTB = 0x01;
         if(headerDetected){
+          PORTB = 0x02;
             uint8_t tmp;
-            tmp = readBits(COMMAND_SIZE);
-            // tmp=readBit();
-            // readBit();
-            // readBit();
-            // readBit();
+            // tmp = readBits(COMMAND_SIZE);
+            tmp=readBit();
+            readBit();
+            readBit();
+            readBit();
+            readBit();
             PORTD = tmp;
             for(;;){_delay_ms(300); PORTB = 0x02;}
         }
