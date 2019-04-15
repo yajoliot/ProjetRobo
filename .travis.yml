@@ -4,7 +4,9 @@ sudo: enabled
 os: linux
 branches:
   only:
-  - CI
+  - master
+  - SuiveurDeLigne
+  - section3
 before-install:
 addons:
   apt:
@@ -22,7 +24,7 @@ install:
 #  - pip install --user cpplint
 
 script:
-   - chmod +x ./setmode.sh && ./setmode.sh debug
+#   - chmod +x ./setmode.sh && ./setmode.sh debug
    - make
 
 after_success:
@@ -41,8 +43,3 @@ after_success:
 notifications:
   email:
     - simon.zhang@polymtl.ca
-    
-branches:
-  only:
-    - master
-    - core
