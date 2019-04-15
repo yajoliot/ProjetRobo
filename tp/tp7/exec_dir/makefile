@@ -29,13 +29,16 @@ PROJECTNAME=test
 # Utilisez le suffixe .cpp pour les fichiers C++
 # Listez tous les fichiers a compiler, separes par
 # un espace. exemple: 'tp1.c tp2.cpp':
-PRJSRC= Probleme3.cpp memoire_24.cpp memoire_24.h
+PRJSRC= main.cpp
+
+# Nom de la librairie
+LIBRARYNAME=108
 
 # Inclusions additionnels (ex: -I/path/to/mydir)
-INC=
+INC=-I ../lib_dir
 
 # Libraires a lier (ex: -lmylib)
-LIBS=
+LIBS=-L ../lib_dir/ -l$(LIBRARYNAME)
 
 # Niveau d'optimization
 # Utilisez s (size opt), 1, 2, 3 ou 0 (off)
@@ -113,7 +116,7 @@ OBJDEPS=$(CFILES:.c=.o) \
 	
 # Pour plus d'information sur cette section, consulter :
 # http://bit.ly/257R53E	
-# Les fonctions $(filter pattern…,text) &
+# Les fonctions $(filter patternâ€¦,text) &
 # $(patsubst pattern,replacement,text) sont pertinentes
 	
 
@@ -124,16 +127,18 @@ OBJDEPS=$(CFILES:.c=.o) \
 # En plus de la commande make qui permet de compiler
 # votre projet, vous pouvez utilisez les commandes
 # make all, make install et make clean
-.PHONY: all install clean 
+.PHONY: all install clean lib
 
 # Make all permet simplement de compiler le projet
 #
-all: $(TRG)
+all: lib $(TRG)
+
+lib: 
+	cd ../lib_dir && $(MAKE)
 
 # Implementation de la cible
-$(TRG): $(OBJDEPS)
-	$(CC) $(LDFLAGS) -o $(TRG) $(OBJDEPS) \
-	-lm $(LIBS)
+$(TRG): $(OBJDEPS) 
+	$(CC) $(LDFLAGS) -o $(TRG) $(OBJDEPS) $(LIBS) $(INC)
 
 # Production des fichiers object
 # De C a objet
@@ -164,7 +169,8 @@ install: $(HEXROMTRG)
 # Make clean permet d'effacer tout les fichiers generes
 # lors de la compilation
 clean:
-	$(REMOVE) $(TRG) $(TRG).map $(OBJDEPS) $(HEXTRG) *.d
+	$(REMOVE) $(TRG) $(TRG).map $(OBJDEPS) $(HEXTRG) *.d \
+	&& cd ../lib_dir && $(MAKE) clean
 
 # Pour plus d'information sur les phony target, consulter:
 # http://bit.ly/1WBQe61
@@ -178,3 +184,4 @@ clean:
 # http://bit.ly/1XvxsN3
 
 #####                    EOF                   #####
+

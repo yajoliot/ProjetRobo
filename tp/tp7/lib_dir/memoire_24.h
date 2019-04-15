@@ -17,8 +17,8 @@
 /*                                                                            */
 /******************************************************************************/
 
-#ifndef MEMOIRE_24_H
-#define MEMOIRE_24_H
+#ifndef LIB_DIR_ANTIREBOND_H
+#define LIB_DIR_ANTIREBOND_H
 
 #include <avr/io.h>
 #include <util/twi.h>
@@ -62,4 +62,4 @@ private:
    const uint8_t PAGE_SIZE;
 };
 
-#endif /* MEMOIRE_24_H */
+#endif LIB_DIR_ANTIREBOND_H

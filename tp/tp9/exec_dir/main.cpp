@@ -136,7 +136,11 @@ int main() {
 
         case 0x44 : // allumer les DEL : dal
           // Possibilite d'allumer la DEL en rouge ou en vert en fonction de l'operande
+<<<<<<< HEAD:codeCommun/tp/tp9/exec_dir/main.cpp
           dal(operande);
+=======
+          allumerDEL_dal(operande);
+>>>>>>> complet:tp/tp9/exec_dir/main.cpp
           break;
 
         case 0x45 : // eteindre les DEL : det

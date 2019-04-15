@@ -16,7 +16,7 @@ void initPWM(){
 	TCCR0A |= (1 << WGM00);
 	TCCR0B |= (1 << CS01);
 
-}
+}	
 
 
 // Ajustement de la vitesse des roues
@@ -30,7 +30,6 @@ void roueGauche(bool direction, uint8_t rapport){
 	else {
 		PORTB &= ~(0x01 << PB2);
 	}
-	rapport= ((rapport)/0xff)*100;
 	OCR0B = rapport;
 }
 
@@ -42,7 +41,6 @@ void roueDroite(bool direction,uint8_t rapport){
 	else {
 		PORTB &= ~(1 << PB5);
 	}
-	rapport= ((rapport+7)/255)*100;
 	OCR0A = rapport;
 }
 
@@ -73,7 +71,7 @@ void arreter(){
 void tournerADroite(){
     // Tourner a droite : bloquer la roue droite et faire tourner vers l'avant la roue gauche
 	OCR0A = 0;
-	PORTD &= ~(1 << PB2);
+	PORTB &= ~(1 << PB2);
 	OCR0B = 255; // A determiner avec le robot
 	_delay_ms(800); // A determiner avec le robot
 	arreter();
@@ -83,7 +81,7 @@ void tournerADroite(){
 void tournerAGauche(){
 	// Tourner a gauche : bloquer la roue gauche et faire tourner vers l'avant la roue droite
 	OCR0B = 0;
-	PORTD &= ~(1 << PB5);
+	PORTB &= ~(1 << PB5);
 	OCR0A= 255; // A determiner avec le robot
 	_delay_ms(800); // A determiner avec le robot
 	arreter();
