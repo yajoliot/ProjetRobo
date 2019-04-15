@@ -11,7 +11,6 @@ volatile bool usePointISR = false;
 
 void Robot::isr_INIT() {
 
-
     cli ();
 
     EIMSK |= (1 << INT0);
@@ -19,6 +18,7 @@ void Robot::isr_INIT() {
     EICRA |= (1 << ISC01) | (1 << ISC00); // EICRA = EICRA | (1 << ISC01)
 
     sei();
+
 }
 
 
@@ -30,7 +30,7 @@ Robot::Robot(){}
 uint8_t Robot::receive(){
     uint8_t result = 0;
 
-    startMinuterie();
+    startMinuterie(0xFFFF);
     while(TCNT1 < 0x5FFF){
         if(headerVerified()){
             result = readBits(COMMAND_SIZE);
@@ -360,15 +360,14 @@ void Robot::RunCMD3(){
         
         
 
-        if(valueMap == 0x1F && !analyse){
-            etat = INTWAIT;
-            analyse = true;
-        }
         
 
         switch(etat){
             case INIT:
                 pwm.avancementAjuste(rapport, valueMap);
+                if(valueMap == 0x1F ){
+                    etat = INTWAIT;
+                }
                 break;
 
             case INTWAIT:
@@ -379,14 +378,15 @@ void Robot::RunCMD3(){
             case ANALYSE:
                 boolISR = false;
                 usePointISR = false;
-                pointCounterIsr = 0;
-                if(valueMap == 0x1F){
-                    etat2 = ANTI_REBOND;
-                }
+                pointCounterISR = 0;
+                
                     
                 switch(etat2){
                     case INIT2:
                         pwm.avancer(rapport);
+                        if(valueMap == 0x1F){
+                            etat2 = ANTI_REBOND;
+                        }
                     break;
 
                     case ANTI_REBOND:
