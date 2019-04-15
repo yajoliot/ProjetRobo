@@ -107,7 +107,7 @@ ISR(PCINT2_vect){
         headerDetected = verifyHeader();
         // PORTB = 0x01;
         if(headerDetected){
-        //   PORTB = 0x02;
+          PORTB = 0x02;
             uint8_t tmp;
             tmp = readBits(COMMAND_SIZE);
             uint8_t addr;
@@ -116,6 +116,9 @@ ISR(PCINT2_vect){
             if(tmp == 3){
               pwm.avancer(155);
             }
+            // if(tmp == 12){
+              // pwm.avancer(155);
+            // }
         //     tmp=readBit();
         //     readBit();
         //     readBit();
