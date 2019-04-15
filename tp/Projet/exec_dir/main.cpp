@@ -37,10 +37,11 @@ ISR(INT0_vect){
     _delay_ms(30);
     if(PIND & 0x04){
         etat = ANALYSE;
-         pointCounterISR++;
-         cornerCounterISR++;
-         useCornerISR = true;
-         usePointISR = true;
+        boolISR = true;
+        pointCounterISR++;
+        cornerCounterISR++;
+        useCornerISR = true;
+        usePointISR = true;
     }
 
 

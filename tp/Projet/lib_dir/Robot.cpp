@@ -29,19 +29,22 @@ Robot::Robot(){}
 
 uint8_t Robot::receive(){
     uint8_t result = 0;
-    while(useCornerISR == false){
+
+    startMinuterie();
+    while(TCNT1 < 0x5FFF){
         if(headerVerified()){
             result = readBits(COMMAND_SIZE);
         }
     }
+    stopMinuterie();
+    resetMinuterie();
 
     if(cornerCounterISR != 0){
-
         pointCounterISR = 0;
         usePointISR = false;
+        boolISR = false;
         return cornerCounterISR - 1;
     } else {
-        pointCounterISR = 0;
         return result - 1;
     }
 }
@@ -71,14 +74,11 @@ void Robot::Run(uint8_t IRCom){
 
             case 0x03:
                 RunCMD4();
-                DEBUG_PARAMETER_VALUE((uint8_t*)"apres cmd4", &valueMap);
                 nCMD++;
                 if(nCMD == 5)
                     break;
-            DEBUG_PARAMETER_VALUE((uint8_t*)"apres case", &valueMap);
-            case 0x04:
-                DEBUG_PARAMETER_VALUE((uint8_t*)"avant coin", &valueMap);
 
+            case 0x04:
                 RunCMDCoin();
                 nCMD++;
                 IRCom = 0x00;
@@ -134,14 +134,16 @@ void Robot::RunCMD1(){
                         startMinuterie(0xFFFF);
                         while(TCNT1 < 0x7FFF){
                             pwm.arreter();
-                            if(false/*headerVerified()*/){
+                            if(headerVerified()){
                                 pointIR = readBits(COMMAND_SIZE);
                             }
                         }
 
 
                         if (usePointISR == true){
+                            boolISR = false;
                             pointIR = pointCounterISR - 1;
+
                         } else {
                             pointIR--;
                         }
@@ -340,7 +342,6 @@ void Robot::RunCMD3(){
     enum etats2 {INIT2,ANTI_REBOND, DIST_1, DIST_2};
 
     volatile etats2 etat2 = INIT2;
-    isr_INIT();
     uint16_t duree  = 0xFFFF;
     uint16_t distTime1 = 0;
     uint16_t distTime2 = 0;
@@ -376,6 +377,9 @@ void Robot::RunCMD3(){
                 break;
 
             case ANALYSE:
+                boolISR = false;
+                usePointISR = false;
+                pointCounterIsr = 0;
                 if(valueMap == 0x1F){
                     etat2 = ANTI_REBOND;
                 }
@@ -484,7 +488,7 @@ void Robot::RunCMD3(){
                     } 
                 }
                 
-                boolISR = true;
+                boolISR = false;
                 etat = NEXT;
         
             break;
