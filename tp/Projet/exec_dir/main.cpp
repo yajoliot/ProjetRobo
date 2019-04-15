@@ -8,16 +8,15 @@
  #include <avr/interrupt.h>
  #include "pwm.h"
  #include "piezo.h"
- #include "usart.h"
+ #include "USART.h"
  #include "memoire_24.h"
- #include "usart.h"
  #include "bytecode.h"
  #include "util.h"
- #include "linetracker.h"
+ #include "LineTracker.h"
  #include "debug.h"
  #include "Minuterie.h"
  #include "Robot.h"
- #include "Sirc.h"
+ #include "sirc.h"
 
 
 extern volatile bool boolISR;
@@ -30,10 +29,6 @@ extern volatile bool usePointISR;
 #define petit 0x01 //dummy values
 #define grand 0x02 //dummy values
 
-DDRA = 0x00;
-DDRB = 0xFF;
-DDRC = 0xFF;
-DDRD = 0xFB;
 
 
 ISR(INT0_vect){
@@ -49,6 +44,8 @@ ISR(INT0_vect){
 
 }
 
+static uint8_t cmd = 0x00;
+
 ISR(PCINT2_vect){
     if(prev_pin_value == 0x20){
         //edge from hi to lo
@@ -56,11 +53,7 @@ ISR(PCINT2_vect){
         // //VERIFY HEADER!
         headerDetected = headerVerified();
         if(headerDetected){
-            uint8_t tmp;
-            tmp = readBits(COMMAND_SIZE);
-  
-            PORTD = tmp;
-            for(;;){_delay_ms(300); PORTB = 0x02;}
+            cmd = readBits(COMMAND_SIZE);
         }
     }else/*prev_pin_value == 0x00*/{
         // highEdge = true;
@@ -70,13 +63,33 @@ ISR(PCINT2_vect){
 
 
 int main() {
+    DDRA = 0x00;
+DDRB = 0xFF;
+DDRC = 0xDF;
+DDRD = 0xFB;
    
-   Robot robot;
+
+
+   PORTC = 0x04;
+   _delay_ms(3000);
+   PORTC = 0x00;
+
+    uint8_t tmp = PINC & 0x20;
+    prev_pin_value = tmp;
+    sei();
+   enablePCINT();
+   while(!headerDetected){}
+    disablePCINT();
+    PORTB = 0x02;
+    PORTC = cmd;
+      _delay_ms(3000);
+   PORTC = 0x00;
+
+    Robot robot;
    robot.isr_INIT();
-
-   robot.Run(0x00);
-
+   robot.Run(cmd);
+   // uint8_t tmp = robot.receive();
+   // PORTC = tmp;
+   // robot.Run(tmp);
+   for(;;){}
 }
-
-
-

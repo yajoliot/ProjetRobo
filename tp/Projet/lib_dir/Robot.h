@@ -46,7 +46,7 @@ class Robot {
         void RunCMD4();
         void RunCMDCoin();
         void test();
-        uint8_t receive();
+        static uint8_t receive();
         void isr_INIT();
 };
 

@@ -46,20 +46,21 @@ ISR(INT0_vect){
 int main(){
     ATOMIC_BLOCK(ATOMIC_FORCEON){
         DDRB = 0xFF;
+        DDRC = 0xFF;
         DDRD = 0xFB;
         // EIMSK |= _BV(INT0);
         // EICRA |= (1 << ISC01); 
     }
 
-
-    for(;;){
-        // if(TCNT1 == TOP){
-            // resetRegisters();
-            // TCNT1 = 0x0000;
-            // PORTB = 0x02;
             setupSIRC();
-            transmit(0x01, ADDR);
-            // compteur = 0x00;
-        // }
+    for(;;){
+        if(TCNT1 == TOP){
+            resetRegisters();
+            TCNT1 = 0x0000;
+            // PORTB = 0x02;
+            PORTC = compteur;
+            // transmit(0x04, ADDR);
+            compteur = 0x00;
+        }
     }
 }
