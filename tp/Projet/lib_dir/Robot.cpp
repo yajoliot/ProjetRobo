@@ -2,12 +2,12 @@
 #include "debug.h"
 
     
-volatile etats etat = INIT;
-volatile bool boolISR = false;
-volatile uint8_t pointCounterISR = 0;
-volatile uint8_t cornerCounterISR = 0;
-volatile bool useCornerISR = false;
-volatile bool usePointISR = false;
+volatile extern etats etat = INIT;
+volatile extern bool boolISR = false;
+volatile extern uint8_t pointCounterISR = 0;
+volatile extern uint8_t cornerCounterISR = 0;
+volatile extern bool useCornerISR = false;
+volatile extern bool usePointISR = false;
 
 void Robot::isr_INIT() {
 
@@ -357,10 +357,8 @@ void Robot::RunCMD3(){
         
         lineTracker.updateValueMap();
         valueMap = lineTracker.getValueMap();
-        
-        
 
-        
+
 
         switch(etat){
             case INIT:
