@@ -251,7 +251,7 @@ void PWM::tourner90Gauche(uint8_t rapport){
 
 	roueGauche(false, rapport);
 	roueDroite(true, rapport);
-	_delay_ms(890);
+	_delay_ms(1000);
 	arreter();
 }
 
