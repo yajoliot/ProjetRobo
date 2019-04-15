@@ -127,14 +127,14 @@ void PWM::boite(uint8_t &rapport, uint8_t valueMap){
 	else if(valueMap == 1 || valueMap == 3){
 		if(rapport == 0){
 		}else
-			rapport -= 1;
+			rapport = rapport - 2 < 85 ? rapport : rapport - 2;
 		roueGauche(true, VITESSE_DEFAULT);
 		roueDroite(true, rapport);
 	}
 	else if(valueMap == 16 || valueMap == 24){
 		if(rapport == 0){
 		}else
-			rapport -= 1;
+			rapport = rapport - 2 < 85 ? rapport : rapport - 2;
 		roueGauche(true, rapport);
 		roueDroite(true, VITESSE_DEFAULT);
 	}
@@ -242,17 +242,17 @@ void PWM::tournerAGauche(){
 
 void PWM::tourner90Droite(uint8_t rapport){
 
-	roueGauche(true, rapport);
+	roueGauche(true, 0);
 	roueDroite(false, rapport);
-	_delay_ms(950);
+	_delay_ms(1500);
 	arreter();
 }
 
 void PWM::tourner90Gauche(uint8_t rapport){
 
 	roueGauche(false, rapport);
-	roueDroite(true, rapport);
-	_delay_ms(890);
+	roueDroite(true, 0);
+	_delay_ms(1500);
 	arreter();
 }
 

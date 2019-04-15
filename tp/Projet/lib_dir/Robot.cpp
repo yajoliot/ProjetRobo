@@ -2,7 +2,7 @@
 #include "debug.h"
 
     
-volatile extern etats etat = INIT;
+volatile extern bool intWaitISR = false;
 volatile extern bool boolISR = false;
 volatile extern uint8_t pointCounterISR = 0;
 volatile extern uint8_t cornerCounterISR = 0;
@@ -29,15 +29,14 @@ Robot::Robot(){}
 
 uint8_t Robot::receive(){
     uint8_t result = 0;
-    DEBUG_PARAMETER_VALUE((uint8_t*)"receive",(void*) (&result));
+    
     startMinuterie(0xFFFF);
     while(TCNT1 < 0x9FFF){
-        DEBUG_PARAMETER_VALUE((uint8_t*)"receive",(void*) &cornerCounterISR);
         if(false){ //verifyHeader()
             
         
             result = readBits(COMMAND_SIZE);
-            DEBUG_PARAMETER_VALUE((uint8_t*)"receive",(void*) &cornerCounterISR);
+
         }
     }
     stopMinuterie();
@@ -48,7 +47,7 @@ uint8_t Robot::receive(){
         pointCounterISR = 0;
         usePointISR = false;
         boolISR = false;
-        DEBUG_PARAMETER_VALUE((uint8_t*)"in if",(void*) &cornerCounterISR);
+        intWaitISR = false;
         return cornerCounterISR - 1;
     } else {
         return result - 1;
@@ -66,14 +65,13 @@ void Robot::Run(uint8_t IRCom){
 
             case 0x01:
                 RunCMD2();
-
                 nCMD++;
                 if(nCMD == 5)
                     break;
             
             case 0x02:
+                DEBUG_INFO((uint8_t*)"in case 02");
                 RunCMD3();
-                
                 nCMD++;
                 if(nCMD == 5)
                     break;
@@ -102,7 +100,7 @@ void Robot::RunCMD1(){
     uint8_t rapport = pwm.getVitesseDefault();
     uint8_t duree = 0xFF;
 
-    enum states {INIT, ANALYSE_IR, WAIT, GOTO_S3, NEXT};
+    enum states {INIT, ANALYSE_IR, WAIT, GOTO_S3,TOURNANT_GAUCHE , NEXT};
     enum aStates {IR_WAIT, P1P2P3 ,P4P5P6, P7P8P9};
     uint32_t rapport3Inch = 0;
     states etat = INIT;
@@ -153,6 +151,7 @@ void Robot::RunCMD1(){
 
                         if (usePointISR == true){
                             boolISR = false;
+                            intWaitISR = false;
                             pointIR = pointCounterISR - 1;
 
                         } else {
@@ -199,13 +198,13 @@ void Robot::RunCMD1(){
 
                         if(pointIR == 0x03){
                             pwm.tourner90Precis(0, rapport);
-                            pwm.avancerTimer(4, rapport3Inch);
+                            pwm.avancerTimer(3, rapport3Inch);
                         } else if(pointIR == 0x04){
                             pwm.tourner90Precis(0, rapport);
-                            pwm.avancerTimer(3, rapport3Inch);
+                            pwm.avancerTimer(2, rapport3Inch);
                         } else {
                             pwm.tourner90Precis(0, rapport);
-                            pwm.avancerTimer(2, rapport3Inch);
+                            pwm.avancerTimer(1, rapport3Inch);
                         }  
                         etat = WAIT;
                     break;
@@ -216,13 +215,13 @@ void Robot::RunCMD1(){
 
                         if(pointIR == 0x06){
                             pwm.tourner90Precis(0, rapport);
-                            pwm.avancerTimer(4, rapport3Inch);
+                            pwm.avancerTimer(3, rapport3Inch);
                         } else if(pointIR == 0x07){
                             pwm.tourner90Precis(0, rapport);
-                            pwm.avancerTimer(3, rapport3Inch);
+                            pwm.avancerTimer(2, rapport3Inch);
                         } else {
                             pwm.tourner90Precis(0, rapport);
-                            pwm.avancerTimer(2, rapport3Inch);
+                            pwm.avancerTimer(1, rapport3Inch);
                         }  
                         etat = WAIT;        
                     break;
@@ -254,14 +253,14 @@ void Robot::RunCMD1(){
                     pointIR == 0x05 ||
                     pointIR == 0x08 ){
 
-                    pwm.avancerTimer(2, rapport3Inch);
+                    pwm.avancerTimer(1, rapport3Inch);
 
                 } else  if( pointIR == 0x01 ||
                             pointIR == 0x04 ||
                             pointIR == 0x07 ) {
-                    pwm.avancerTimer(3, rapport3Inch);
+                    pwm.avancerTimer(2, rapport3Inch);
                 } else {
-                    pwm.avancerTimer(4, rapport3Inch);
+                    pwm.avancerTimer(3, rapport3Inch);
                 }
 
                 pwm.tourner90Precis(0, pwm.getVitesseDefault());
@@ -273,11 +272,25 @@ void Robot::RunCMD1(){
                     valueMap = lineTracker.getValueMap();
                 }
                 pwm.arreter();
-                _delay_ms(3000);
-                etat = NEXT;
+                _delay_ms(500);
+                etat = TOURNANT_GAUCHE;
                 
 
             break;
+            case TOURNANT_GAUCHE:
+
+            while(valueMap != 0){
+                lineTracker.updateValueMap();
+                valueMap = lineTracker.getValueMap();
+                pwm.avancementAjuste(rapport, valueMap);
+            }
+            
+            while(valueMap != 4){
+                lineTracker.updateValueMap();
+                valueMap = lineTracker.getValueMap();
+                pwm.tournantGauche(rapport, valueMap);
+            }
+            etat = NEXT;
 
             case NEXT:
 
@@ -298,6 +311,7 @@ void Robot::RunCMD1(){
 
 void Robot::RunCMD2(){
     
+    
     enum states {INIT, TOURNE_DROITE, COIN, TOURNE_GAUCHE, NEXT};
     int etat = INIT;
     uint8_t rapport = pwm.getVitesseDefault(); // à changer pas bon -xavie
@@ -311,7 +325,7 @@ void Robot::RunCMD2(){
     
         switch(etat){
             case INIT:
-                pwm.avancementAjuste(rapport, valueMap);
+                pwm.ralentissementGauche(rapport, valueMap);
                 if(valueMap == 24 || valueMap == 28 || valueMap == 30 || valueMap == 31){
                     etat = TOURNE_DROITE;
                 }
@@ -325,7 +339,7 @@ void Robot::RunCMD2(){
             break;
 
             case COIN:
-                pwm.avancementAjuste(rapport, valueMap);
+                pwm.ralentissementGauche(rapport, valueMap);
                 if(valueMap == 0)
                     etat = TOURNE_GAUCHE;
             break;
@@ -338,6 +352,7 @@ void Robot::RunCMD2(){
 
             case NEXT:
                 loop = false;
+                DEBUG_INFO((uint8_t*)"in case next");
             break;
 
         }       
@@ -349,10 +364,10 @@ void Robot::RunCMD2(){
 
 void Robot::RunCMD3(){
 
-    
+    enum states {INIT, INTWAIT, ANALYSE, WAIT_TILL_END, END, NEXT};
     enum etats2 {INIT2,ANTI_REBOND, DIST_1, DIST_2};
-
-    volatile etats2 etat2 = INIT2;
+    states etat = INIT;
+    etats2 etat2 = INIT2;
     uint16_t duree  = 0xFFFF;
     uint16_t distTime1 = 0;
     uint16_t distTime2 = 0;
@@ -363,6 +378,10 @@ void Robot::RunCMD3(){
     uint8_t valueMap = lineTracker.getValueMap();
     uint8_t rapport;
     isr_INIT();
+    boolISR = false;
+    pointCounterISR = 0;
+    usePointISR = 0;
+
 
 
     for(;loop;){
@@ -374,22 +393,28 @@ void Robot::RunCMD3(){
 
         switch(etat){
             case INIT:
+                DEBUG_INFO((uint8_t*)"in case INIT");
                 pwm.avancementAjuste(rapport, valueMap);
-                DEBUG_PARAMETER_VALUE((uint8_t*)"INIT", (void*) & etat);
                 if(valueMap == 0x1F ){
                     etat = INTWAIT;
                 }
                 break;
 
             case INTWAIT:
+                DEBUG_INFO((uint8_t*)"in case intwait");
                 pwm.arreter();
-                DEBUG_PARAMETER_VALUE((uint8_t*)"ARRETER", (void*) &etat);
                 rapport = pwm.getVitesseDefault();
+                if(intWaitISR)
+                    etat = ANALYSE;
+                    pointCounterISR = 0;
+                    cornerCounterISR = 0;
+                    useCornerISR = false;
+                    pointCounterISR = false;
                 break;
 
             case ANALYSE:
+                DEBUG_INFO((uint8_t*)"in case analyse");
                 boolISR = false;
-                DEBUG_PARAMETER_VALUE((uint8_t*)"ANALYSE", (void*) &etat);
                 usePointISR = false;
                 pointCounterISR = 0;
                 
@@ -397,7 +422,6 @@ void Robot::RunCMD3(){
                 switch(etat2){
                     case INIT2:
                         pwm.avancer(rapport);
-                        DEBUG_PARAMETER_VALUE((uint8_t*)"AVANCER", (void*) &etat);
                         if(valueMap == 0x1F){
                             etat2 = ANTI_REBOND;
                         }
@@ -415,7 +439,6 @@ void Robot::RunCMD3(){
 
                         }
 
-                        _delay_ms(1);
                     break;
 
                     case DIST_1:
@@ -470,6 +493,8 @@ void Robot::RunCMD3(){
                             }
                         }
                         boolISR = false;
+                        usePointISR = false;
+                        pointCounterISR = 0;
                         distTime2 = TCNT1;
                         etat = WAIT_TILL_END;
                         
@@ -504,6 +529,9 @@ void Robot::RunCMD3(){
                 
                 boolISR = false;
                 etat = NEXT;
+                pointCounterISR = 0;
+                usePointISR = false;
+                intWaitISR = false;
         
             break;
             case NEXT:

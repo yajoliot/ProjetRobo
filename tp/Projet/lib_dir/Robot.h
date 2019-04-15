@@ -7,21 +7,14 @@
 #include "piezo.h"
 #include "Sirc.h"
 
-typedef enum {           /* <--- the type definition */
-  INIT = 0, 
-  INTWAIT = 1, 
-  ANALYSE = 2,
-  WAIT_TILL_END = 3,
-  END = 4,
-  NEXT = 5
-} etats;
+
 
 extern volatile bool boolISR;
-extern volatile etats etat;
 extern volatile uint8_t pointCounterISR;
 extern volatile uint8_t cornerCounterISR;
 extern volatile bool useCornerISR;
 extern volatile bool usePointISR;
+extern volatile bool intWaitISR;
 
 class Robot {
     private:

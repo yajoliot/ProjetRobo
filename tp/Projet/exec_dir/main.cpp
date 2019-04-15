@@ -21,7 +21,6 @@
 
 
 extern volatile bool boolISR;
-extern volatile etats etat;
 extern volatile uint8_t pointCounterISR;
 extern volatile uint8_t cornerCounterISR;
 extern volatile bool useCornerISR;
@@ -37,12 +36,12 @@ ISR(INT0_vect){
     _delay_ms(30);
     
     if(PIND & 0x04){
-        etat = ANALYSE;
         boolISR = true;
         useCornerISR = true;
         usePointISR = true;
         pointCounterISR++;
         cornerCounterISR++;
+        intWaitISR = true;
     }
     DEBUG_PARAMETER_VALUE((uint8_t*)"receive",(void*) &cornerCounterISR);
 

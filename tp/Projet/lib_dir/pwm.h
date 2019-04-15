@@ -19,15 +19,15 @@ class PWM{
         static const uint8_t AJUSTEMENT_GAUCHE = 4;
 
         //Diminution minimale possible d'une roue pour ajuster sa trajectoire
-        static const uint8_t DIMINUTION_MINIMALE = 50;
+        static const uint8_t DIMINUTION_MINIMALE = 80;
 
-        static const uint8_t DIMINUTION_REDUCTION = 50;
+        static const uint8_t DIMINUTION_REDUCTION = 80;
         
         //Vitesse maximale
         static const uint8_t VITESSE_MAX = 255;
 
         //Vitesse par defaut
-        uint8_t VITESSE_DEFAULT = 145;
+        uint8_t VITESSE_DEFAULT = 135;
         
         
         uint8_t vitesseTournage = 130;
