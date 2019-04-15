@@ -4,7 +4,7 @@
 #include <avr/io.h>
 #include <stdio.h>
 #include "util.h"
-#include "usart.h"
+#include "USART.h"
 #include "del.h"
 #include <assert.h>
 

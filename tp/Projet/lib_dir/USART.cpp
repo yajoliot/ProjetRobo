@@ -1,4 +1,4 @@
-#include "usart.h"
+#include "USART.h"
 
 // Routine d'initialisation
 

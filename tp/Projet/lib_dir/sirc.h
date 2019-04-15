@@ -13,7 +13,7 @@
 
 #ifdef MODE_1
 #define COMMAND_SIZE 0x04
-#define ADDRESS_SIZE 0x00
+#define ADDRESS_SIZE 0x01
 #endif
 #ifdef MODE_2
 #define COMMAND_SIZE 0x04

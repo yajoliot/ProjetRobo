@@ -12,7 +12,7 @@ Si la minuterie atteint 2 secondes, elle est arrêtée et un signal correspondan
 
 #include <util/atomic.h>
 #include <avr/io.h>
-#include "Sirc.h"
+#include "sirc.h"
 #include "Minuterie.h"
 
 ISR(TIMER2_OVF_vect){
@@ -30,12 +30,15 @@ volatile uint8_t compteur = 0;
 
 ISR(INT0_vect){
         TCNT1 = 0;
+        PORTD = 0x00;
 //    _delay_ms(30);
 //    if(PIND & 0x02){
         //increment counter
         PORTB ^= 0x01;
-        compteur++; compteur = (compteur % 9)+1;  
+        compteur++; if(compteur == 10)compteur = 1;
+        PORTD |= compteur;
         //initialize minuterie
+        resetRegisters();
         TCCR1B |= _BV(CS10) | _BV(CS12);
 //    }
 }
@@ -44,19 +47,19 @@ int main(){
     ATOMIC_BLOCK(ATOMIC_FORCEON){
         DDRB = 0xFF;
         DDRD = 0xFB;
-        EIMSK |= _BV(INT0);
-        EICRA |= (1 << ISC01); 
+        // EIMSK |= _BV(INT0);
+        // EICRA |= (1 << ISC01); 
     }
 
-    for(;;){
-        if(TCNT1 == TOP){
-            PORTB = 0x02;
-            setupSIRC();
-            transmit(compteur, ADDR);
-            resetRegisters();
-            compteur = 0x00;
 
-            TCNT1 = 0x0000;
-        }
+    for(;;){
+        // if(TCNT1 == TOP){
+            // resetRegisters();
+            // TCNT1 = 0x0000;
+            // PORTB = 0x02;
+            setupSIRC();
+            transmit(0x01, ADDR);
+            // compteur = 0x00;
+        // }
     }
 }

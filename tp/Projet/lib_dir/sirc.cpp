@@ -1,4 +1,4 @@
-#include "Sirc.h"
+#include "sirc.h"
 
 //(GREEN -> NOTHING -> GREEN):
 // 0 bit:      - 35k-37.5k
@@ -190,7 +190,7 @@ void transmit(uint8_t command_, uint8_t address_){
         transmitHeader();
         transmitCommand(command_);
         transmitAddress(address_);
-        // transmitEndBit();
+        transmitEndBit();
         //wait till end of 45 ms
         while(!reach_end_45_ms){}
         //reset the boolean for 45 ms

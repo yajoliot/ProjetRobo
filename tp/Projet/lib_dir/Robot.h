@@ -5,7 +5,7 @@
 #include "pwm.h"
 #include "Minuterie.h"
 #include "piezo.h"
-#include "Sirc.h"
+#include "sirc.h"
 
 typedef enum {           /* <--- the type definition */
   INIT = 0, 
