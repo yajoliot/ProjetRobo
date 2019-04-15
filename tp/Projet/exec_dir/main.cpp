@@ -6,12 +6,13 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include "del.h"
+#include "pwm.h"
 #include "debug.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
-#define MODE_1
-// #define MODE_2
+// #define MODE_1
+#define MODE_2
 // #define MODE_3
 
 #ifdef MODE_1
@@ -86,6 +87,8 @@ uint16_t calculateCyclesToWaste_us(uint16_t microseconds){
     // return miliseconds
 // }
 
+
+PWM pwm;
 uint8_t readBit();
 uint8_t readBits(uint8_t length);
 bool verifyHeader();
@@ -101,12 +104,18 @@ ISR(PCINT2_vect){
         //edge from hi to lo
         prev_pin_value = 0x00;
         // //VERIFY HEADER!
-        // headerDetected = verifyHeader();
+        headerDetected = verifyHeader();
         // PORTB = 0x01;
-        // if(headerDetected){
+        if(headerDetected){
         //   PORTB = 0x02;
-        //     uint8_t tmp;
-        //     // tmp = readBits(COMMAND_SIZE);
+            uint8_t tmp;
+            tmp = readBits(COMMAND_SIZE);
+            uint8_t addr;
+            addr = readBits(ADDRESS_SIZE);
+
+            if(tmp == 3){
+              pwm.avancer(155);
+            }
         //     tmp=readBit();
         //     readBit();
         //     readBit();
@@ -127,6 +136,7 @@ ISR(PCINT2_vect){
         prev_pin_value = 0x20;
     }
     // PORTD = prev_pin_value; 
+}
 }
 
 void testFunction(){
